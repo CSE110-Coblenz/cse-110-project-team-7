@@ -3,7 +3,9 @@ import type { ScreenSwitcher, Screen } from "./types.ts";
 
 import { STAGE_WIDTH, STAGE_HEIGHT } from "./constants.ts";
 import { BasicGameScreenController } from "./screens/BasicGameScreen/BasicGameScreenController.ts";
-import { BasicGameScreenModel } from "./screens/BasicGameScreen/BasicGameScreenModel.ts";
+import { BossGameScreenController } from "./screens/BossGameScreen/BossGameScreenController.ts";
+import { TowerSelectScreenController } from "./screens/TowerSelectScreen/TowerSelectScreenController.ts";
+import { LoginScreenController } from "./screens/LoginScreen/LoginScreenController.ts";
 
 /**
  * Main Application - Coordinates all screens
@@ -20,6 +22,9 @@ class App implements ScreenSwitcher {
 	private layer: Konva.Layer;
 
     private basicgamecontroller: BasicGameScreenController;
+	private bossgamecontroller: BossGameScreenController;
+	private towerselectcontroller: TowerSelectScreenController;
+	private logincontroller: LoginScreenController;
 	
 
 	constructor(container: string) {
@@ -37,11 +42,17 @@ class App implements ScreenSwitcher {
 		// Initialize all screen controllers
 		// Each controller manages a Model, View, and handles user interactions
 		this.basicgamecontroller = new BasicGameScreenController(this);
+		this.bossgamecontroller = new BossGameScreenController(this);
+		this.towerselectcontroller = new TowerSelectScreenController(this);
+		this.logincontroller = new LoginScreenController(this);
 		
 
 		// Add all screen groups to the layer
 		// All screens exist simultaneously but only one is visible at a time
 		this.layer.add(this.basicgamecontroller.getView().getGroup());
+		this.layer.add(this.bossgamecontroller.getView().getGroup());
+		this.layer.add(this.towerselectcontroller.getView().getGroup());
+		this.layer.add(this.logincontroller.getView().getGroup());
 		
 
 		// Draw the layer (render everything to the canvas)
@@ -49,6 +60,9 @@ class App implements ScreenSwitcher {
 
 		// Start with menu screen visible
 		this.basicgamecontroller.getView().show();
+		this.bossgamecontroller.getView().show();
+		this.towerselectcontroller.getView().show();
+		this.logincontroller.getView().show();
 	}
 
 	/**
@@ -63,12 +77,24 @@ class App implements ScreenSwitcher {
 	switchToScreen(screen: Screen): void {
 		// Hide all screens first by setting their Groups to invisible
 		this.basicgamecontroller.hide();
+		this.bossgamecontroller.hide();
+		this.towerselectcontroller.hide();
+		this.logincontroller.hide();
 		
 
 		// Show the requested screen based on the screen type
 		switch (screen.type) {
 			case "basic_game":
 				this.basicgamecontroller.show();
+				break;
+			case "boss_game":
+				this.bossgamecontroller.show();
+				break;
+			case "tower_select":
+				this.towerselectcontroller.show();
+				break;
+			case "login":
+				this.logincontroller.show();
 				break;
 
 			//add more cases as we go
