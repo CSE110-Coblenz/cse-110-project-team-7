@@ -25,3 +25,4 @@ export class BasicGameScreenController extends ScreenController {
 		return this.view;
 	}
 }
+
