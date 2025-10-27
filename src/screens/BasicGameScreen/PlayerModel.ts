@@ -5,7 +5,7 @@ export class Player {
     name: string;
 
     // add more player attributes as needed
-    constructor(name: string){
+    constructor(name: any = null){
         this.health = MAX_HEALTH;
         this.name = name;
     }
