@@ -15,8 +15,12 @@ export class LoginScreenController extends ScreenController {
 		super();
 		this.screenSwitcher = screenSwitcher;
 
+	// Initialize Model and View
 		this.model = new LoginScreenModel();
-		this.view = new LoginScreenView();
+		this.view = new LoginScreenView((username: string) => {
+			this.model.username = username;
+			console.log("Username entered:", this.model.username); // For testing purposes
+		});
     }
 	/**
 	 * Get the view group
