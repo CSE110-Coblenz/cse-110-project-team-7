@@ -1,11 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>CSE110 Group 7 Tower Game</title>
-  </head>
-  <body>
-    <div id="container"></div>
-    <script type="module" src="/src/main.ts"></script>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <title>CSE110 Group 7 Tower Game</title>
+</head>
+
+<body>
+  <div id="container"></div>
+  <style>
+    #container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      /* make sure the body takes full viewport height */
+    }
+
+    body {
+      margin: 0;
+      background-color: #f0f0f0;
+      /* optional */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  </style>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+
 </html>
