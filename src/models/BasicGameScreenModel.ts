@@ -1,4 +1,4 @@
-import { BasicEnemy } from './BasicEnemyModel'
+import { BasicEnemy } from '../screens/BasicGameScreen/BasicEnemyModel'
 /**
  * GameScreenModel - Manages game state
  */
