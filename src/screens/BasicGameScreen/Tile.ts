@@ -10,7 +10,7 @@ export class Tile {
         x: number,
         y: number,
         size = 100,
-        fill = "#8B5A2B", // brown
+        fill = "#82c4ae", // brown
         stroke = "black",
         strokeWidth = 3
     ) {
