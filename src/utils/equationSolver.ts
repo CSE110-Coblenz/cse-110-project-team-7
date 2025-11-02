@@ -1,8 +1,7 @@
 function is_digit(char: string): boolean{
     return /^\d$/.test(char);
 }
-
-// Equations should be stripped of whitespaces before using
+// Equations should be a string with no whitespaces
 // Equations should only contain whole numbers
 export function evaluate(equation: string): number {
     let stack: number[] = [];
