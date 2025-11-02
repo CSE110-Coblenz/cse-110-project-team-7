@@ -4,6 +4,7 @@ import { BossGameScreenModel } from "./BossGameScreenModel.ts";
 import { BossGameScreenView } from "./BossGameScreenView.ts";
 import { GAME_DURATION } from "../../constants.ts";
 import type { Tile } from "./Tile.ts";
+import { evaluate } from "../../utils/equationSolver.ts";
 
 /**
  * BaiscGameScreenController - Coordinates game logic between Model and View
@@ -57,11 +58,11 @@ export class BossGameScreenController extends ScreenController {
 
 	addTile(tile: Tile): void {
 		this.tileSet.add(tile)
-		console.log(tile.getLabel() + " added to set")
+		console.log(evaluate(this.makeEquation()))
 	}
 	removeTile(tile:Tile): void {
 		this.tileSet.delete(tile)
-		console.log(tile.getLabel() + " removed from set")
+		console.log(evaluate(this.makeEquation()))
 	}
 
 	/*
@@ -97,5 +98,22 @@ export class BossGameScreenController extends ScreenController {
 
 		//bring up pop up
 
+	}
+
+	private makeEquation(): string {
+		let toReturn: string = ""
+		if (this.tileSet.size == 0){
+			return "";
+		}
+
+		const tileArray: Tile[] = Array.from(this.tileSet);
+
+		tileArray.sort((a,b) => a.getPosition().x - b.getPosition().x)
+
+		for(let i = 0; i < tileArray.length; i++){
+			toReturn += tileArray[i].getLabel(); 
+		}
+
+		return toReturn
 	}
 }

@@ -132,10 +132,10 @@ export class BossGameScreenView implements View {
 
 			node.on("dragend", () => {
 				if (this.isInsideEntryBox(node)) {
-					console.log(`${tile.getLabel()} dropped inside entry box`);
+					// console.log(`${tile.getLabel()} dropped inside entry box`);
 					// You can snap it into position or trigger logic here
 					if (this.onTileEntry) {
-						this.onTileEntry(tile); // ✅ Pass the full Tile object
+						this.onTileEntry(tile); 
 					}
 					this.group.getLayer()?.draw();
 				} else {
