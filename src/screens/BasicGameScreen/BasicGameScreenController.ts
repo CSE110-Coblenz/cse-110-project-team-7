@@ -1,7 +1,9 @@
 import { ScreenController } from "../../types.ts";
 import type { ScreenSwitcher } from "../../types.ts";
-import { BasicGameScreenModel } from "./BasicGameScreenModel";
+import { BasicGameScreenModel } from "../../models/BasicGameScreenModel.ts";
 import { BasicGameScreenView } from "./BasicGameScreenView.ts";
+import { Player } from '../../models/PlayerModel.ts'
+import { BasicEnemy } from './BasicEnemyModel.ts'
 
 /**
  * BaiscGameScreenController - Coordinates game logic between Model and View
@@ -14,7 +16,6 @@ export class BasicGameScreenController extends ScreenController {
     constructor(screenSwitcher: ScreenSwitcher) {
 		super();
 		this.screenSwitcher = screenSwitcher;
-
 		this.model = new BasicGameScreenModel();
 		this.view = new BasicGameScreenView();
     }
@@ -25,3 +26,4 @@ export class BasicGameScreenController extends ScreenController {
 		return this.view;
 	}
 }
+
