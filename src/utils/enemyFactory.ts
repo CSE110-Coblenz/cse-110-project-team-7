@@ -1,5 +1,5 @@
 import { getRandomSprite } from './spriteUtils';
-import { BasicEnemy } from '../screens/BasicGameScreen/BasicEnemyModel'
+import { BasicEnemy } from '../models/BasicEnemyModel'
 
 // get random number between 0, 100
 function randomInt(): number{

@@ -1,9 +1,9 @@
 import { ScreenController } from "../../types.ts";
 import type { ScreenSwitcher } from "../../types.ts";
-import { BasicGameScreenModel } from "../../models/BasicGameScreenModel.ts";
+import { BasicGameScreenModel } from "./BasicGameScreenModel.ts";
 import { BasicGameScreenView } from "./BasicGameScreenView.ts";
 import { Player } from '../../models/PlayerModel.ts'
-import { BasicEnemy } from './BasicEnemyModel.ts'
+import { BasicEnemy } from '../../models/BasicEnemyModel.ts'
 
 /**
  * BaiscGameScreenController - Coordinates game logic between Model and View
