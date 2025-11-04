@@ -1,4 +1,3 @@
-/// <reference types="jest" />
 import { validate } from '../../src/utils/validateEquation';
 
 describe("validate()", () => {
