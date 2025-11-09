@@ -20,8 +20,8 @@ export class BasicGameScreenView implements View {
 	private group: Konva.Group;
 	private questionText: Konva.Text;
 	private choiceButtons: Konva.Group[] = [];
+	private monster?: Konva.Image;
 	
-
     constructor() {
 		this.group = new Konva.Group({ visible: false });
 
@@ -35,6 +35,19 @@ export class BasicGameScreenView implements View {
 		});
 		this.group.add(bg);
 
+		Konva.Image.fromURL('src/assets/monster.png', (monsterNode) => {
+			this.monster = monsterNode;
+			monsterNode.setAttrs({
+				x: STAGE_WIDTH / 2.5,
+				y: STAGE_HEIGHT * 0.05,
+				scaleX: 0.5,
+				scaleY: 0.5,
+				cornerRadius: 20
+			});
+			this.group.add(monsterNode)
+			this.group.getLayer()?.draw();
+		});
+		
 		this.questionText = new Konva.Text({
 			x: 0,
 			y: STAGE_WIDTH * 0.15,
@@ -46,14 +59,14 @@ export class BasicGameScreenView implements View {
 			align: "center",
 		});
 
-		this.group.add(this.questionText)
+		this.group.add(this.questionText);
 
 		this.loadQuestion(currentQuestionIndex);
     }
 
 	loadQuestion(index: number){
 		const question = questions[index];
-		this.updateEquationText(`Answer: ${question.answer}`);
+		this.updateEquationText(`${question.answer}`, 20, 20);
 
 		this.choiceButtons.forEach(btn => btn.destroy());
 		this.choiceButtons = [];
@@ -114,11 +127,14 @@ export class BasicGameScreenView implements View {
 		this.group.getLayer()?.draw();
 	}
 
-	handleAnswer(selected: string){
+	async handleAnswer(selected: string){
 		const question = questions[currentQuestionIndex];
 
 		if (selected === question.equation){
 			console.log("correct");
+			this.updateMonsterImage('src/assets/monstersln.png')
+			await this.sleep(2000);
+			this.updateMonsterImage('src/assets/monster.png')
 			currentQuestionIndex++;
 
 			if (currentQuestionIndex < questions.length) {
@@ -128,15 +144,35 @@ export class BasicGameScreenView implements View {
 			}
 		} else {
 			console.log("wrong")
+			this.updateMonsterImage('src/assets/monsteratk.png')
+			await this.sleep(2000);
+			this.updateMonsterImage('src/assets/monster.png')
 		}
 	}
 	
-	updateEquationText(text: string){
-		const eqNode = this.group.findOne((node: Konva.Node) => node.getClassName() === "Text");
-		if (eqNode) {
-			(eqNode as Konva.Text).text(text);
+	updateEquationText(text: string, x?: number, y?: number){
+		this.questionText.text(text);
+
+		if (x !== undefined) this.questionText.x(x);
+		if (y !== undefined) this.questionText.y(y);
+
+		this.group.getLayer()?.draw();
+	}
+
+	updateMonsterImage(newUrl: string){
+		Konva.Image.fromURL(newUrl, (newMonster) => {
+			newMonster.position(this.monster!.position());
+			newMonster.scale(this.monster!.scale());
+
+			this.monster?.destroy();
+			this.monster = newMonster;
+			this.group.add(newMonster);
 			this.group.getLayer()?.draw();
-		}
+		});
+	}
+
+	sleep(ms: number): Promise<void> {
+		return new Promise(resolve => setTimeout(resolve, ms));
 	}
 
 
@@ -153,4 +189,5 @@ export class BasicGameScreenView implements View {
 	getGroup(): Konva.Group {
 		return this.group;
 	}
+	
 }
