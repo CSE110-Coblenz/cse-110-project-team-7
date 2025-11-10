@@ -1,4 +1,4 @@
-// target: RHS of equation, length: length of each equation, count: number of equations generated
+// target: RHS of equation, length: length of each equation, count: max number of equations generated
 // returns list of all generated equations as strings
 
 export function generateEquation(target: number, length: number, count: number): string[]{
