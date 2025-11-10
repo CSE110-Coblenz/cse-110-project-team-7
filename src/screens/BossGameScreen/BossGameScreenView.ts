@@ -7,7 +7,7 @@ import { Tile } from "./Tile.ts"
  * GameScreenView - Renders the game UI using Konva
  */
 export class BossGameScreenView implements View {
-	private parts: string[] = ["1", "5", "x"]
+	private parts: string[] = ["1", "5", "x", "10", "-", "0"]
 	private group: Konva.Group;
 	private scoreText: Konva.Text;
 	private timerText: Konva.Text;
@@ -18,8 +18,16 @@ export class BossGameScreenView implements View {
 
 	private entryEquationText: Konva.Text;
 
+	//boss png
+	private bossImg = new Image();
+
+	//boss number
+	private bossNumber: Konva.Text;
+
 	private onTileEntry?: (tile: Tile) => void;
 	private onTileRemoval?: (tile: Tile) => void;
+
+	private equationPulseAnim?: Konva.Animation;
 
 	constructor() {
 		this.group = new Konva.Group({ visible: false });
@@ -32,6 +40,32 @@ export class BossGameScreenView implements View {
 			fill: "#87CEEB", // Sky blue
 		});
 		this.group.add(bg);
+
+		this.bossImg.onload = () => {
+			const vader = new Konva.Image({
+				x: STAGE_WIDTH / 2 - 250,
+				y: 20,
+				image: this.bossImg,
+				width: 500,
+				height: 500
+			});
+
+			this.group.add(vader);
+			vader.zIndex(1);
+		};
+		this.bossImg.src = 'https://konvajs.org/assets/darth-vader.jpg';
+
+		this.bossNumber = new Konva.Text({
+			x: STAGE_WIDTH / 2 - 5,
+			y: 30,
+			text: "place",
+			fontSize: 50,
+			fontFamily: "Arial",
+			fill: "white",
+		});
+		this.group.add(this.bossNumber);
+		this.bossNumber.moveToTop();
+
 
 		this.scoreText = new Konva.Text({
 			x: 20,
@@ -59,12 +93,24 @@ export class BossGameScreenView implements View {
 			y: STAGE_HEIGHT / 2 + 50, // start halfway down
 			width: STAGE_WIDTH / 2,
 			height: STAGE_HEIGHT / 2 - 50,
-			fill: "#f4f4f4",
+			fill: "#aeffaaff",
 			stroke: "black",
 			strokeWidth: 3,
 			cornerRadius: 10,
 		});
 		this.group.add(this.entryBox);
+
+		// var highlightRect = new Konva.Rect({
+		// 	x: 0, // left edge
+		// 	y: STAGE_HEIGHT / 2 + 50, // start halfway down
+		// 	width: this.entryBox.width(), // Match the width of the text
+		// 	height: this.entryBox.height(), // Match the height of the text
+		// 	fill: 'white', // Choose your highlight color
+		// 	opacity: 1, // Adjust transparency
+		// 	listening: false // Make sure it doesn't interfere with text clicks
+		// });
+		// this.group.add(highlightRect);
+		// highlightRect.moveToTop();
 
 		//small text box that shows the inputted equation
 		this.entryEquationText = new Konva.Text({
@@ -75,9 +121,10 @@ export class BossGameScreenView implements View {
 			text: "Current: ",
 			fontSize: 22,
 			fontFamily: "Impact",
-			fill: "darkblue",
+			fill: "white",
 		});
 		this.group.add(this.entryEquationText);
+
 
 		// Label for Entry Box
 		const entryLabel = new Konva.Text({
@@ -227,6 +274,7 @@ export class BossGameScreenView implements View {
 	show(): void {
 		this.group.visible(true);
 		this.group.getLayer()?.draw();
+		this.startEquationPulsate();
 	}
 
 	/**
@@ -240,4 +288,73 @@ export class BossGameScreenView implements View {
 	getGroup(): Konva.Group {
 		return this.group;
 	}
+
+	startEquationPulsate(): void {
+		if (this.equationPulseAnim) return; // already pulsing
+
+		const text = this.entryEquationText;
+		if (!text) return;
+
+		let t = 0;
+		this.equationPulseAnim = new Konva.Animation((frame) => {
+			t += frame.timeDiff / 500;
+			const r = 255;
+			const g = 255;
+			const b = Math.floor(255 * (0.5 + 0.5 * Math.sin(t)));
+			text.fill(`rgb(${r},${g},${b})`);
+		}, text.getLayer());
+
+		this.equationPulseAnim.start();
+	}
+
+
+	stopEquationPulsate(): void {
+		if (this.equationPulseAnim) {
+			this.equationPulseAnim.stop();
+			this.equationPulseAnim = undefined;
+			// optional: reset the color
+			this.entryEquationText.fill("white");
+			this.entryEquationText.getLayer()?.draw();
+		}
+	}
+
+	flashEquationGreen(duration: number = 1000, flashes: number = 3): void {
+		if (!this.entryEquationText) return;
+		this.stopEquationPulsate();
+
+		const text = this.entryEquationText;
+		const originalColor = text.fill();
+		const interval = duration / (flashes * 2);
+		let count = 0;
+
+		const flashInterval = setInterval(() => {
+			text.fill(count % 2 === 0 ? 'green' : originalColor);
+			this.group.getLayer()?.draw();
+
+			count++;
+			if (count >= flashes * 2) {
+				clearInterval(flashInterval);
+				text.fill(originalColor);
+				this.group.getLayer()?.draw();
+			}
+		}, interval);
+	}
+
+
+
+	updateBossNum(newnum: string): void {
+		if (!this.bossNumber) return;
+
+		this.bossNumber.setText(newnum);
+		this.group.getLayer()?.draw();
+	}
+
+	getBossNum(): number {
+		if (!this.bossNumber) return NaN;
+
+		return parseInt(this.bossNumber.text());
+
+	}
+
+
 }

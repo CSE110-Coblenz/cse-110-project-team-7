@@ -52,6 +52,9 @@ export class BossGameScreenController extends ScreenController {
 		this.view.updateTimer(GAME_DURATION);
 		this.view.show();
 
+		console.log(this.model.getNums())
+		this.view.updateBossNum(this.model.getNums().toString());
+
 		this.startTimer();
 	}
 
@@ -59,13 +62,20 @@ export class BossGameScreenController extends ScreenController {
 		this.tileSet.add(tile)
 		const eq: string = this.makeEquation();
 		this.view.updateEquationText(eq);
-		console.log("evaluated as " + evaluate(this.makeEquation()))
+		if(this.checkEQ()){
+			console.log("EQUATION COMPLETE")
+			this.view.flashEquationGreen();
+		}
+		//console.log("evaluated as " + evaluate(this.makeEquation()))
 	}
 	removeTile(tile:Tile): void {
 		this.tileSet.delete(tile)
 		const eq: string = this.makeEquation();
 		this.view.updateEquationText(eq);
-		console.log("evaluated as " + evaluate(this.makeEquation()))
+		if(this.checkEQ()){
+			this.view.flashEquationGreen();
+		}
+		//console.log("evaluated as " + evaluate(this.makeEquation()))
 	}
 
 	/*
@@ -119,4 +129,19 @@ export class BossGameScreenController extends ScreenController {
 
 		return toReturn
 	}
+
+	private checkEQ(): boolean {
+		// check if the equation made by makeEquation() equals the boss num
+
+		let evald: number = evaluate(this.makeEquation());
+
+		if(evald == this.view.getBossNum()){
+			//console.log("EQUATION COMPLETE")
+			return true;
+		}
+
+		return false;
+	}
+
+
 }
