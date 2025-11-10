@@ -26,7 +26,7 @@ export function evaluate(equation: string): number {
                 stack.push(-num);
             }
 
-            if (operator == '*'){
+            if (operator == 'x'){
                 let top = stack[stack.length - 1];
                 stack.pop();
                 stack.push(top * num);
@@ -50,4 +50,20 @@ export function evaluate(equation: string): number {
 
     return res;
 
+}
+
+function is_valid_equation(equation: string): boolean {
+  // Must only contain digits and + - * / (optionally parentheses)
+  if (!/^[\d+\-*/\s]+$/.test(equation)) return false;
+
+  // No consecutive operators (except something like "-5" at the start)
+  if (/[*+\-/]{2,}/.test(equation)) return false;
+
+  // Must not start or end with an invalid operator
+  if (/^[*/+]/.test(equation) || /[*+\-/]$/.test(equation)) return false;
+
+  // Must contain at least one digit
+  if (!/\d/.test(equation)) return false;
+
+  return true;
 }

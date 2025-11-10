@@ -32,7 +32,6 @@ export class BossGameScreenController extends ScreenController {
 		this.view.setOnTileRemoval((tile: Tile) => {
 			this.removeTile(tile)
 		});
-
 	}
 	/**
 	 * Get the view group
@@ -58,11 +57,15 @@ export class BossGameScreenController extends ScreenController {
 
 	addTile(tile: Tile): void {
 		this.tileSet.add(tile)
-		console.log(evaluate(this.makeEquation()))
+		const eq: string = this.makeEquation();
+		this.view.updateEquationText(eq);
+		console.log("evaluated as " + evaluate(this.makeEquation()))
 	}
 	removeTile(tile:Tile): void {
 		this.tileSet.delete(tile)
-		console.log(evaluate(this.makeEquation()))
+		const eq: string = this.makeEquation();
+		this.view.updateEquationText(eq);
+		console.log("evaluated as " + evaluate(this.makeEquation()))
 	}
 
 	/*
