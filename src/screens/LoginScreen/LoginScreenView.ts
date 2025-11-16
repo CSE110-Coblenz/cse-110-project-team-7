@@ -92,10 +92,7 @@ export class LoginScreenView implements View {
 	 */
 	show(): void {
 		this.group.visible(true);
-		const layer = this.group.getLayer();
-		if (layer) {
-			layer.draw();
-		}
+		this.group.getLayer()?.draw();
 	}
 
 	/**
