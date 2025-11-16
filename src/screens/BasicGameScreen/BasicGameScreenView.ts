@@ -54,7 +54,7 @@ function generateFakeOption(): string {
 
 let currentQuestionIndex = 0;
 let health = 3;
-  
+
 export class BasicGameScreenView implements View {
 	private group: Konva.Group;
 	private questionText: Konva.Text;
@@ -86,6 +86,20 @@ export class BasicGameScreenView implements View {
 			this.group.add(monsterNode)
 			this.group.getLayer()?.draw();
 		});
+
+		for (let i = 0; i < 3; i++){
+			Konva.Image.fromURL('src/assets/heart.png', (heart) => {
+				heart.setAttrs({
+					x: 20 + i * 40,
+					y: 20,
+					scaleX: 0.15,
+					scaleY: 0.15,
+				});
+				this.group.add(heart);
+				this.hearts.push(heart);
+				this.group.getLayer()?.draw();
+			})
+		}
 		
 		this.questionText = new Konva.Text({
 			x: 0,
@@ -102,6 +116,37 @@ export class BasicGameScreenView implements View {
 
 		this.loadQuestion(currentQuestionIndex);
     }
+
+	private hearts: Konva.Image[] = [];
+	updateHealth() {
+		if (health <= 0) return;
+
+		health--;
+
+		const heart = this.hearts[health];
+		heart.visible(false);
+		this.group.getLayer()?.draw();
+
+		if (health === 0){
+			this.showGameOver();
+		}
+	}
+
+	showGameOver(){
+		const text = new Konva.Text({
+			x: 0,
+			y: STAGE_HEIGHT / 2 - 50,
+			width: STAGE_WIDTH,
+			align: "center",
+			text: "GAME OVER",
+			fontSize: 60,
+			fontFamily: "Calibri",
+			fill: "red"
+		});
+		this.group.add(text);
+		this.group.getLayer()?.draw();
+		this.choiceButtons.forEach(btn => btn.off("click"));
+	}
 
 	loadQuestion(index: number){
 		const question = questions[index];
@@ -184,6 +229,7 @@ export class BasicGameScreenView implements View {
 		} else {
 			console.log("wrong")
 			this.updateMonsterImage('src/assets/monsteratk.png')
+			this.updateHealth();
 			await this.sleep(2000);
 			this.updateMonsterImage('src/assets/monster.png')
 		}
