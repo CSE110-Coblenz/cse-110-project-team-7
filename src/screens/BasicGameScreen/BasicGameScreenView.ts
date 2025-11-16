@@ -1,6 +1,7 @@
 import Konva from "konva";
 import type { View } from "../../types.ts";
 import { STAGE_WIDTH, STAGE_HEIGHT } from "../../constants.ts";
+import { generateEquation } from "../../utils/generateEquation.ts";
 import type { KonvaNodeEvent } from "konva/lib/types";
 import { Stage } from "konva/lib/Stage";
 
@@ -8,13 +9,51 @@ import { Stage } from "konva/lib/Stage";
  * GameScreenView - Renders the game UI using Konva
  */
 
-const questions = [
-	{ equation: "9+10", answer: "19", options: ["9+10", "2+8", "3+10", "12+9"] },
-	{ equation: "2+4", answer: "6", options: ["2+5", "3+1", "2+4", "2+2"] },
-	{ equation: "3*3", answer: "9", options: ["3*2", "2*2", "1*2", "3*3"] },
-  ];
+const questions = generateQuestionSet();
+
+function generateQuestionSet() {
+	const questions = [];
+
+	for (let i = 0; i < 5; i++) {
+		const target = Math.floor(Math.random() * 30);
+		const eqs = generateEquation(target, 3, 5);
+		if (eqs.length === 0) {
+			i--;
+			continue;
+		}
+
+		const eq = eqs[Math.floor(Math.random() * eqs.length)];
+		const answer = eval(eq).toString();
+
+		const wrong: string[] = [];
+		while (wrong.length < 3) {
+			const fake = generateFakeOption();
+			if (fake !== answer && !wrong.includes(fake)) wrong.push(fake);
+		}
+
+		const options = [eq, ...wrong].sort(() => Math.random() - 0.5);
+
+		questions.push({
+			equation: eq,
+			answer,
+			options
+		});
+	}
+
+	return questions;
+}
+
+
+function generateFakeOption(): string {
+	const a = Math.floor(Math.random() * 10);
+	const b = Math.floor(Math.random() * 10);
+	const ops = ["+", "-", "*"];
+	const op = ops[Math.floor(Math.random() * ops.length)];
+	return `${a}${op}${b}`;
+}
 
 let currentQuestionIndex = 0;
+let health = 3;
   
 export class BasicGameScreenView implements View {
 	private group: Konva.Group;
@@ -171,6 +210,7 @@ export class BasicGameScreenView implements View {
 		});
 	}
 
+
 	sleep(ms: number): Promise<void> {
 		return new Promise(resolve => setTimeout(resolve, ms));
 	}
@@ -191,3 +231,4 @@ export class BasicGameScreenView implements View {
 	}
 	
 }
+
