@@ -58,11 +58,8 @@ class App implements ScreenSwitcher {
 		// Draw the layer (render everything to the canvas)
 		this.layer.draw();
 
-		// Start with menu screen visible
-		this.basicgamecontroller.getView().show();
-		this.bossgamecontroller.getView().show();
-		this.towerselectcontroller.getView().show();
-		this.logincontroller.getView().show();
+		// Start with tower selection screen visible
+		this.switchToScreen({ type: "tower_select" });
 	}
 
 	/**
