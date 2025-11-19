@@ -4,10 +4,19 @@ import { STAGE_WIDTH, STAGE_HEIGHT } from "../../constants.ts";
 import { generateEquation } from "../../utils/generateEquation.ts";
 import type { KonvaNodeEvent } from "konva/lib/types";
 import { Stage } from "konva/lib/Stage";
+import { BossGameScreenView } from "../BossGameScreen/BossGameScreenView.ts";
+
+let bossScreen: BossGameScreenView | null = null;
 
 /**
  * GameScreenView - Renders the game UI using Konva
  */
+
+let equationMode: "any" | "addition" | "subtraction" | "multiplication" | "division" = "any";
+
+let correctAnswers = 0;
+const MAX_LEVELS = 20;
+
 
 const questions = generateQuestionSet();
 
@@ -47,7 +56,24 @@ function generateQuestionSet() {
 function generateFakeOption(): string {
 	const a = Math.floor(Math.random() * 10);
 	const b = Math.floor(Math.random() * 10);
-	const ops = ["+", "-", "*"];
+	let ops: string[] = [];
+	switch (equationMode) {
+		case "addition":
+			ops = ["+"];
+			break;
+		case "subtraction":
+			ops = ["-"];
+			break;
+		case "multiplication":
+			ops = ["*"];
+			break;
+		case "division":
+			ops = ["/"];
+			break;
+		default:
+			ops = ["+", "-", "*", "/"];
+	}
+	
 	const op = ops[Math.floor(Math.random() * ops.length)];
 	return `${a}${op}${b}`;
 }
@@ -58,6 +84,7 @@ let health = 3;
 export class BasicGameScreenView implements View {
 	private group: Konva.Group;
 	private questionText: Konva.Text;
+	private levelText: Konva.Text;
 	private choiceButtons: Konva.Group[] = [];
 	private monster?: Konva.Image;
 	
@@ -147,7 +174,16 @@ export class BasicGameScreenView implements View {
 		helpGroup.add(helpText);
 		this.group.add(helpGroup);
 
-		
+		this.levelText = new Konva.Text({
+			x: STAGE_WIDTH - 180,
+			y: STAGE_HEIGHT - 50,
+			text: `Progress: ${correctAnswers}/${MAX_LEVELS}`,
+			fontSize: 28,
+			fontFamily: "Calibri",
+			fill: "black",
+		});
+		this.group.add(this.levelText);
+
 		this.questionText = new Konva.Text({
 			x: 0,
 			y: STAGE_WIDTH * 0.15,
@@ -243,6 +279,11 @@ export class BasicGameScreenView implements View {
 		}
 	}
 
+	updateLevelText() {
+		this.levelText.text(`Progress: ${correctAnswers}/${MAX_LEVELS}`);
+		this.group.getLayer()?.draw();
+	}
+
 	showGameOver(){
 		const text = new Konva.Text({
 			x: 0,
@@ -326,6 +367,8 @@ export class BasicGameScreenView implements View {
 		const question = questions[currentQuestionIndex];
 
 		if (selected === question.equation){
+			correctAnswers++;
+			this.updateLevelText();
 			rect.fill("#58b85a");
 			console.log("correct");
 			this.updateMonsterImage('src/assets/monstersln.png')
@@ -334,11 +377,23 @@ export class BasicGameScreenView implements View {
 			this.updateMonsterImage('src/assets/monster.png')
 			currentQuestionIndex++;
 
+			if (correctAnswers >= MAX_LEVELS) {
+				console.log("Switching to boss screen...");
+	
+				this.hide();
+	
+				if (!bossScreen) bossScreen = new BossGameScreenView();
+				bossScreen.show();
+	
+				return;
+			}
+
 			if (currentQuestionIndex < questions.length) {
 				this.loadQuestion(currentQuestionIndex);
 			} else {
 				console.log("finished")
 			}
+
 		} else {
 			rect.fill("#bd2c19")
 			console.log("wrong")
