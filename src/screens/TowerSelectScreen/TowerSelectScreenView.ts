@@ -117,6 +117,8 @@ export class TowerSelectScreenView implements View {
 			shadowOffset: { x: 4, y: 4 },
 			shadowOpacity: 0.5
 		});
+
+		group.add(towerBody);
 		for (let i = 0; i < 7; i++){
 			const brickLine = new Konva.Line({
 				points: [
@@ -128,7 +130,7 @@ export class TowerSelectScreenView implements View {
 			});
 			group.add(brickLine);
 		}
-		group.add(towerBody);
+		
 
 		// Draw large math symbol at top of tower
 		const symbolCircle = new Konva.Circle({
