@@ -100,6 +100,53 @@ export class BasicGameScreenView implements View {
 				this.group.getLayer()?.draw();
 			})
 		}
+
+		const helpGroup = new Konva.Group({
+			x: STAGE_WIDTH - 70,
+			y: 20,
+			cursor: "pointer",
+		});
+
+		const helpBox = new Konva.Rect({
+			width: 50,
+			height: 50,
+			fill: "lightblue",
+			stroke: "blue",
+			strokeWidth: 2,
+			cornerRadius: 1,
+			listening: true,
+		});
+
+		const helpText = new Konva.Text({
+			text: "?",
+			fontSize: 36,
+			fontFamily: "Calibri",
+			fill: "blue",
+			width: 50,
+			height: 50,
+			align: "center",
+			offsetY: -5,
+			listening: false,
+		});
+
+		helpGroup.on("mouseover", () => {
+			helpBox.fill("darkblue")
+			this.group.getLayer()?.batchDraw();
+		});
+
+		helpGroup.on("mouseout", () => {
+			helpBox.fill("lightblue")
+			this.group.getLayer()?.batchDraw();
+		});
+
+		helpGroup.on("click", () => {
+			this.showHelpPopup();
+		});
+
+		helpGroup.add(helpBox);
+		helpGroup.add(helpText);
+		this.group.add(helpGroup);
+
 		
 		this.questionText = new Konva.Text({
 			x: 0,
@@ -116,6 +163,70 @@ export class BasicGameScreenView implements View {
 
 		this.loadQuestion(currentQuestionIndex);
     }
+
+	showHelpPopup() {
+		const overlay = new Konva.Rect({
+			x: 0,
+			y: 0,
+			width: STAGE_WIDTH,
+			height: STAGE_HEIGHT,
+			fill: "black",
+			opacity: 0.6,
+		});
+	
+		const popup = new Konva.Group({
+			x: STAGE_WIDTH / 2 - 200,
+			y: STAGE_HEIGHT / 2 - 150,
+		});
+	
+		const box = new Konva.Rect({
+			width: 400,
+			height: 300,
+			fill: "white",
+			cornerRadius: 10,
+			shadowColor: "black",
+			shadowBlur: 10,
+			shadowOpacity: 0.5,
+		});
+	
+		const text = new Konva.Text({
+			text: "How to play:\n\n1. Each monster has a number appear near them \n2. Select the answer with your mouse that has the correct equation to match.\n3. Be Careful! If you select the wrong answer, you’ll lose a life. Three strikes and you’re out...\n4. Keep defeating monsters to climb the tower.",
+			width: 380,
+			padding: 10,
+			fontSize: 20,
+			fontFamily: "Calibri",
+			fill: "black",
+			align: "left",
+		});
+	
+		const closeBtn = new Konva.Text({
+			x: 360,
+			y: 10,
+			text: "X",
+			fontSize: 24,
+			fontFamily: "Calibri",
+			fill: "red",
+			cursor: "pointer",
+		});
+	
+		closeBtn.on("click", () => {
+			popup.destroy();
+			overlay.destroy();
+			this.group.getLayer()?.draw();
+		});
+	
+		popup.add(box);
+		popup.add(text);
+		popup.add(closeBtn);
+	
+		this.group.add(overlay);
+		this.group.add(popup);
+
+		overlay.moveToTop();
+		popup.moveToTop();
+		this.group.getLayer()?.draw();
+	}
+	
 
 	private hearts: Konva.Image[] = [];
 	updateHealth() {
@@ -199,7 +310,7 @@ export class BasicGameScreenView implements View {
 			});
 
 			buttonGroup.on("click", () => {
-				this.handleAnswer(choice);
+				this.handleAnswer(choice, rect);
 			});
 
 			buttonGroup.add(rect);
@@ -211,13 +322,15 @@ export class BasicGameScreenView implements View {
 		this.group.getLayer()?.draw();
 	}
 
-	async handleAnswer(selected: string){
+	async handleAnswer(selected: string, rect: Konva.Rect){
 		const question = questions[currentQuestionIndex];
 
 		if (selected === question.equation){
+			rect.fill("#58b85a");
 			console.log("correct");
 			this.updateMonsterImage('src/assets/monstersln.png')
 			await this.sleep(2000);
+			rect.fill("#ddd");
 			this.updateMonsterImage('src/assets/monster.png')
 			currentQuestionIndex++;
 
@@ -227,6 +340,7 @@ export class BasicGameScreenView implements View {
 				console.log("finished")
 			}
 		} else {
+			rect.fill("#bd2c19")
 			console.log("wrong")
 			this.updateMonsterImage('src/assets/monsteratk.png')
 			this.updateHealth();
