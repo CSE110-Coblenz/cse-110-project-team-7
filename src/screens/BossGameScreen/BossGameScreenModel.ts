@@ -2,29 +2,30 @@
  * GameScreenModel - Manages game state
  */
 export class BossGameScreenModel {
-	private phases: number = 4;
-    private score: number = 0;
-    private nums: number[] = [5, 10, 15, 20];
+    private score = 0;
+    private timeRemaining = 60;
 
-    decrementPhases(): void {
-        this.phases--;
+    constructor() {}
+
+    addScore(amount: number) {
+        this.score += amount;
     }
-
-    getPhases(): number {
-        return this.phases;
-    }
-
-    reset(): void {
-        this.phases = 4;
-		this.score = 0;
-	}
 
     getScore(): number {
         return this.score;
     }
 
-    getNums(): number{
-        return this.nums[0];
+    tickTimer(): number {
+        return this.timeRemaining--;
+    }
+
+    getTime(): number {
+        return this.timeRemaining;
+    }
+
+    reset(): void {
+        this.score = 0;
+        this.timeRemaining = 120;
     }
 
 

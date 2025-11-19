@@ -59,10 +59,12 @@ class App implements ScreenSwitcher {
 		this.layer.draw();
 
 		// Start with menu screen visible
-		this.basicgamecontroller.getView().show();
-		this.bossgamecontroller.getView().show();
-		this.towerselectcontroller.getView().show();
-		this.logincontroller.getView().show();
+		this.basicgamecontroller.getView().hide();
+		this.bossgamecontroller.getView().hide();
+		this.towerselectcontroller.getView().hide();
+		this.logincontroller.getView().hide();
+
+		this.switchToScreen({type: "boss_game"})
 	}
 
 	/**
@@ -89,6 +91,7 @@ class App implements ScreenSwitcher {
 				break;
 			case "boss_game":
 				this.bossgamecontroller.show();
+				this.bossgamecontroller.startGame();
 				break;
 			case "tower_select":
 				this.towerselectcontroller.show();

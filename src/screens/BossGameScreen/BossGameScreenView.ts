@@ -7,7 +7,7 @@ import { Tile } from "./Tile.ts"
  * GameScreenView - Renders the game UI using Konva
  */
 export class BossGameScreenView implements View {
-	private parts: string[] = ["1", "5", "x", "10", "-", "0"]
+	private parts: string[] = ["0", "x", "0"]
 	private group: Konva.Group;
 	private scoreText: Konva.Text;
 	private timerText: Konva.Text;
@@ -19,7 +19,7 @@ export class BossGameScreenView implements View {
 	private entryEquationText: Konva.Text;
 
 	//boss png
-	private bossImg = new Image();
+	private bossImageNode?: Konva.Image;
 
 	//boss number
 	private bossNumber: Konva.Text;
@@ -28,6 +28,7 @@ export class BossGameScreenView implements View {
 	private onTileRemoval?: (tile: Tile) => void;
 
 	private equationPulseAnim?: Konva.Animation;
+	private bossNumPulseAnim?: Konva.Animation;
 
 	constructor() {
 		this.group = new Konva.Group({ visible: false });
@@ -41,27 +42,14 @@ export class BossGameScreenView implements View {
 		});
 		this.group.add(bg);
 
-		this.bossImg.onload = () => {
-			const vader = new Konva.Image({
-				x: STAGE_WIDTH / 2 - 250,
-				y: 20,
-				image: this.bossImg,
-				width: 500,
-				height: 500
-			});
-
-			this.group.add(vader);
-			vader.zIndex(1);
-		};
-		this.bossImg.src = 'https://konvajs.org/assets/darth-vader.jpg';
-
 		this.bossNumber = new Konva.Text({
-			x: STAGE_WIDTH / 2 - 5,
-			y: 30,
+			x: STAGE_WIDTH / 2 - 25,
+			y: 10,
 			text: "place",
 			fontSize: 50,
 			fontFamily: "Arial",
-			fill: "white",
+			fontStyle: "italic bold",
+			fill: "black",
 		});
 		this.group.add(this.bossNumber);
 		this.bossNumber.moveToTop();
@@ -165,67 +153,6 @@ export class BossGameScreenView implements View {
 		});
 		this.group.add(inventoryLabel);
 
-		// ===== Tiles go inside the inventory box =====
-
-		// Compute how much horizontal space we have
-		const invWidth = this.inventory.width();
-		const invHeight = this.inventory.height();
-		const invX = this.inventory.x();
-		const invY = this.inventory.y();
-
-		const numTiles = this.parts.length;
-
-		// Define a reasonable margin ratio
-		const sideMargin = invWidth * 0.05; // 5% margin on each side
-		const availableWidth = invWidth - 2 * sideMargin;
-
-		// Compute ideal spacing: each tile + gap between
-		// Let’s assume we want small gaps proportional to tile size
-		// So tileSize + spacing = availableWidth / numTiles
-		// and we’ll make spacing = tileSize * 0.2 → solve for tileSize
-		let tileSize = availableWidth / (numTiles + 0.2 * (numTiles - 1));
-		let tileSpacing = tileSize * 0.2;
-
-		// Also ensure the tile fits vertically
-		if (tileSize > invHeight * 0.6) {
-			tileSize = invHeight * 0.6;
-			tileSpacing = tileSize * 0.2;
-		}
-
-		// Compute top-left start so everything is centered
-		const totalWidth = numTiles * tileSize + (numTiles - 1) * tileSpacing;
-		const startX = invX + (invWidth - totalWidth) / 2;
-		const startY = invY + (invHeight - tileSize) / 2;
-
-		// Create and place tiles
-		this.parts.forEach((part, index) => {
-			const x = startX + index * (tileSize + tileSpacing);
-			const y = startY;
-
-			const tile = new Tile(part, x, y, tileSize);
-			this.group.add(tile.getNode());
-			this.tiles.push(tile);
-		});
-
-		this.tiles.forEach(tile => {
-			const node = tile.getNode();
-
-			node.on("dragend", () => {
-				if (this.isInsideEntryBox(node)) {
-					// console.log(`${tile.getLabel()} dropped inside entry box`);
-					// You can snap it into position or trigger logic here
-					if (this.onTileEntry) {
-						this.onTileEntry(tile);
-					}
-					this.group.getLayer()?.draw();
-				} else {
-					console.log(`${tile.getLabel()} dropped outside entry box`);
-					if (this.onTileRemoval) {
-						this.onTileRemoval(tile)
-					}
-				}
-			});
-		});
 	}
 
 	private isInsideEntryBox(node: Konva.Group): boolean {
@@ -275,6 +202,7 @@ export class BossGameScreenView implements View {
 		this.group.visible(true);
 		this.group.getLayer()?.draw();
 		this.startEquationPulsate();
+		this.startBossNumPulsate();
 	}
 
 	/**
@@ -307,6 +235,22 @@ export class BossGameScreenView implements View {
 		this.equationPulseAnim.start();
 	}
 
+	startBossNumPulsate(): void {
+		if (this.bossNumPulseAnim) return; // already pulsing
+
+		const text = this.bossNumber;
+		if (!text) return;
+
+		let t = 0;
+		this.bossNumPulseAnim = new Konva.Animation((frame) => {
+			t += frame.timeDiff / 100;
+			// Flash between white and red
+			const intensity = Math.floor(255 * (0.5 + 0.5 * Math.sin(t)));
+			text.fill(`rgb(255, ${255 - intensity}, ${255 - intensity})`);
+		}, text.getLayer());
+
+		this.bossNumPulseAnim.start();
+	}
 
 	stopEquationPulsate(): void {
 		if (this.equationPulseAnim) {
@@ -315,6 +259,15 @@ export class BossGameScreenView implements View {
 			// optional: reset the color
 			this.entryEquationText.fill("white");
 			this.entryEquationText.getLayer()?.draw();
+		}
+	}
+
+	stopBossNumPulsate(): void {
+		if (this.bossNumPulseAnim) {
+			this.bossNumPulseAnim.stop();
+			this.bossNumPulseAnim = undefined;
+			this.bossNumber.fill("black"); // reset color
+			this.bossNumber.getLayer()?.draw();
 		}
 	}
 
@@ -340,8 +293,6 @@ export class BossGameScreenView implements View {
 		}, interval);
 	}
 
-
-
 	updateBossNum(newnum: string): void {
 		if (!this.bossNumber) return;
 
@@ -355,6 +306,80 @@ export class BossGameScreenView implements View {
 		return parseInt(this.bossNumber.text());
 
 	}
+	updateBossImage(path: string): void {
+		const img = new Image();
+		img.onload = () => {
+			if (this.bossImageNode) {
+				this.bossImageNode.image(img); // update existing node
+			} else {
+				this.bossImageNode = new Konva.Image({
+					x: STAGE_WIDTH / 2 - 100,
+					y: 50,
+					image: img,
+					width: 200,
+					height: 200,
+				});
+				this.group.add(this.bossImageNode);
+				this.bossImageNode.zIndex(1);
+			}
+			this.group.getLayer()?.draw();
+		};
+		img.src = path;
+	}
+	updatePhaseTiles(newParts: string[]): void {
+		// Remove old tiles from the stage
+		this.tiles.forEach(tile => tile.getNode().destroy());
+		this.tiles = [];
+
+		// Save new tile labels
+		this.parts = newParts;
+
+		// Rebuild inventory tile layout
+		const invWidth = this.inventory.width();
+		const invHeight = this.inventory.height();
+		const invX = this.inventory.x();
+		const invY = this.inventory.y();
+
+		const numTiles = newParts.length;
+		const sideMargin = invWidth * 0.05;
+		const availableWidth = invWidth - 2 * sideMargin;
+
+		let tileSize = availableWidth / (numTiles + 0.2 * (numTiles - 1));
+		let tileSpacing = tileSize * 0.2;
+
+		if (tileSize > invHeight * 0.6) {
+			tileSize = invHeight * 0.6;
+			tileSpacing = tileSize * 0.2;
+		}
+
+		const totalWidth = numTiles * tileSize + (numTiles - 1) * tileSpacing;
+		const startX = invX + (invWidth - totalWidth) / 2;
+		const startY = invY + (invHeight - tileSize) / 2;
+
+		// Create the tiles
+		newParts.forEach((label, index) => {
+			const x = startX + index * (tileSize + tileSpacing);
+			const y = startY;
+
+			const tile = new Tile(label, x, y, tileSize);
+			this.group.add(tile.getNode());
+			this.tiles.push(tile);
+
+			// Reattach drag logic
+			const node = tile.getNode();
+			node.on("dragend", () => {
+				if (this.isInsideEntryBox(node)) {
+					if (this.onTileEntry) this.onTileEntry(tile);
+				} else {
+					if (this.onTileRemoval) this.onTileRemoval(tile);
+				}
+				this.group.getLayer()?.draw();
+			});
+		});
+
+		this.group.getLayer()?.draw();
+	}
+
 
 
 }

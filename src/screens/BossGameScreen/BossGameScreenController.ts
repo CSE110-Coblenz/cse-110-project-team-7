@@ -2,6 +2,7 @@ import { ScreenController } from "../../types.ts";
 import type { ScreenSwitcher } from "../../types.ts";
 import { BossGameScreenModel } from "./BossGameScreenModel.ts";
 import { BossGameScreenView } from "./BossGameScreenView.ts";
+import { BossEnemyModel } from "../../models/BossEnemyModel.ts";
 import { GAME_DURATION } from "../../constants.ts";
 import type { Tile } from "./Tile.ts";
 import { evaluate } from "../../utils/equationSolver.ts";
@@ -10,6 +11,7 @@ import { evaluate } from "../../utils/equationSolver.ts";
  * BaiscGameScreenController - Coordinates game logic between Model and View
  */
 export class BossGameScreenController extends ScreenController {
+	private boss: BossEnemyModel;
 	private model: BossGameScreenModel;
 	private view: BossGameScreenView;
 	private screenSwitcher: ScreenSwitcher;
@@ -32,7 +34,16 @@ export class BossGameScreenController extends ScreenController {
 		this.view.setOnTileRemoval((tile: Tile) => {
 			this.removeTile(tile)
 		});
+
+		this.boss = new BossEnemyModel([
+			{ targetNumber: 12, tiles: ["3", "+", "9"], imagePath: "https://p7.hiclipart.com/preview/79/102/357/pac-man-world-3-ghosts-clip-art-pac-man-ghost-png-transparent-image-thumbnail.jpg" },
+			{ targetNumber: 8, tiles: ["4", "x", "2"], imagePath: "https://p7.hiclipart.com/preview/79/102/357/pac-man-world-3-ghosts-clip-art-pac-man-ghost-png-transparent-image-thumbnail.jpg" },
+			{ targetNumber: 5, tiles: ["7", "-", "2"], imagePath: "https://p7.hiclipart.com/preview/79/102/357/pac-man-world-3-ghosts-clip-art-pac-man-ghost-png-transparent-image-thumbnail.jpg" },
+			{ targetNumber: 20, tiles: ["4", "x", "5"], imagePath: "https://p7.hiclipart.com/preview/79/102/357/pac-man-world-3-ghosts-clip-art-pac-man-ghost-png-transparent-image-thumbnail.jpg" }
+		]);
 	}
+
+
 	/**
 	 * Get the view group
 	 */
@@ -46,48 +57,84 @@ export class BossGameScreenController extends ScreenController {
 	startGame(): void {
 		// Reset model state
 		this.model.reset();
+		this.boss.reset();
 
 		// Update view
-		this.view.updateScore(this.model.getScore());
-		this.view.updateTimer(GAME_DURATION);
+		// this.view.updateScore(this.model.getScore());
+		// this.view.updateTimer(GAME_DURATION);
+		// this.view.show();
+
+		// console.log(this.model.getNums())
+		// this.view.updateBossNum(this.model.getNums().toString());
+
+		// this.startTimer();
+
+		this.loadPhaseIntoView();
 		this.view.show();
-
-		console.log(this.model.getNums())
-		this.view.updateBossNum(this.model.getNums().toString());
-
 		this.startTimer();
 	}
 
+	private loadPhaseIntoView() {
+		const phase = this.boss.getCurrentPhase();
+
+		this.view.updateBossNum(phase.targetNumber.toString());
+		this.view.updateBossImage(phase.imagePath);
+		this.view.updatePhaseTiles(phase.tiles);
+		this.view.updateEquationText("");
+	}
+
 	addTile(tile: Tile): void {
-		this.tileSet.add(tile)
-		const eq: string = this.makeEquation();
+		this.tileSet.add(tile);
+		const eq = this.makeEquation();
 		this.view.updateEquationText(eq);
-		if(this.checkEQ()){
-			console.log("EQUATION COMPLETE")
+
+		if (this.checkEQ()) {
+			console.log("EQUATION COMPLETE");
 			this.view.flashEquationGreen();
+			this.model.addScore(10);
+			this.view.updateScore(this.model.getScore());
+			// Advance to next phase
+			if (!this.boss.isFinalPhase()) {
+				this.boss.nextPhase();
+				this.tileSet.clear(); // Clear current tile selections
+				this.loadPhaseIntoView();
+			} else {
+				// End game if final phase completed
+				this.endGame();
+			}
 		}
-		//console.log("evaluated as " + evaluate(this.makeEquation()))
 	}
-	removeTile(tile:Tile): void {
-		this.tileSet.delete(tile)
-		const eq: string = this.makeEquation();
+
+	removeTile(tile: Tile): void {
+		this.tileSet.delete(tile);
+		const eq = this.makeEquation();
 		this.view.updateEquationText(eq);
-		if(this.checkEQ()){
+
+		if (this.checkEQ()) {
+			console.log("EQUATION COMPLETE");
 			this.view.flashEquationGreen();
+
+			// Advance to next phase
+			if (!this.boss.isFinalPhase()) {
+				this.boss.nextPhase();
+				this.tileSet.clear(); // Clear current tile selections
+				this.loadPhaseIntoView();
+			} else {
+				// End game if final phase completed
+				this.endGame();
+			}
 		}
-		//console.log("evaluated as " + evaluate(this.makeEquation()))
 	}
+
 
 	/*
 	Start the timer
 	*/
 	private startTimer(): void {
-		// TODO: Task 3 - Implement countdown timer using setInterval
-
-		let timeRemaining: number = GAME_DURATION;
 		this.gameTimer = setInterval(() => {
-			timeRemaining -= 1;
+			const timeRemaining = this.model.tickTimer(); // decrement every tick
 			this.view.updateTimer(timeRemaining);
+
 			if (timeRemaining <= 0) {
 				this.endGame();
 			}
@@ -115,16 +162,16 @@ export class BossGameScreenController extends ScreenController {
 
 	private makeEquation(): string {
 		let toReturn: string = ""
-		if (this.tileSet.size == 0){
+		if (this.tileSet.size == 0) {
 			return "";
 		}
 
 		const tileArray: Tile[] = Array.from(this.tileSet);
 
-		tileArray.sort((a,b) => a.getPosition().x - b.getPosition().x)
+		tileArray.sort((a, b) => a.getPosition().x - b.getPosition().x)
 
-		for(let i = 0; i < tileArray.length; i++){
-			toReturn += tileArray[i].getLabel(); 
+		for (let i = 0; i < tileArray.length; i++) {
+			toReturn += tileArray[i].getLabel();
 		}
 
 		return toReturn
@@ -133,14 +180,9 @@ export class BossGameScreenController extends ScreenController {
 	private checkEQ(): boolean {
 		// check if the equation made by makeEquation() equals the boss num
 
-		let evald: number = evaluate(this.makeEquation());
+		const val: number = evaluate(this.makeEquation());
 
-		if(evald == this.view.getBossNum()){
-			//console.log("EQUATION COMPLETE")
-			return true;
-		}
-
-		return false;
+		return val === this.boss.getCurrentPhase().targetNumber;
 	}
 
 
