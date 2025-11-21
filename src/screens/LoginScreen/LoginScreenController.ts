@@ -27,6 +27,7 @@ export class LoginScreenController extends ScreenController {
 				console.error("Username or Password cannot be empty");
 				return;
 			}
+			try{
 			const response=await fetch("http://localhost:3000/login",{
 				method:"POST",
 				headers:{"Content-Type":"application/json"},
@@ -39,6 +40,10 @@ export class LoginScreenController extends ScreenController {
 			}
 			console.log("Login Success",data)
 			this.screenSwitcher.switchToScreen({type:"tower_select"});
+		}
+		catch(error){
+			console.log("Network error during login",error)
+		}
 			},
 			async (username:string,password:string) =>{
 				this.model.username=username;

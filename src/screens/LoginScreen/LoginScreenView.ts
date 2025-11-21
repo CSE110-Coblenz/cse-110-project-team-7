@@ -172,6 +172,9 @@ export class LoginScreenView implements View {
 		loginButton.on("click", () => {
 			this.onLogin(this.usernameText.text(), this.passwordText.text());
 		});
+		loginText.on("click",()=>{
+			this.onLogin(this.usernameText.text(),this.passwordText.text())
+		})
 
 		this.group.add(loginButton);
 		this.group.add(loginText);
@@ -237,6 +240,9 @@ export class LoginScreenView implements View {
 		signUpButton.on("click", () => {
 			this.onSignUp(this.usernameText.text(), this.passwordText.text());
 		});
+		signUpText.on("click",()=>{
+			this.onSignUp(this.usernameText.text(),this.passwordText.text());
+		})
 
 		this.group.add(signUpButton);
 		this.group.add(signUpText);
