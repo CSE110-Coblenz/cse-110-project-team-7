@@ -1,69 +1,35 @@
-function is_digit(char: string): boolean{
-    return /^\d$/.test(char);
+function is_digit(c: string): boolean {
+    return c >= '0' && c <= '9';
 }
 
-// Equations should be stripped of whitespaces before using
-// Equations should only contain whole numbers
 export function evaluate(equation: string): number {
+    equation = equation.replace(/\s+/g, '');
     let stack: number[] = [];
-    let num: number = 0;
-    let operator: string = '+'
-    let res: number = 0;
+    let num = 0;
+    let operator = '+';
 
-    for (let i: number = 0; i <= equation.length; i ++){
-        let c = i < equation.length ? equation[i] : '\0';
-        
-        if (is_digit(c)){
+    for (const c of equation) {
+        if (is_digit(c)) {
             num = num * 10 + Number(c);
-        }
-
-        if (!is_digit(c) || i == equation.length){
-            if (operator == '+'){
-                stack.push(num);
+        } else {
+            switch(operator) {
+                case '+': stack.push(num); break;
+                case '-': stack.push(-num); break;
+                case 'x': stack.push(stack.pop()! * num); break;
+                case '/': stack.push(stack.pop()! / num); break;
             }
-
-            if (operator == '-'){
-                stack.push(-num);
-            }
-
-            if (operator == 'x'){
-                let top = stack[stack.length - 1];
-                stack.pop();
-                stack.push(top * num);
-            }
-
-            if (operator == '/'){
-                let top = stack[stack.length - 1];
-                stack.pop();
-                stack.push(top / num);
-            }
-
             operator = c;
             num = 0;
         }
     }
 
-    while (stack.length > 0){
-        res += stack[stack.length - 1];
-        stack.pop();
+    // Process last number
+    switch(operator) {
+        case '+': stack.push(num); break;
+        case '-': stack.push(-num); break;
+        case 'x': stack.push(stack.pop()! * num); break;
+        case '/': stack.push(stack.pop()! / num); break;
     }
 
-    return res;
-
-}
-
-function is_valid_equation(equation: string): boolean {
-  // Must only contain digits and + - * / (optionally parentheses)
-  if (!/^[\d+\-*/\s]+$/.test(equation)) return false;
-
-  // No consecutive operators (except something like "-5" at the start)
-  if (/[*+\-/]{2,}/.test(equation)) return false;
-
-  // Must not start or end with an invalid operator
-  if (/^[*/+]/.test(equation) || /[*+\-/]$/.test(equation)) return false;
-
-  // Must contain at least one digit
-  if (!/\d/.test(equation)) return false;
-
-  return true;
+    return stack.reduce((a, b) => a + b, 0);
 }
