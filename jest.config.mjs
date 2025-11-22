@@ -1,20 +1,13 @@
-import { createDefaultPreset } from 'ts-jest';
+// jest.config.mjs
+import { createDefaultPreset } from "ts-jest";
 
-const tsJestTransformCfg = createDefaultPreset().transform;
-
+/** @type {import("jest").Config} */
 export default {
-  preset: 'ts-jest/presets/default-esm',
-  testEnvironment: 'node',
-  globals: {
-    'ts-jest': {
-      tsconfig: 'tsconfig.jest.json'
-    }
-  },
-  transform: {
-    ...tsJestTransformCfg,
-  },
-  extensionsToTreatAsEsm: ['.ts'],
+  preset: "ts-jest",
+  testEnvironment: "jsdom", // needed for Konva/text nodes
+  transform: createDefaultPreset().transform,
+  testMatch: ["**/*.test.ts"],
   moduleNameMapper: {
-    '^(\\.{1,2}/.*)\\.js$': '$1', // allow ts imports without .js extension
+    "^konva$": "<rootDir>/__mocks__/konva.js", // use your mock
   },
 };
