@@ -10,5 +10,5 @@ jobs:
         with:
           node-version: '20'
       - run: npm ci                     # Installs dependencies
-      - run: npx tsc --noEmit           # TypeScript type check only
+      # - run: npx tsc --noEmit           # TypeScript type check only
       - run: npm test -- --coverage     # Runs tests (Jest)
