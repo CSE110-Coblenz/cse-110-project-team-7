@@ -2,6 +2,7 @@ import { ScreenController } from "../../types.ts";
 import type { ScreenSwitcher, TowerType } from "../../types.ts";
 import { TowerSelectScreenModel } from "./TowerSelectScreenModel.ts";
 import { TowerSelectScreenView } from "./TowerSelectScreenView.ts";
+import { setEquationMode} from "../BasicGameScreen/BasicGameScreenView.ts";
 
 /**
  * TowerSelectScreenController - Coordinates tower selection logic between Model and View
@@ -29,9 +30,14 @@ export class TowerSelectScreenController extends ScreenController {
 	 */
 	private handleTowerSelection(towerType: TowerType): void {
 		this.model.setSelectedTower(towerType);
+
+		setEquationMode(
+			towerType === "combo" ? "any" : towerType
+		);
+
 		
 		this.screenSwitcher.switchToScreen({
-			type: "boss_game",
+			type: "basic_game",
 			towerType: towerType
 		});
 	}

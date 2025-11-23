@@ -12,16 +12,23 @@ let bossScreen: BossGameScreenView | null = null;
  * GameScreenView - Renders the game UI using Konva
  */
 
-let equationMode: "any" | "addition" | "subtraction" | "multiplication" | "division" = "any";
+export let equationMode: "any" | "addition" | "subtraction" | "multiplication" | "division" = "any";
+export function setEquationMode(mode: typeof equationMode){
+	equationMode = mode;
+}
 
-export let correctAnswers = 0;
-export const MAX_LEVELS = 20;
+let correctAnswers = 0;
+const MAX_LEVELS = 20;
 
 
 const questions = generateQuestionSet();
 
 function generateQuestionSet() {
-	const questions = [];
+	const questions: {
+        equation: string;
+        answer: string;
+		options: string[];
+    }[] = [];
 
 	for (let i = 0; i < 5; i++) {
 		const target = Math.floor(Math.random() * 30);
@@ -34,22 +41,25 @@ function generateQuestionSet() {
 		const eq = eqs[Math.floor(Math.random() * eqs.length)];
 		const answer = eval(eq).toString();
 
-		const wrong: string[] = [];
-		while (wrong.length < 3) {
-			const fake = generateFakeOption();
-			if (fake !== answer && !wrong.includes(fake)) wrong.push(fake);
-		}
-
-		const options = [eq, ...wrong].sort(() => Math.random() - 0.5);
-
 		questions.push({
 			equation: eq,
 			answer,
-			options
+			get options() {
+				return getQuestionOptions({equation: eq, answer})
+			}
 		});
 	}
 
 	return questions;
+}
+
+export function getQuestionOptions(question: {equation: string; answer: string}): string[] {
+    const wrong: string[] = [];
+    while (wrong.length < 3) {
+        const fake = generateFakeOption();
+        if (fake !== question.answer && !wrong.includes(fake)) wrong.push(fake);
+    }
+    return [question.equation, ...wrong].sort(() => Math.random() - 0.5);
 }
 
 
