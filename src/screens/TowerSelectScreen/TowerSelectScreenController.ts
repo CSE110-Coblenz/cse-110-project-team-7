@@ -31,7 +31,7 @@ export class TowerSelectScreenController extends ScreenController {
 		this.model.setSelectedTower(towerType);
 		
 		this.screenSwitcher.switchToScreen({
-			type: "boss_game",
+			type: "basic_game",
 			towerType: towerType
 		});
 	}

@@ -5,6 +5,7 @@ import { generateEquation } from "../../utils/generateEquation.ts";
 import type { KonvaNodeEvent } from "konva/lib/types";
 import { Stage } from "konva/lib/Stage";
 import { BossGameScreenView } from "../BossGameScreen/BossGameScreenView.ts";
+import { evaluate } from "../../utils/equationSolver.ts";
 
 let bossScreen: BossGameScreenView | null = null;
 
@@ -32,7 +33,7 @@ function generateQuestionSet() {
 		}
 
 		const eq = eqs[Math.floor(Math.random() * eqs.length)];
-		const answer = eval(eq).toString();
+		const answer = evaluate(eq).toString();
 
 		const wrong: string[] = [];
 		while (wrong.length < 3) {
@@ -446,4 +447,3 @@ export class BasicGameScreenView implements View {
 	}
 	
 }
-
