@@ -18,7 +18,6 @@ export class TowerSelectScreenView implements View {
     }
 
 	private setupUI(): void {
-		// 1. Sky Gradient (Dark Purple Sunset/Dusk)
 		const sky = new Konva.Rect({
 			x: 0,
 			y: 0,
@@ -30,7 +29,6 @@ export class TowerSelectScreenView implements View {
 		});
 		this.group.add(sky);
 
-		// 2. Moon (Pale glow)
 		const moon = new Konva.Circle({
 			x: STAGE_WIDTH - 100,
 			y: 80,
@@ -42,13 +40,10 @@ export class TowerSelectScreenView implements View {
 		});
 		this.group.add(moon);
 
-		// 3. Background Mountains (Dark Silhouette Purple)
 		this.createPixelTerrain(STAGE_HEIGHT / 2 + 50, "#372549", 0.9, 80);
 
-		// 4. Midground Hills (Dark Teal/Shadowed Green)
 		this.createPixelTerrain(STAGE_HEIGHT / 2 + 120, "#1A3C40", 1, 60);
 
-		// 5. Foreground Ground (Dark Dirt)
 		const groundY = STAGE_HEIGHT - 100;
 		const ground = new Konva.Rect({
 			x: 0,
@@ -61,23 +56,18 @@ export class TowerSelectScreenView implements View {
 		});
 		this.group.add(ground);
 
-		// Add welcome message at the top
 		this.createWelcomeMessage();
 
-		// Add info button in top-right corner
 		this.createInfoButton();
 
-		// Button dimensions and spacing for 5 towers
 		const buttonWidth = 120;
 		const buttonHeight = 50;
 		const buttonSpacing = 20;
 		const startY = STAGE_HEIGHT - 150;
 
-		// Lay out 5 towers left→right
 		const totalWidth = 5 * buttonWidth + 4 * buttonSpacing;
 		const startX = STAGE_WIDTH / 2 - totalWidth / 2;
 
-		// 1. Tower of Addition
 		const addTower = this.createTowerButton(
 			"Addition",
 			"+",
@@ -90,7 +80,6 @@ export class TowerSelectScreenView implements View {
 		addTower.on("click", () => { if (this.onTowerSelect) this.onTowerSelect("addition"); });
 		this.group.add(addTower);
 
-		// 2. Tower of Subtraction
 		const subTower = this.createTowerButton(
 			"Subtraction",
 			"-",
@@ -103,7 +92,6 @@ export class TowerSelectScreenView implements View {
 		subTower.on("click", () => { if (this.onTowerSelect) this.onTowerSelect("subtraction"); });
 		this.group.add(subTower);
 
-		// 3. Tower of Multiplication
 		const multTower = this.createTowerButton(
 			"Multiplication",
 			"×",
@@ -116,7 +104,6 @@ export class TowerSelectScreenView implements View {
 		multTower.on("click", () => { if (this.onTowerSelect) this.onTowerSelect("multiplication"); });
 		this.group.add(multTower);
 
-		// 4. Tower of Division
 		const divTower = this.createTowerButton(
 			"Division",
 			"÷",
@@ -129,7 +116,6 @@ export class TowerSelectScreenView implements View {
 		divTower.on("click", () => { if (this.onTowerSelect) this.onTowerSelect("division"); });
 		this.group.add(divTower);
 
-		// 5. Tower of All Operations (Combo)
 		const comboTower = this.createTowerButton(
 			"All Operations",
 			"★",
@@ -142,7 +128,6 @@ export class TowerSelectScreenView implements View {
 		comboTower.on("click", () => { if (this.onTowerSelect) this.onTowerSelect("combo"); });
 		this.group.add(comboTower);
 
-		// Create info modal (initially hidden)
 		this.createInfoModal();
 	}
 
