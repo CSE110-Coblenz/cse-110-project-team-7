@@ -4,9 +4,9 @@ describe("validate()", () => {
     test("valid equations", () => {
         expect(validate("1+2")).toBe(true);
         expect(validate("3-4")).toBe(true);
-        expect(validate("2*3")).toBe(true);
+        expect(validate("2x3")).toBe(true);
         expect(validate("8/4")).toBe(true);
-        expect(validate("1+2*3-4")).toBe(true);
+        expect(validate("1+2x3-4")).toBe(true);
     });
 
     test("invalid: too short", () => {
@@ -18,7 +18,7 @@ describe("validate()", () => {
         expect(validate("+1")).toBe(false);
         expect(validate("1+")).toBe(false);
         expect(validate("-3")).toBe(false);
-        expect(validate("3*")).toBe(false);
+        expect(validate("3x")).toBe(false);
     });
 
     test("invalid: consecutive digits (multi-digit numbers)", () => {
@@ -30,7 +30,7 @@ describe("validate()", () => {
     test("invalid: consecutive operators", () => {
         expect(validate("1++2")).toBe(false);
         expect(validate("3--1")).toBe(false);
-        expect(validate("4**2")).toBe(false);
+        expect(validate("4xx2")).toBe(false);
         expect(validate("6//3")).toBe(false);
     });
 
@@ -47,6 +47,6 @@ describe("validate()", () => {
     });
 
     test("valid long alternating sequence", () => {
-        expect(validate("1+2-3*4/5+6")).toBe(true);
+        expect(validate("1+2-3x4/5+6")).toBe(true);
     });
 });
