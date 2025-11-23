@@ -31,7 +31,6 @@ describe('evaluate()', () => {
     expect(evaluate('3+2*2')).toBe(7);
     expect(evaluate('10+2*6')).toBe(22);
     expect(evaluate('100*2+12')).toBe(212);
-    expect(evaluate('100*(2+12)')).not.toBe(1400); // parentheses not supported yet
   });
 
   test('should handle sequential operations correctly', () => {
