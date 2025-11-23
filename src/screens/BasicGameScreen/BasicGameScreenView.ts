@@ -92,16 +92,17 @@ export class BasicGameScreenView implements View {
     constructor() {
 		this.group = new Konva.Group({ visible: false });
 
+		// 1. Cobblestone Wall Background
+		this.createCobblestoneWall();
 
-		const bg = new Konva.Rect({
-			x:0,
-			y:0,
-			width: STAGE_WIDTH,
-			height: STAGE_HEIGHT,
-			fill: "#f0f0f0",
-		});
-		this.group.add(bg);
+		// 2. Stone Floor
+		this.createStoneFloor();
 
+		// 3. Add Lanterns
+		this.createLantern(100, 150); // Left lantern
+		this.createLantern(STAGE_WIDTH - 100, 150); // Right lantern
+
+		// 4. Monster Image
 		Konva.Image.fromURL('src/assets/monster.png', (monsterNode) => {
 			this.monster = monsterNode;
 			monsterNode.setAttrs({
@@ -115,6 +116,7 @@ export class BasicGameScreenView implements View {
 			this.group.getLayer()?.draw();
 		});
 
+		// 5. Hearts
 		for (let i = 0; i < 3; i++){
 			Konva.Image.fromURL('src/assets/heart.png', (heart) => {
 				heart.setAttrs({
@@ -176,12 +178,14 @@ export class BasicGameScreenView implements View {
 		this.group.add(helpGroup);
 
 		this.levelText = new Konva.Text({
-			x: STAGE_WIDTH - 180,
+			x: STAGE_WIDTH - 250, // Adjusted for visibility on dark background
 			y: STAGE_HEIGHT - 50,
 			text: `Progress: ${correctAnswers}/${MAX_LEVELS}`,
 			fontSize: 28,
 			fontFamily: "Calibri",
-			fill: "black",
+			fill: "white", // White text for contrast
+			shadowColor: "black",
+			shadowBlur: 2,
 		});
 		this.group.add(this.levelText);
 
@@ -190,16 +194,123 @@ export class BasicGameScreenView implements View {
 			y: STAGE_WIDTH * 0.15,
 			width: STAGE_WIDTH,
 			text: "",
-			fontSize: 36,
+			fontSize: 48, // Larger font
 			fontFamily: "Calibri",
-			fill: "black",
+			fill: "white", // White text
 			align: "center",
+			shadowColor: "black",
+			shadowBlur: 4,
+			fontStyle: "bold",
 		});
 
 		this.group.add(this.questionText);
 
 		this.loadQuestion(currentQuestionIndex);
     }
+
+	private createCobblestoneWall(): void {
+		const width = STAGE_WIDTH || 800;
+		const height = STAGE_HEIGHT || 600;
+
+		// Base wall color
+		const wallBg = new Konva.Rect({
+			x: 0,
+			y: 0,
+			width: width,
+			height: height,
+			fill: "#34495e", // Dark base
+		});
+		this.group.add(wallBg);
+
+		const rows = 20;
+		const cols = 15;
+		const brickWidth = width / cols;
+		const brickHeight = height / rows;
+
+		for (let r = 0; r < rows; r++) {
+			for (let c = 0; c <= cols; c++) {
+				// Offset every other row
+				const xOffset = (r % 2 === 0) ? 0 : -brickWidth / 2;
+				
+				// Vary color slightly for texture
+				const shade = Math.random() > 0.5 ? "#7f8c8d" : "#95a5a6";
+				
+				const brick = new Konva.Rect({
+					x: c * brickWidth + xOffset,
+					y: r * brickHeight,
+					width: brickWidth - 2, // Gap for mortar
+					height: brickHeight - 2,
+					fill: shade,
+					cornerRadius: 2,
+					opacity: 0.8, // Let some base color through
+				});
+				this.group.add(brick);
+			}
+		}
+	}
+
+	private createStoneFloor(): void {
+		const width = STAGE_WIDTH || 800;
+		const height = STAGE_HEIGHT || 600;
+		const floorHeight = 100;
+		
+		const floor = new Konva.Rect({
+			x: 0,
+			y: height - floorHeight,
+			width: width,
+			height: floorHeight,
+			fill: "#2c3e50", // Dark slate floor
+			stroke: "#1a252f",
+			strokeWidth: 5,
+		});
+		this.group.add(floor);
+	}
+
+	private createLantern(x: number, y: number): void {
+		// 1. Glow effect (behind)
+		const glow = new Konva.Circle({
+			x: x,
+			y: y + 20,
+			radius: 80,
+			fillRadialGradientStartPoint: { x: 0, y: 0 },
+			fillRadialGradientStartRadius: 0,
+			fillRadialGradientEndPoint: { x: 0, y: 0 },
+			fillRadialGradientEndRadius: 80,
+			fillRadialGradientColorStops: [0, "rgba(255, 200, 0, 0.4)", 1, "rgba(0,0,0,0)"],
+		});
+		this.group.add(glow);
+
+		// 2. Wall Bracket
+		const bracket = new Konva.Line({
+			points: [x, y, x, y - 20, x + 10, y - 20], // Hook shape
+			stroke: "#2c3e50",
+			strokeWidth: 4,
+		});
+		this.group.add(bracket);
+
+		// 3. Lantern Body
+		const lantern = new Konva.Rect({
+			x: x - 15,
+			y: y,
+			width: 30,
+			height: 40,
+			fill: "rgba(255, 255, 0, 0.2)", // Glassy yellow
+			stroke: "#2c3e50",
+			strokeWidth: 3,
+		});
+		this.group.add(lantern);
+
+		// 4. Flame
+		const flame = new Konva.Circle({
+			x: x,
+			y: y + 20,
+			radius: 8,
+			fill: "#e67e22", // Orange core
+			stroke: "#f1c40f", // Yellow rim
+			strokeWidth: 2,
+		});
+		this.group.add(flame);
+	}
 
 	showHelpPopup() {
 		const overlay = new Konva.Rect({
@@ -258,7 +369,7 @@ export class BasicGameScreenView implements View {
 	
 		this.group.add(overlay);
 		this.group.add(popup);
-
+	
 		overlay.moveToTop();
 		popup.moveToTop();
 		this.group.getLayer()?.draw();
@@ -416,10 +527,12 @@ export class BasicGameScreenView implements View {
 
 	updateMonsterImage(newUrl: string){
 		Konva.Image.fromURL(newUrl, (newMonster) => {
-			newMonster.position(this.monster!.position());
-			newMonster.scale(this.monster!.scale());
-
-			this.monster?.destroy();
+			if (this.monster) {
+				newMonster.position(this.monster.position());
+				newMonster.scale(this.monster.scale());
+				newMonster.cornerRadius(20);
+				this.monster.destroy();
+			}
 			this.monster = newMonster;
 			this.group.add(newMonster);
 			this.group.getLayer()?.draw();
