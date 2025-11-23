@@ -28,10 +28,8 @@ export class TowerSelectScreenController extends ScreenController {
 	 * Handle tower selection and navigate to the appropriate game screen
 	 */
 	private handleTowerSelection(towerType: TowerType): void {
-		// Store the selected tower type in the model
 		this.model.setSelectedTower(towerType);
 		
-		// Navigate to the basic game screen (placeholder) with the selected tower type
 		this.screenSwitcher.switchToScreen({
 			type: "boss_game",
 			towerType: towerType

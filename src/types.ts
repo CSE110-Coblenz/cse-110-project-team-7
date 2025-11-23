@@ -9,7 +9,7 @@ export interface View {
 /**
  * Tower types available in the game
  */
-export type TowerType = "mult_div" | "add_sub" | "combo";
+export type TowerType = "addition" | "subtraction" | "multiplication" | "division" | "combo";
 
 /**
  * Screen types for navigation

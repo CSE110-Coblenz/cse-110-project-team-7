@@ -67,65 +67,79 @@ export class TowerSelectScreenView implements View {
 		// Add info button in top-right corner
 		this.createInfoButton();
 
-		// Button dimensions and spacing
-		const buttonWidth = 180;
-		const buttonHeight = 60;
-		const buttonSpacing = 40;
-		const startY = STAGE_HEIGHT - 150; // Position near bottom
+		// Button dimensions and spacing for 5 towers
+		const buttonWidth = 120;
+		const buttonHeight = 50;
+		const buttonSpacing = 20;
+		const startY = STAGE_HEIGHT - 150;
 
-		// Lay out 3 towers left→right with equal spacing
-		const totalWidth = 3 * buttonWidth + 2 * buttonSpacing;
+		// Lay out 5 towers left→right
+		const totalWidth = 5 * buttonWidth + 4 * buttonSpacing;
 		const startX = STAGE_WIDTH / 2 - totalWidth / 2;
 
-		// Tower of Addition & Subtraction
-		const addSubTower = this.createTowerButton(
-			"Tower of Addition & Subtraction",
+		// 1. Tower of Addition
+		const addTower = this.createTowerButton(
+			"Addition",
 			"+",
 			startX,
 			startY,
 			buttonWidth,
 			buttonHeight,
-			"#8B4513" // Brown/red for addition
+			"#C0392B" // Red
 		);
-		addSubTower.on("click", () => { 
-			if (this.onTowerSelect) { 
-				this.onTowerSelect("add_sub"); 
-			} 
-		});
-		this.group.add(addSubTower);
+		addTower.on("click", () => { if (this.onTowerSelect) this.onTowerSelect("addition"); });
+		this.group.add(addTower);
 
-		// Tower of Multiplication & Division
-		const multDivTower = this.createTowerButton(
-			"Tower of Multiplication & Division",
-			"×",
-			startX + buttonWidth + buttonSpacing,
+		// 2. Tower of Subtraction
+		const subTower = this.createTowerButton(
+			"Subtraction",
+			"-",
+			startX + (buttonWidth + buttonSpacing),
 			startY,
 			buttonWidth,
 			buttonHeight,
-			"#9ACD32" // Green for multiplication
+			"#2980B9" // Blue
 		);
-		multDivTower.on("click", () => { 
-			if (this.onTowerSelect) { 
-				this.onTowerSelect("mult_div"); 
-			} 
-		});
-		this.group.add(multDivTower);
+		subTower.on("click", () => { if (this.onTowerSelect) this.onTowerSelect("subtraction"); });
+		this.group.add(subTower);
 
-		// Tower of All Operations (Combo)
-		const comboTower = this.createTowerButton(
-			"Tower of All Operations",
-			"÷",
+		// 3. Tower of Multiplication
+		const multTower = this.createTowerButton(
+			"Multiplication",
+			"×",
 			startX + 2 * (buttonWidth + buttonSpacing),
 			startY,
 			buttonWidth,
 			buttonHeight,
-			"#9370DB" // Purple for combo
+			"#27AE60" // Green
 		);
-		comboTower.on("click", () => { 
-			if (this.onTowerSelect) { 
-				this.onTowerSelect("combo"); 
-			} 
-		});
+		multTower.on("click", () => { if (this.onTowerSelect) this.onTowerSelect("multiplication"); });
+		this.group.add(multTower);
+
+		// 4. Tower of Division
+		const divTower = this.createTowerButton(
+			"Division",
+			"÷",
+			startX + 3 * (buttonWidth + buttonSpacing),
+			startY,
+			buttonWidth,
+			buttonHeight,
+			"#8E44AD" // Purple
+		);
+		divTower.on("click", () => { if (this.onTowerSelect) this.onTowerSelect("division"); });
+		this.group.add(divTower);
+
+		// 5. Tower of All Operations (Combo)
+		const comboTower = this.createTowerButton(
+			"All Operations",
+			"★",
+			startX + 4 * (buttonWidth + buttonSpacing),
+			startY,
+			buttonWidth,
+			buttonHeight,
+			"#F39C12" // Gold
+		);
+		comboTower.on("click", () => { if (this.onTowerSelect) this.onTowerSelect("combo"); });
 		this.group.add(comboTower);
 
 		// Create info modal (initially hidden)
@@ -133,7 +147,7 @@ export class TowerSelectScreenView implements View {
 	}
 
 	private createPixelTerrain(baseY: number, color: string, opacity: number, variance: number): void {
-		const segments = 100; // Number of "steps" across the screen
+		const segments = 20; // Number of "steps" across the screen
 		const segmentWidth = STAGE_WIDTH / segments;
 		const points: number[] = [];
 
@@ -243,9 +257,7 @@ export class TowerSelectScreenView implements View {
 		});
 		infoButtonGroup.add(buttonBg);
 
-		// Question mark icon
-		// Since the Circle is centered at (0,0), we need to position the text
-		// starting from top-left (-radius, -radius) to align it properly
+		//having trouble getting question mark into the center
 		const questionMark = new Konva.Text({
 			x: -buttonSize / 2,
 			y: -buttonSize / 2 + 9, // +9 for vertical centering ((50-32)/2)
