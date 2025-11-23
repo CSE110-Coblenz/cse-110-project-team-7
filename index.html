@@ -4,28 +4,22 @@
 <head>
   <meta charset="UTF-8" />
   <title>CSE110 Group 7 Tower Game</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden; /* Prevent scrollbars */
+      background-color: #2E1A47; /* Match game bg color */
+    }
+    #container {
+      width: 100vw;
+      height: 100vh;
+    }
+  </style>
 </head>
 
 <body>
   <div id="container"></div>
-  <style>
-    #container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      /* make sure the body takes full viewport height */
-    }
-
-    body {
-      margin: 0;
-      background-color: #f0f0f0;
-      /* optional */
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-  </style>
   <script type="module" src="/src/main.ts"></script>
 </body>
 

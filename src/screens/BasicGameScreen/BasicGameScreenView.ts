@@ -14,8 +14,8 @@ let bossScreen: BossGameScreenView | null = null;
 
 let equationMode: "any" | "addition" | "subtraction" | "multiplication" | "division" = "any";
 
-let correctAnswers = 0;
-const MAX_LEVELS = 20;
+export let correctAnswers = 0;
+export const MAX_LEVELS = 20;
 
 
 const questions = generateQuestionSet();
@@ -348,7 +348,7 @@ export class BasicGameScreenView implements View {
 				this.group.getLayer()?.batchDraw();
 			});
 			buttonGroup.on("mouseout", () => {
-				rect.fill("#ddd");
+				rect.fill("#ddd");	
 				this.group.getLayer()?.batchDraw();
 			});
 

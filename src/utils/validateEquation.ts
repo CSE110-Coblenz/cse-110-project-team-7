@@ -13,7 +13,7 @@ export function validate(equation: string): boolean{
         return false;
     }
 
-    const operators = ['+','-','/','*']
+    const operators = ['+','-','/','x']
 
     for (let i = 1; i < equation.length; i ++){
         let curr = equation[i];

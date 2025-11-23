@@ -9,7 +9,7 @@ export function generateEquation(target: number, length: number, count: number):
     if (length % 2 == 0){
         return [];
     }
-    const operations = ['+', '-', '*', '/']
+    const operations = ['+', '-', 'x', '/']
     let res: string[] = [];
 
     function backtrack(curr: string, idx: number, val: number, prev: number, last_op: string | null = null): void{
@@ -42,7 +42,7 @@ export function generateEquation(target: number, length: number, count: number):
                     backtrack(updated_str, idx + 1, val + i, i, null);
                 } else if (last_op == '-'){
                     backtrack(updated_str, idx + 1, val - i, -i, null);
-                } else if (last_op == '*'){
+                } else if (last_op == 'x'){
                     backtrack(updated_str, idx + 1, val - prev + (prev * i), prev * i, null);
                 } else{
                     backtrack(updated_str, idx + 1, val - prev + Math.floor(prev / i), Math.floor(prev / i), null);
