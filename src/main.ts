@@ -89,6 +89,7 @@ class App implements ScreenSwitcher {
 				break;
 			case "boss_game":
 				this.bossgamecontroller.show();
+				this.bossgamecontroller.startGame();
 				break;
 			case "tower_select":
 				this.towerselectcontroller.show();
