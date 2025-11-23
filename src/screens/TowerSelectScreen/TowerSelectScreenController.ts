@@ -33,7 +33,7 @@ export class TowerSelectScreenController extends ScreenController {
 		
 		// Navigate to the basic game screen (placeholder) with the selected tower type
 		this.screenSwitcher.switchToScreen({
-			type: "basic_game",
+			type: "boss_game",
 			towerType: towerType
 		});
 	}
