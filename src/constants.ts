@@ -3,6 +3,7 @@
 import Konva from "konva";
 export const STAGE_WIDTH = window.innerWidth;
 export const STAGE_HEIGHT = window.innerHeight;
+export const GAME_DURATION = 300;
 
 window.addEventListener("resize", () => {
     const stage = Konva.stages?.[0];
@@ -12,3 +13,4 @@ window.addEventListener("resize", () => {
         stage.draw();
     }
 });
+

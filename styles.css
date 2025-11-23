@@ -5,3 +5,19 @@ html, body {
     height: 100%;
     overflow: hidden;
 }
+#container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    /* make sure the body takes full viewport height */
+  }
+
+  body {
+    margin: 0;
+    background-color: #f0f0f0;
+    /* optional */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
