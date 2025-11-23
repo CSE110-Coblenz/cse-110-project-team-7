@@ -28,7 +28,7 @@ describe("generateEquation", () => {
 
         result.forEach(expr => {
             // eval is safe here because the generator produces digits/operators only
-            expect(eval(expr)).toBe(target);
+            expect(evaluate(expr)).toBe(target);
         });
     });
 
@@ -62,7 +62,7 @@ describe("generateEquation", () => {
     test("produces valid math characters only", () => {
         const result = generateEquation(8, 5, 10);
 
-        const validChars = /^[0-9+\-*/]+$/;
+        const validChars = /^[0-9+\-x/]+$/;
 
         result.forEach(expr => {
             expect(validChars.test(expr)).toBe(true);
@@ -121,7 +121,7 @@ describe("generateEquation", () => {
 
         const results = generateEquation(target, length, count);
 
-        const validPattern = /^[0-9+\-*/]+$/;
+        const validPattern = /^[0-9+\-x/]+$/;
 
         results.forEach(expr => {
             expect(expr.length).toBe(length);

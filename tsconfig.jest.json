@@ -1,9 +1,0 @@
-{
-  "extends": "./tsconfig.json",
-  "compilerOptions": {
-    "verbatimModuleSyntax": false,
-    "moduleResolution": "NodeNext",
-    "types": ["jest", "node"]
-  },
-  "include": ["tests"]
-}
