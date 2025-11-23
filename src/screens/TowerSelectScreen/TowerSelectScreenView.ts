@@ -133,7 +133,7 @@ export class TowerSelectScreenView implements View {
 	}
 
 	private createPixelTerrain(baseY: number, color: string, opacity: number, variance: number): void {
-		const segments = 20; // Number of "steps" across the screen
+		const segments = 100; // Number of "steps" across the screen
 		const segmentWidth = STAGE_WIDTH / segments;
 		const points: number[] = [];
 
