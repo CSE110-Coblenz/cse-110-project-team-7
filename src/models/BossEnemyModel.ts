@@ -9,11 +9,13 @@ export interface BossPhase {
 
 export class BossEnemyModel {
     private phases: BossPhase[];
+    private sprite: string;
     private index = 0;
     //note - the boss doesn't have health - it only has the num phases
 
-    constructor(phases: BossPhase[]) {
+    constructor(phases: BossPhase[], sprite: string) {
         this.phases = phases;
+        this.sprite = sprite;
     }
 
     getCurrentPhase(): BossPhase {
