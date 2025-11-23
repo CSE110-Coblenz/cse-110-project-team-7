@@ -62,9 +62,7 @@ class App implements ScreenSwitcher {
 		this.basicgamecontroller.getView().hide();
 		this.bossgamecontroller.getView().hide();
 		this.towerselectcontroller.getView().hide();
-		this.logincontroller.getView().hide();
-
-		this.switchToScreen({type: "boss_game"})
+		this.logincontroller.getView().show();
 	}
 
 	/**
