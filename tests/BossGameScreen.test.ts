@@ -1,5 +1,5 @@
 //import { BossGameScreenController } from "../screens/BossGameScreen/BossGameScreenController.ts";
-import { BossGameScreenModel } from "../screens/BossGameScreen/BossGameScreenModel.ts";
+import { BossGameScreenModel } from "../src/screens/BossGameScreen/BossGameScreenModel.ts";
 //import { BossGameScreenView } from "../screens/BossGameScreen/BossGameScreenView.ts";
 
 describe("BossGameScreenModel", () => {
