@@ -1,4 +1,3 @@
-/// <reference types="jest" />
 import { evaluate } from '../../src/utils/equationSolver'
 
 describe('evaluate()', () => {

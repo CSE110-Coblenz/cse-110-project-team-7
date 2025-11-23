@@ -1,13 +1,28 @@
-const normal_sprites = ['slime', 'skeleton', 'goblin', 'bat']
-const boss_sprites = ['ogre', 'witch', 'giant', 'werewolf']
+const normal_sprites = {
+    'slime': 'sprite', 
+    'skeleton': 'sprite', 
+    'goblin': 'sprite', 
+    'bat': 'sprite'}
 
-export function getRandomSprite(type: "normal" | "boss" = "normal"){
+const boss_sprites = {
+    'ogre': 'sprite',
+    'witch': 'sprite',
+    'giant': 'sprite', 
+    'werewolf': 'sprite'}
 
+
+function getRandomKey<T extends object>(dict: T): keyof T {
+  const keys = Object.keys(dict) as (keyof T)[];
+  const randomIndex = Math.floor(Math.random() * keys.length);
+  return keys[randomIndex];
+}
+
+export function getRandomSprite(type: "normal" | "boss" = "normal"): [string, string] | undefined{
     if (type == 'normal'){
-        const idx = Math.floor(Math.random() * normal_sprites.length);
-        return normal_sprites[idx];
+        const key = getRandomKey(normal_sprites);
+        return [key, normal_sprites[key]];
     } else if (type == 'boss'){
-        const idx = Math.floor(Math.random() * boss_sprites.length);
-        return boss_sprites[idx];
+        const key = getRandomKey(boss_sprites);
+        return [key, boss_sprites[key]];
     }
 }
