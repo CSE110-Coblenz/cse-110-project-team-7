@@ -1,0 +1,14 @@
+name: CI
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4       # Checks out your repo
+      - uses: actions/setup-node@v4     # Sets up Node.js 20
+        with:
+          node-version: '20'
+      - run: npm ci                     # Installs dependencies
+      - run: npx tsc --noEmit           # TypeScript type check only
+      - run: npm test -- --coverage     # Runs tests (Jest)
