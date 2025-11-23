@@ -41,6 +41,11 @@ export class BossGameScreenController extends ScreenController {
 			{ targetNumber: 5, tiles: ["7", "-", "2"], imagePath: "https://p7.hiclipart.com/preview/79/102/357/pac-man-world-3-ghosts-clip-art-pac-man-ghost-png-transparent-image-thumbnail.jpg" },
 			{ targetNumber: 20, tiles: ["4", "x", "5"], imagePath: "https://p7.hiclipart.com/preview/79/102/357/pac-man-world-3-ghosts-clip-art-pac-man-ghost-png-transparent-image-thumbnail.jpg" }
 		]);
+
+		// Pause functionality
+		this.view.setOnPauseClick(() => {
+			this.togglePause();
+		});
 	}
 
 
@@ -144,6 +149,34 @@ export class BossGameScreenController extends ScreenController {
 	/**
 	 * Stop the timer
 	 */
+
+	private isPaused = false; // Tracks pause state 
+
+	private togglePause(): void {
+		if (this.isPaused) {
+			// Resume the game
+			this.resumeGame();
+		} else {
+			// Pause the game
+			this.pauseGame();
+		}
+		this.isPaused = !this.isPaused;
+	}
+
+	private pauseGame(): void {
+		this.stopTimer();
+		this.view.getGroup().listening(false); // Disable interactions
+		this.view.stopEquationPulsate();
+		this.view.stopBossNumPulsate();
+	}
+
+	private resumeGame(): void {
+		this.startTimer();
+		this.view.getGroup().listening(true); // Enable interactions
+		this.view.startEquationPulsate();
+		this.view.startBossNumPulsate();
+	}
+	
 	private stopTimer(): void {
 		// TODO: Task 3 - Stop the timer using clearInterval
 
@@ -151,6 +184,7 @@ export class BossGameScreenController extends ScreenController {
 			clearInterval(this.gameTimer);
 			this.gameTimer = null;
 		}
+
 	}
 
 	private endGame(): void {
@@ -159,6 +193,7 @@ export class BossGameScreenController extends ScreenController {
 		//bring up pop up
 
 	}
+
 
 	private makeEquation(): string {
 		let toReturn: string = ""

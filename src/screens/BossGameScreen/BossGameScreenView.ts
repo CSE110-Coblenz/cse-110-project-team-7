@@ -30,6 +30,12 @@ export class BossGameScreenView implements View {
 	private equationPulseAnim?: Konva.Animation;
 	private bossNumPulseAnim?: Konva.Animation;
 
+	//Pause functionality
+	private onPauseClick?: () => void;
+	setOnPauseClick(callback: () => void): void {
+		this.onPauseClick = callback;
+	}
+
 	constructor() {
 		this.group = new Konva.Group({ visible: false });
 
@@ -74,6 +80,36 @@ export class BossGameScreenView implements View {
 			fill: "red",
 		});
 		this.group.add(this.timerText);
+
+		//Pause Button (top-right corner)
+		const pauseButton = new Konva.Circle({
+			x: STAGE_WIDTH - 70,
+			y: 100,
+			radius: 30,
+			fill: "#F7C500",
+			stroke: "black",
+			strokeWidth: 2,
+			cornerRadius: 10,
+		});
+		this.group.add(pauseButton);
+
+		pauseButton.on("mouseover", () => {
+			document.body.style.cursor = "pointer";
+			pauseButton.fill("#D1A700");
+			this.group.getLayer()?.draw();
+		});
+
+		pauseButton.on("mouseout", () => {
+			document.body.style.cursor = "default";
+			pauseButton.fill("#F7C500");
+			this.group.getLayer()?.draw();
+		});
+
+		pauseButton.on("click", () => {
+			// Implement pause functionality here
+			if (this.onPauseClick) this.onPauseClick();
+		});
+
 
 		// ===== Entry Box (bottom-left quadrant) =====
 		this.entryBox = new Konva.Rect({
