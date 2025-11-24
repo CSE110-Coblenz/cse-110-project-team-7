@@ -82,12 +82,27 @@ function generateFakeOption(): string {
 let currentQuestionIndex = 0;
 let health = 3;
 
+// Helper to load external library
+function loadGifler(callback: () => void) {
+	if ((window as any).gifler) {
+		callback();
+		return;
+	}
+	const script = document.createElement('script');
+	script.src = 'https://unpkg.com/gifler@0.1.0/gifler.min.js';
+	script.onload = callback;
+	document.head.appendChild(script);
+}
+
 export class BasicGameScreenView implements View {
 	private group: Konva.Group;
 	private questionText: Konva.Text;
 	private levelText: Konva.Text;
 	private choiceButtons: Konva.Group[] = [];
-	private monster?: Konva.Image;
+	
+	private monsterPlaceholder?: Konva.Image;
+	private idleMonster?: Konva.Image;
+	private attackMonster?: Konva.Image;
 	
     constructor() {
 		this.group = new Konva.Group({ visible: false });
@@ -102,20 +117,8 @@ export class BasicGameScreenView implements View {
 		this.createLantern(100, 150); // Left lantern
 		this.createLantern(STAGE_WIDTH - 100, 150); // Right lantern
 
-		// 4. Monster Image
-		Konva.Image.fromURL('src/assets/monster.png', (monsterNode) => {
-			this.monster = monsterNode;
-			monsterNode.setAttrs({
-				x: STAGE_WIDTH / 2.5,
-				y: STAGE_HEIGHT * 0.05,
-				scaleX: 0.5,
-				scaleY: 0.5,
-				cornerRadius: 20,
-				image: monsterNode.image()
-			});
-			this.group.add(monsterNode)
-			this.group.getLayer()?.draw();
-		});
+		// 4. Monster Setup (Load Gifler)
+		this.setupMonster();
 
 		// 5. Hearts
 		for (let i = 0; i < 3; i++){
@@ -209,6 +212,81 @@ export class BasicGameScreenView implements View {
 
 		this.loadQuestion(currentQuestionIndex);
     }
+
+	private setupMonster(): void {
+		// 1. Add Static Placeholder (so screen isn't empty while waiting)
+		Konva.Image.fromURL('src/assets/monster.png', (monsterNode) => {
+			this.monsterPlaceholder = monsterNode;
+			monsterNode.setAttrs({
+				x: STAGE_WIDTH / 2 - 125, // Centered (assuming approx width)
+				y: STAGE_HEIGHT * 0.05,
+				scaleX: 0.5,
+				scaleY: 0.5,
+				cornerRadius: 20,
+				image: monsterNode.image()
+			});
+			// Only add if we don't have GIFs yet
+			if (!this.idleMonster) {
+				this.group.add(monsterNode);
+				this.group.getLayer()?.draw();
+			}
+		});
+
+		// 2. Load Gifler and setup GIFs
+		loadGifler(() => {
+			console.log("Gifler loaded!");
+			
+			// Setup Idle GIF
+			this.createGifNode('src/assets/first_half_monster.gif', (node) => {
+				this.idleMonster = node;
+				this.idleMonster.visible(true); // Start visible
+				this.group.add(this.idleMonster);
+				
+				// Remove placeholder if it exists
+				if (this.monsterPlaceholder) {
+					this.monsterPlaceholder.destroy();
+					this.monsterPlaceholder = undefined;
+				}
+				this.group.getLayer()?.draw();
+			});
+
+			// Setup Attack GIF
+			this.createGifNode('src/assets/second_half_monster.gif', (node) => {
+				this.attackMonster = node;
+				this.attackMonster.visible(false); // Start hidden
+				this.group.add(this.attackMonster);
+			});
+		});
+	}
+
+	private createGifNode(src: string, onLoad: (node: Konva.Image) => void): void {
+		const canvas = document.createElement('canvas');
+		
+		// Use gifler to animate into canvas
+		(window as any).gifler(src).frames(canvas, (ctx: any, frame: any) => {
+			// Update canvas size to match frame
+			canvas.width = frame.width;
+			canvas.height = frame.height;
+			
+			// Draw frame
+			ctx.drawImage(frame.buffer, 0, 0);
+			
+			// Force Konva redraw (since canvas changed)
+			this.group.getLayer()?.batchDraw();
+		});
+
+		// Create Konva Image wrapping the canvas
+		const konvaImage = new Konva.Image({
+			x: STAGE_WIDTH / 2 - 175, // Centered position
+			y: STAGE_HEIGHT * 0.05,
+			scaleX: 0.5,
+			scaleY: 0.5,
+			cornerRadius: 20,
+			image: canvas,
+		});
+
+		onLoad(konvaImage);
+	}
 
 	private createCobblestoneWall(): void {
 		const width = STAGE_WIDTH || 800;
@@ -423,7 +501,8 @@ export class BasicGameScreenView implements View {
 
 		const buttonWidth = STAGE_WIDTH * 0.4;
 		const buttonHeight = 60;
-		const startY = STAGE_HEIGHT * 0.35;
+		// Move buttons down to avoid overlapping the monster
+		const startY = STAGE_HEIGHT * 0.45;
 		const spacing = 20;
 
 		question.options.forEach((choice, i) => {
@@ -485,10 +564,23 @@ export class BasicGameScreenView implements View {
 			this.updateLevelText();
 			rect.fill("#58b85a");
 			console.log("correct");
-			this.updateMonsterImage('src/assets/monstersln.png')
-			await this.sleep(2000);
+			
+			// Play Attack Animation
+			if (this.idleMonster && this.attackMonster) {
+				this.idleMonster.visible(false);
+				this.attackMonster.visible(true);
+			}
+			
+			// Wait for animation (adjusted to match GIF length approx 1s)
+			await this.sleep(1000);
+			
+			// Revert to Idle
+			if (this.idleMonster && this.attackMonster) {
+				this.attackMonster.visible(false);
+				this.idleMonster.visible(true);
+			}
+			
 			rect.fill("#ddd");
-			this.updateMonsterImage('src/assets/monster.png')
 			currentQuestionIndex++;
 
 			if (correctAnswers >= MAX_LEVELS) {
@@ -511,10 +603,11 @@ export class BasicGameScreenView implements View {
 		} else {
 			rect.fill("#bd2c19")
 			console.log("wrong")
-			this.updateMonsterImage('src/assets/monsteratk.png')
+			
+			// Could play attack here too if you have a separate "monster attack" gif
+			// For now we just take damage
 			this.updateHealth();
 			await this.sleep(2000);
-			this.updateMonsterImage('src/assets/monster.png')
 		}
 	}
 	
@@ -527,21 +620,8 @@ export class BasicGameScreenView implements View {
 		this.group.getLayer()?.draw();
 	}
 
-	updateMonsterImage(newUrl: string){
-		Konva.Image.fromURL(newUrl, (newMonster) => {
-			if (this.monster) {
-				newMonster.position(this.monster.position());
-				newMonster.scale(this.monster.scale());
-				newMonster.cornerRadius(20);
-				this.monster.destroy();
-			}
-			this.monster = newMonster;
-			this.group.add(newMonster);
-			this.group.getLayer()?.draw();
-		});
-	}
-
-
+	// Removed updateMonsterImage as we use GIFs now, but kept helper if needed
+	
 	sleep(ms: number): Promise<void> {
 		return new Promise(resolve => setTimeout(resolve, ms));
 	}
