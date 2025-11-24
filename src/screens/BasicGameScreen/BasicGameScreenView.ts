@@ -5,7 +5,6 @@ import { generateEquation } from "../../utils/generateEquation.ts";
 import type { KonvaNodeEvent } from "konva/lib/types";
 import { Stage } from "konva/lib/Stage";
 import { BossGameScreenView } from "../BossGameScreen/BossGameScreenView.ts";
-import { evaluate } from "../../utils/equationSolver.ts";
 
 let bossScreen: BossGameScreenView | null = null;
 
@@ -33,7 +32,7 @@ function generateQuestionSet() {
 		}
 
 		const eq = eqs[Math.floor(Math.random() * eqs.length)];
-		const answer = evaluate(eq).toString();
+		const answer = eval(eq).toString();
 
 		const wrong: string[] = [];
 		while (wrong.length < 3) {
@@ -84,7 +83,11 @@ let health = 3;
 
 export class BasicGameScreenView implements View {
 	private group: Konva.Group;
-
+	private questionText: Konva.Text;
+	private levelText: Konva.Text;
+	private choiceButtons: Konva.Group[] = [];
+	private monster?: Konva.Image;
+	
     constructor() {
 		this.group = new Konva.Group({ visible: false });
 
@@ -105,8 +108,7 @@ export class BasicGameScreenView implements View {
 				y: STAGE_HEIGHT * 0.05,
 				scaleX: 0.5,
 				scaleY: 0.5,
-				cornerRadius: 20,
-				image: monsterNode.image()
+				cornerRadius: 20
 			});
 			this.group.add(monsterNode)
 			this.group.getLayer()?.draw();
@@ -119,7 +121,6 @@ export class BasicGameScreenView implements View {
 					y: 20,
 					scaleX: 0.15,
 					scaleY: 0.15,
-					image: heart.image()
 				});
 				this.group.add(heart);
 				this.hearts.push(heart);
@@ -435,9 +436,6 @@ export class BasicGameScreenView implements View {
 		this.group.getLayer()?.draw();
 	}
 
-	/**
-	 * Hide the screen
-	 */
 	hide(): void {
 		this.group.visible(false);
 		this.group.getLayer()?.draw();
@@ -446,4 +444,6 @@ export class BasicGameScreenView implements View {
 	getGroup(): Konva.Group {
 		return this.group;
 	}
+	
 }
+

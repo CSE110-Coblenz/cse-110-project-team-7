@@ -7,7 +7,7 @@ import { Tile } from "./Tile.ts"
  * GameScreenView - Renders the game UI using Konva
  */
 export class BossGameScreenView implements View {
-	private parts: string[] = ["0", "x", "0"]
+	//private parts: string[] = ["0", "x", "0"]
 	private group: Konva.Group;
 	private scoreText: Konva.Text;
 	private timerText: Konva.Text;
@@ -55,7 +55,6 @@ export class BossGameScreenView implements View {
 			fill: "black",
 		});
 		this.group.add(this.bossNumber);
-		this.bossNumber.moveToTop();
 
 
 		this.scoreText = new Konva.Text({
@@ -360,7 +359,7 @@ export class BossGameScreenView implements View {
 		this.tiles = [];
 
 		// Save new tile labels
-		this.parts = newParts;
+		//this.parts = newParts;
 
 		// Rebuild inventory tile layout
 		const invWidth = this.inventory.width();
@@ -407,7 +406,6 @@ export class BossGameScreenView implements View {
 
 		this.group.getLayer()?.draw();
 	}
-
 
 
 }
