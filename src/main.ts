@@ -6,7 +6,6 @@ import { BasicGameScreenController } from "./screens/BasicGameScreen/BasicGameSc
 import { BossGameScreenController } from "./screens/BossGameScreen/BossGameScreenController.ts";
 import { TowerSelectScreenController } from "./screens/TowerSelectScreen/TowerSelectScreenController.ts";
 import { LoginScreenController } from "./screens/LoginScreen/LoginScreenController.ts";
-import { Player } from "./models/PlayerModel.ts";
 
 /**
  * Main Application - Coordinates all screens
@@ -18,6 +17,7 @@ import { Player } from "./models/PlayerModel.ts";
  * Key concept: All screens are added to the same layer, but only one is
  * visible at a time. This is managed by the switchToScreen() method.
  */
+
 class App implements ScreenSwitcher {
 	private stage: Konva.Stage;
 	private layer: Konva.Layer;
@@ -26,9 +26,6 @@ class App implements ScreenSwitcher {
 	private bossgamecontroller: BossGameScreenController;
 	private towerselectcontroller: TowerSelectScreenController;
 	private logincontroller: LoginScreenController;
-
-	private player = new Player("user");
-	
 
 	constructor(container: string) {
 		// Initialize Konva stage (the main canvas)

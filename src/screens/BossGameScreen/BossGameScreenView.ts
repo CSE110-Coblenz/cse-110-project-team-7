@@ -18,6 +18,10 @@ export class BossGameScreenView implements View {
 
 	private entryEquationText: Konva.Text;
 
+	//entry submission box
+	private submitText: Konva.Text;
+	private submitRect: Konva.Rect;
+
 	//health pngs
 	private hearts?: Konva.Image[] = [];
 
@@ -29,6 +33,8 @@ export class BossGameScreenView implements View {
 
 	private onTileEntry?: (tile: Tile) => void;
 	private onTileRemoval?: (tile: Tile) => void;
+
+	private onSubmitPress?: (rect: Konva.Rect) => void;
 
 	private equationPulseAnim?: Konva.Animation;
 	private bossNumPulseAnim?: Konva.Animation;
@@ -103,6 +109,23 @@ export class BossGameScreenView implements View {
 		});
 		this.group.add(this.entryEquationText);
 
+		// submission 
+		this.submitRect = new Konva.Rect({
+			x: STAGE_WIDTH / 2 - 300,
+			y: this.entryBox.y() - 60,
+			width: 200,
+			height: 50,
+			fill: "#c1c1c1ff",
+			stroke: "black",
+			strokeWidth: 3,
+			cornerRadius: 1
+		})
+		this.group.add(this.submitRect);
+
+		this.submitRect.on('click', () => {
+			console.log("submission presssed");
+			if (this.onSubmitPress) this.onSubmitPress(this.submitRect);
+		});
 
 		// Label for Entry Box
 		const entryLabel = new Konva.Text({
@@ -171,6 +194,10 @@ export class BossGameScreenView implements View {
 
 	setOnTileRemoval(callback: (tile: Tile) => void): void {
 		this.onTileRemoval = callback;
+	}
+
+	setOnSubmitPress(callback: (rect: Konva.Rect) => void): void {
+		this.onSubmitPress = callback;
 	}
 
 	//update the score
