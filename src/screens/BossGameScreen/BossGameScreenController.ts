@@ -62,18 +62,8 @@ export class BossGameScreenController extends ScreenController {
 	 */
 	startGame(): void {
 		// Reset model state
-		this.model.reset();
+		this.model.resetTimer();
 		this.boss.reset();
-
-		// Update view
-		// this.view.updateScore(this.model.getScore());
-		// this.view.updateTimer(GAME_DURATION);
-		// this.view.show();
-
-		// console.log(this.model.getNums())
-		// this.view.updateBossNum(this.model.getNums().toString());
-
-		// this.startTimer();
 
 		this.loadPhaseIntoView();
 		this.view.show();
@@ -94,22 +84,6 @@ export class BossGameScreenController extends ScreenController {
 		this.tileSet.add(tile);
 		const eq = this.makeEquation();
 		this.view.updateEquationText(eq);
-
-		// if (this.checkEQ()) {
-		// 	console.log("EQUATION COMPLETE");
-		// 	this.view.flashEquationGreen();
-		// 	this.model.addScore(10);
-		// 	this.view.updateScore(this.model.getScore());
-		// 	// Advance to next phase
-		// 	if (!this.boss.isFinalPhase()) {
-		// 		this.boss.nextPhase();
-		// 		this.tileSet.clear(); // Clear current tile selections
-		// 		this.loadPhaseIntoView();
-		// 	} else {
-		// 		// End game if final phase completed
-		// 		this.endGame();
-		// 	}
-		// }
 	}
 
 	checkSubmit(): void {
@@ -123,13 +97,17 @@ export class BossGameScreenController extends ScreenController {
 				this.boss.nextPhase();
 				this.tileSet.clear(); // Clear current tile selections
 				this.loadPhaseIntoView();
+				this.model.resetTimer();
 			} else {
 				// End game if final phase completed
 				this.endGame();
 			}
-		}else{
+		} else {
 			console.log("equation failed");
+			this.view.flashEquationRed();
+			this.model.subtractScore(7);
 			GlobalPlayer.take_damage(1);
+			this.view.updateScore(this.model.getScore());
 			this.view.updateHealth(GlobalPlayer.get_health());
 		}
 	}
@@ -138,21 +116,6 @@ export class BossGameScreenController extends ScreenController {
 		this.tileSet.delete(tile);
 		const eq = this.makeEquation();
 		this.view.updateEquationText(eq);
-
-		// if (this.checkEQ()) {
-		// 	console.log("EQUATION COMPLETE");
-		// 	this.view.flashEquationGreen();
-
-		// 	// Advance to next phase
-		// 	if (!this.boss.isFinalPhase()) {
-		// 		this.boss.nextPhase();
-		// 		this.tileSet.clear(); // Clear current tile selections
-		// 		this.loadPhaseIntoView();
-		// 	} else {
-		// 		// End game if final phase completed
-		// 		this.endGame();
-		// 	}
-		// }
 	}
 
 
@@ -165,7 +128,7 @@ export class BossGameScreenController extends ScreenController {
 			this.view.updateTimer(timeRemaining);
 
 			if (timeRemaining <= 0) {
-				this.endGame();
+				this.endPhase();
 			}
 		}, 1000);
 	}
@@ -174,12 +137,28 @@ export class BossGameScreenController extends ScreenController {
 	 * Stop the timer
 	 */
 	private stopTimer(): void {
-		// TODO: Task 3 - Stop the timer using clearInterval
-
 		if (this.gameTimer != null) {
 			clearInterval(this.gameTimer);
 			this.gameTimer = null;
 		}
+	}
+
+	private endPhase(): void {
+		//The user failed to complete the phase, just keep it as is
+		this.loadPhaseIntoView();
+		this.model.subtractScore(5)
+		GlobalPlayer.take_damage(1);
+		this.view.updateScore(this.model.getScore());
+		this.view.updateHealth(GlobalPlayer.get_health());
+
+		// Clear any tiles user placed (otherwise old equation persists)
+		this.tileSet.clear();
+		this.view.updateEquationText("");
+
+		// Load the **same boss phase**, but reset timer first
+		this.model.resetTimer(); // you MUST implement this if not already
+		this.loadPhaseIntoView();
+
 	}
 
 	private endGame(): void {
