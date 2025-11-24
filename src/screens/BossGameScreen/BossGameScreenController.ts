@@ -3,7 +3,7 @@ import type { ScreenSwitcher } from "../../types.ts";
 import { BossGameScreenModel } from "./BossGameScreenModel.ts";
 import { BossGameScreenView } from "./BossGameScreenView.ts";
 import { BossEnemyModel } from "../../models/BossEnemyModel.ts";
-import { GAME_DURATION } from "../../constants.ts";
+import { BOSS_PHASE_DURATION } from "../../constants.ts";
 import type { Tile } from "./Tile.ts";
 import { evaluate } from "../../utils/equationSolver.ts";
 
@@ -41,6 +41,7 @@ export class BossGameScreenController extends ScreenController {
 			{ targetNumber: 5, tiles: ["7", "-", "2"], imagePath: "https://p7.hiclipart.com/preview/79/102/357/pac-man-world-3-ghosts-clip-art-pac-man-ghost-png-transparent-image-thumbnail.jpg" },
 			{ targetNumber: 20, tiles: ["4", "x", "5"], imagePath: "https://p7.hiclipart.com/preview/79/102/357/pac-man-world-3-ghosts-clip-art-pac-man-ghost-png-transparent-image-thumbnail.jpg" }
 		]);
+
 	}
 
 
@@ -71,6 +72,7 @@ export class BossGameScreenController extends ScreenController {
 
 		this.loadPhaseIntoView();
 		this.view.show();
+		this.view.updateHealth(3);
 		this.startTimer();
 	}
 

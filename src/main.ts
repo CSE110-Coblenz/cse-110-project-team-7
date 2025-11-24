@@ -6,6 +6,7 @@ import { BasicGameScreenController } from "./screens/BasicGameScreen/BasicGameSc
 import { BossGameScreenController } from "./screens/BossGameScreen/BossGameScreenController.ts";
 import { TowerSelectScreenController } from "./screens/TowerSelectScreen/TowerSelectScreenController.ts";
 import { LoginScreenController } from "./screens/LoginScreen/LoginScreenController.ts";
+import { Player } from "./models/PlayerModel.ts";
 
 /**
  * Main Application - Coordinates all screens
@@ -25,6 +26,8 @@ class App implements ScreenSwitcher {
 	private bossgamecontroller: BossGameScreenController;
 	private towerselectcontroller: TowerSelectScreenController;
 	private logincontroller: LoginScreenController;
+
+	private player = new Player("user");
 	
 
 	constructor(container: string) {
@@ -58,13 +61,8 @@ class App implements ScreenSwitcher {
 		// Draw the layer (render everything to the canvas)
 		this.layer.draw();
 
-		// Start with menu screen visible
-		this.basicgamecontroller.getView().hide();
-		this.bossgamecontroller.getView().hide();
-		this.towerselectcontroller.getView().hide();
-		this.logincontroller.getView().hide();
-
-		this.switchToScreen({type: "boss_game"})
+		// Start with boss selection screen visible
+		this.switchToScreen({ type: "boss_game" });
 	}
 
 	/**
@@ -90,6 +88,7 @@ class App implements ScreenSwitcher {
 				this.basicgamecontroller.show();
 				break;
 			case "boss_game":
+				console.log("on boss game screen");
 				this.bossgamecontroller.show();
 				this.bossgamecontroller.startGame();
 				break;
