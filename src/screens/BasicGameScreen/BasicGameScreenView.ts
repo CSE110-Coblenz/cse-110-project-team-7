@@ -88,6 +88,11 @@ export class BasicGameScreenView implements View {
 	private levelText: Konva.Text;
 	private choiceButtons: Konva.Group[] = [];
 	private monster?: Konva.Image;
+	// Pause game button functionality
+	private onPauseClick?: () => void;
+	setOnPause(callback: () => void): void {
+		this.onPauseClick = callback;
+	}
 	
     constructor() {
 		this.group = new Konva.Group({ visible: false });
@@ -199,6 +204,34 @@ export class BasicGameScreenView implements View {
 		this.group.add(this.questionText);
 
 		this.loadQuestion(currentQuestionIndex);
+
+		// Pause Button
+	const pauseButton = new Konva.Circle({
+ 	   x: STAGE_WIDTH - 70,
+    	y: 100,
+    	radius: 30,
+    	fill: "#F7C500",
+    	stroke: "black",
+    	strokeWidth: 2,
+    	cursor: "pointer",
+	});
+
+	pauseButton.on("mouseover", () => {
+    	pauseButton.fill("#D1A700");
+    	this.group.getLayer()?.draw();
+	});
+
+	pauseButton.on("mouseout", () => {
+    	pauseButton.fill("#F7C500");
+    	this.group.getLayer()?.draw();
+	});
+
+	pauseButton.on("click", () => {
+    	if (this.onPauseClick) this.onPauseClick();
+	});
+
+	this.group.add(pauseButton);
+
     }
 
 	showHelpPopup() {
@@ -425,6 +458,8 @@ export class BasicGameScreenView implements View {
 			this.group.getLayer()?.draw();
 		});
 	}
+	
+	
 
 
 	sleep(ms: number): Promise<void> {

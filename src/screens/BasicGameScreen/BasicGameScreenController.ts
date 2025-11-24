@@ -13,11 +13,13 @@ export class BasicGameScreenController extends ScreenController {
 	private view: BasicGameScreenView;
 	private screenSwitcher: ScreenSwitcher;
 	
+	
     constructor(screenSwitcher: ScreenSwitcher) {
 		super();
 		this.screenSwitcher = screenSwitcher;
 		this.model = new BasicGameScreenModel();
 		this.view = new BasicGameScreenView();
+		this.view.setOnPause(() => this.togglePause());
     }
 	/**
 	 * Get the view group
@@ -25,5 +27,26 @@ export class BasicGameScreenController extends ScreenController {
 	getView(): BasicGameScreenView {
 		return this.view;
 	}
+	private isPaused = false;
+
+	private togglePause() {
+    	this.isPaused = !this.isPaused;
+    	if (this.isPaused) {
+    	    this.pauseGame();
+    	} else {
+    	    this.resumeGame();
+    	}
+	}
+
+	private pauseGame() {
+		console.log("Game Paused");//Testing
+    	this.view.getGroup().listening(false);
+	}
+
+	private resumeGame() {
+		//console.log("Game Resumed");//Testing
+    	this.view.getGroup().listening(true);
+	}
+
 }
 
