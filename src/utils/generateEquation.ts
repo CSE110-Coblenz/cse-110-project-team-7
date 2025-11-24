@@ -3,13 +3,8 @@
 import { EquationMode } from "../screens/BasicGameScreen/BasicGameScreenModel";
 import { evaluate } from "./equationSolver";
 export function generateEquation(target: number, length: number, count: number, operations: string[]): string[]{
-    if (length <= 2){
-        return [];
-    }
-
-    if (length % 2 == 0){
-        return [];
-    }
+    if (count <= 0) return [];
+    if (length <= 2 || length % 2 === 0 ) return [];
  
     let res: string[] = [];
 
@@ -43,7 +38,7 @@ export function generateEquation(target: number, length: number, count: number, 
                     backtrack(updated_str, idx + 1, val + i, i, null);
                 } else if (last_op == '-'){
                     backtrack(updated_str, idx + 1, val - i, -i, null);
-                } else if (last_op == 'x'){
+                } else if (last_op == '*'){
                     backtrack(updated_str, idx + 1, val - prev + (prev * i), prev * i, null);
                 } else if (last_op == '/'){
                     backtrack(updated_str, idx + 1, val - prev + Math.floor(prev / i), Math.floor(prev / i), null);
@@ -65,21 +60,21 @@ export function generateEquationOptions(target: number, equationMode: EquationMo
         } else if (equationMode == 'subtraction'){
             operations = ['-'];
         } else if (equationMode == 'multiplication'){
-            operations = ['x'];
+            operations = ['*'];
         } else if (equationMode == 'division'){
             operations = ['/'];
         } else{
-            operations = ['+', '-', 'x', '/'];
+            operations = ['+', '-', '*', '/'];
         }
         const correctEquations = generateEquation(target, 3, 5, operations);
         
-        if (correctEquations.length === 0) {
-            // Fallback if no equations found
-            return [target.toString()];
-        }
+        let guaranteedCorrect = 
+            correctEquations.length > 0
+            ? correctEquations
+            : [buildGuaranteedEquation(target, equationMode)];
 
         // Pick one correct equation
-        const correctEq = correctEquations[Math.floor(Math.random() * correctEquations.length)];
+        const correctEq = guaranteedCorrect[Math.floor(Math.random() * guaranteedCorrect.length)];
 
         // Generate 3 wrong options
         const wrongOptions: string[] = [];
@@ -96,7 +91,51 @@ export function generateEquationOptions(target: number, equationMode: EquationMo
         // Combine and shuffle
         const allOptions = [correctEq, ...wrongOptions];
         return allOptions.sort(() => Math.random() - 0.5);
+}
+
+function buildGuaranteedEquation(target: number, mode: EquationMode): string {
+    switch (mode) {
+        case "addition": {
+            // x + y = target → pick x randomly
+            const x = Math.floor(Math.random() * target);
+            const y = target - x;
+            return `${x}+${y}`;
+        }
+
+        case "subtraction": {
+            // x - y = target → pick y randomly
+            const y = Math.floor(Math.random() * 10);
+            const x = target + y;
+            return `${x}-${y}`;
+        }
+
+        case "multiplication": {
+            // x * y = target → find a divisor
+            for (let i = 1; i <= 9; i++) {
+                if (target % i === 0) {
+                    const other = target / i;
+                    if (other >= 0 && other < 10) {
+                        return `${i}*${other}`;
+                    }
+                }
+            }
+            // If no single-digit factor: use 1 * target
+            return `1*${target}`;
+        }
+
+        case "division": {
+            // x / y = target → x = target * y
+            const y = Math.floor(Math.random() * 9) + 1;
+            const x = target * y;
+            return `${x}/${y}`;
+        }
+
+        default:
+            // For "any", just make a + equation
+            const a = Math.floor(Math.random() * target);
+            return `${a}+${target - a}`;
     }
+}
 
 function generateFakeEquation(equationMode: EquationMode): string {
     const a = Math.floor(Math.random() * 10);

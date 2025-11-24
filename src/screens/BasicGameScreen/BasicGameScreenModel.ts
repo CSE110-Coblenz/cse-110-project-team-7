@@ -19,7 +19,7 @@ export class BasicGameScreenModel {
     // Game state
     private playerHealth: number = 3;
     private correctAnswers: number = 0;
-    private equationMode: EquationMode = "subtraction";
+    private equationMode: EquationMode = "addition";
     private equationOptions: string[] = [];
     
     readonly MAX_HEALTH = 3;
