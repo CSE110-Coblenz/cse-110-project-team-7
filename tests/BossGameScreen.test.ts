@@ -26,7 +26,7 @@ describe("BossGameScreenModel", () => {
     const m = new BossGameScreenModel();
     m.addScore(20);
     m.tickTimer();
-    m.reset();
+    m.resetTimer();
     expect(m.getScore()).toBe(0);
     expect(m.getTime()).toBe(120);
   });
