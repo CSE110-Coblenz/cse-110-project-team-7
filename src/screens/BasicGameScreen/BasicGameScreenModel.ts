@@ -2,13 +2,6 @@ import { BasicEnemy } from '../../models/BasicEnemyModel'
 import { generateEquationOptions } from "../../utils/generateEquation.ts";
 import { evaluate } from "../../utils/equationSolver.ts";
 
-/**
- * GameScreenModel - Manages game state
- */
-const BASE_LEVEL = 0;
-const BASE_TOWER = 1;
-const LEVELS_PER_TOWER = 10;
-
 export type EquationMode = "any" | "addition" | "subtraction" | "multiplication" | "division";
 
 export class BasicGameScreenModel {
@@ -16,22 +9,19 @@ export class BasicGameScreenModel {
     tower: number;
     enemy: BasicEnemy | null = null;
     
-    // Game state
     private playerHealth: number = 3;
     private correctAnswers: number = 0;
-    private equationMode: EquationMode = "addition";
+    private equationMode: EquationMode = "subtraction";
     private equationOptions: string[] = [];
     
     readonly MAX_HEALTH = 3;
     readonly MAX_LEVELS = 20;
 
-    constructor(level: number = BASE_LEVEL, tower: number = BASE_TOWER) {
+    constructor(level: number = 0, tower: number = 1) {
         this.level = level;
         this.tower = tower;
-        this.spawnNewEnemy();
     }
 
-    // Level management
     increment_level(): void {
         this.level += 1;
     }
@@ -59,7 +49,7 @@ export class BasicGameScreenModel {
     }
 
     reset_level(): void {
-        this.level = BASE_LEVEL;
+        this.level = 0;
     }
 
     // Player health management
@@ -90,7 +80,6 @@ export class BasicGameScreenModel {
         return this.correctAnswers >= this.MAX_LEVELS;
     }
 
-    // Enemy management
     getCurrentEnemy(): BasicEnemy | null {
         return this.enemy;
     }
@@ -99,27 +88,19 @@ export class BasicGameScreenModel {
         return this.enemy ? this.enemy.health : 0;
     }
 
-    spawnNewEnemy(): void {
-        // Generate a random target health (the "question")
-        const targetHealth = Math.floor(Math.random() * 30);
-        
-        // Create the enemy with this health
-        this.enemy = new BasicEnemy(
-            targetHealth,
-            1,
-            `Monster ${this.correctAnswers + 1}`,
-            'src/assets/monster.png'
-        );
-
-        // Generate equation options based on enemy health
-        this.equationOptions = generateEquationOptions(targetHealth, this.equationMode);
+    setEnemy(enemy: BasicEnemy): void {
+        this.enemy = enemy;
+        this.equationOptions = generateEquationOptions(enemy.health, this.equationMode);
     }
 
     getEquationOptions(): string[] {
         return this.equationOptions;
     }
 
-    // Answer validation - check if selected equation equals enemy health
+    getEquationMode(): EquationMode {
+        return this.equationMode;
+    }
+
     checkAnswer(selected: string): boolean {
         if (!this.enemy) return false;
         
