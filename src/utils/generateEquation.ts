@@ -48,7 +48,7 @@ export function generateEquation(target: number, length: number, count: number, 
                     backtrack(updated_str, idx + 1, val + i, i, null);
                 } else if (last_op == '-'){
                     backtrack(updated_str, idx + 1, val - i, -i, null);
-                } else if (last_op == '*'){
+                } else if (last_op == 'x'){
                     backtrack(updated_str, idx + 1, val - prev + (prev * i), prev * i, null);
                 } else if (last_op == '/'){
                     if (prev % i == 0){
@@ -72,11 +72,11 @@ export function generateEquationOptions(target: number, equationMode: EquationMo
         } else if (equationMode == 'subtraction'){
             operations = ['-'];
         } else if (equationMode == 'multiplication'){
-            operations = ['*'];
+            operations = ['x'];
         } else if (equationMode == 'division'){
             operations = ['/'];
         } else{
-            operations = ['+', '-', '*', '/'];
+            operations = ['+', '-', 'x', '/'];
         }
         const correctEquations = generateEquation(target, equationLength, 50, operations);
         
@@ -167,13 +167,13 @@ function generateFakeEquation(target: number, length: number, equationMode: Equa
             ops = ["-"];
             break;
         case "multiplication":
-            ops = ["*"];
+            ops = ["x"];
             break;
         case "division":
             ops = ["/"];
             break;
         default:
-            ops = ["+", "-", "*", "/"];
+            ops = ["+", "-", "x", "/"];
     }
     
     for (let i = 0; i < length; i++) {
