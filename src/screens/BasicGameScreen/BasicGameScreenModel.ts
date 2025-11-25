@@ -11,7 +11,7 @@ export class BasicGameScreenModel {
     
     private playerHealth = GlobalPlayer.get_health();
     private correctAnswers: number = 0;
-    private equationMode: EquationMode = "division";
+    private equationMode: EquationMode = "addition";
     private equationOptions: string[] = [];
     
     readonly MAX_HEALTH = 3;
