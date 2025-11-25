@@ -6,7 +6,7 @@ import type { BasicGameScreenController } from "./BasicGameScreenController.ts";
 
 let bossScreen: BossGameScreenView | null = null;
 
-
+const DESIRED_MONSTER_SIZE = 20;
 export class BasicGameScreenView implements View {
     private group: Konva.Group;
     private enemyHealthText!: Konva.Text;
@@ -32,21 +32,34 @@ export class BasicGameScreenView implements View {
             fill: "#f0f0f0",
         });
         this.group.add(bg);
+        
 
-        Konva.Image.fromURL('src/assets/monster.png', (monsterNode) => {
+        Konva.Image.fromURL(this.controller.getCurrentEnemySprite(), (monsterNode) => {
             this.monster = monsterNode;
-            monsterNode.setAttrs({
-                x: STAGE_WIDTH / 2.5,
-                y: -10,
-                scaleX: 0.5,
-                scaleY: 0.5,
-                cornerRadius: 20,
-				image: monsterNode.image()
-            });
-            this.group.add(monsterNode);
-            this.group.getLayer()?.draw();
+        
+            const img = monsterNode.image();
+            const DESIRED_MONSTER_SIZE = 150;
+        
+            const applyScale = () => {
+                const scale = DESIRED_MONSTER_SIZE / img.width;
+                monsterNode.setAttrs({
+                    x: STAGE_WIDTH / 2.15,
+                    y: 100,
+                    scaleX: scale,
+                    scaleY: scale,
+                    image: img,
+                });
+        
+                this.group.add(monsterNode);
+                this.group.getLayer()?.draw();
+            };
+        
+            if (img.width > 0) applyScale();
+            else img.onload = applyScale;
         });
-
+        
+        
+        
         for (let i = 0; i < this.controller.getMaxHealth(); i++) {
             Konva.Image.fromURL('src/assets/heart.png', (heart) => {
                 heart.setAttrs({
@@ -295,15 +308,26 @@ export class BasicGameScreenView implements View {
      */
     updateMonsterImage(newUrl: string): void {
         Konva.Image.fromURL(newUrl, (newMonster) => {
-            newMonster.position(this.monster!.position());
-            newMonster.scale(this.monster!.scale());
-
-            this.monster?.destroy();
-            this.monster = newMonster;
-            this.group.add(newMonster);
-            this.group.getLayer()?.draw();
+            const img = newMonster.image();
+            const DESIRED_MONSTER_SIZE = 150;
+    
+            const applyScale = () => {
+                const scale = DESIRED_MONSTER_SIZE / img.width;
+    
+                newMonster.position(this.monster!.position());
+                newMonster.scale({ x: scale, y: scale });
+    
+                this.monster?.destroy();
+                this.monster = newMonster;
+                this.group.add(newMonster);
+                this.group.getLayer()?.draw();
+            };
+    
+            if (img.width > 0) applyScale();
+            else img.onload = applyScale;
         });
     }
+    
 
     /**
      * Show game over screen
