@@ -76,7 +76,7 @@ export class BossGameScreenView implements View {
 		this.timerText = new Konva.Text({
 			x: STAGE_WIDTH - 150,
 			y: 20,
-			text: "Time: 60",
+			text: "Time: 30",
 			fontSize: 32,
 			fontFamily: "Arial",
 			fill: "red",
@@ -103,7 +103,7 @@ export class BossGameScreenView implements View {
 			width: this.entryBox.width() - 20,
 			align: "left",
 			text: "Current: ",
-			fontSize: 22,
+			fontSize: 50,
 			fontFamily: "Impact",
 			fill: "white",
 		});
@@ -237,6 +237,7 @@ export class BossGameScreenView implements View {
 	}
 
 	startEquationPulsate(): void {
+		//console.log("starting equation pulsate");
 		if (this.equationPulseAnim) return; // already pulsing
 
 		const text = this.entryEquationText;
@@ -252,6 +253,16 @@ export class BossGameScreenView implements View {
 		}, text.getLayer());
 
 		this.equationPulseAnim.start();
+	}
+
+	stopEquationPulsate(): void {
+		if (this.equationPulseAnim) {
+			this.equationPulseAnim.stop();
+			this.equationPulseAnim = undefined;
+			// optional: reset the color
+			this.entryEquationText.fill("white");
+			this.entryEquationText.getLayer()?.draw();
+		}
 	}
 
 	startBossNumPulsate(): void {
@@ -271,15 +282,7 @@ export class BossGameScreenView implements View {
 		this.bossNumPulseAnim.start();
 	}
 
-	stopEquationPulsate(): void {
-		if (this.equationPulseAnim) {
-			this.equationPulseAnim.stop();
-			this.equationPulseAnim = undefined;
-			// optional: reset the color
-			this.entryEquationText.fill("white");
-			this.entryEquationText.getLayer()?.draw();
-		}
-	}
+
 
 	stopBossNumPulsate(): void {
 		if (this.bossNumPulseAnim) {
@@ -310,6 +313,32 @@ export class BossGameScreenView implements View {
 				this.group.getLayer()?.draw();
 			}
 		}, interval);
+
+		setTimeout(() => this.startEquationPulsate(), 1000);
+	}
+
+	flashEquationRed(duration: number = 1000, flashes: number = 3): void{
+		if (!this.entryEquationText) return;
+		this.stopEquationPulsate();
+
+		const text = this.entryEquationText;
+		const originalColor = text.fill();
+		const interval = duration / (flashes * 2);
+		let count = 0;
+
+		const flashInterval = setInterval(() => {
+			text.fill(count % 2 === 0 ? 'red' : originalColor);
+			this.group.getLayer()?.draw();
+
+			count++;
+			if (count >= flashes * 2) {
+				clearInterval(flashInterval);
+				text.fill(originalColor);
+				this.group.getLayer()?.draw();
+			}
+		}, interval);
+
+		setTimeout(() => this.startEquationPulsate(), 1000);
 	}
 
 	updateBossNum(newnum: string): void {

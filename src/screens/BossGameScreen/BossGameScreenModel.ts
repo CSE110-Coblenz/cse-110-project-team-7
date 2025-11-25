@@ -1,19 +1,24 @@
-import { BOSS_PHASE_DURATION } from "../../constants"; 
+import { BOSS_PHASE_DURATION } from "../../constants";
+import { GlobalPlayer } from "../../GlobalPlayer"; 
 /**
  * GameScreenModel - Manages game state
  */
 export class BossGameScreenModel {
-    private score = 0;
+    // the actual score is held in the global player model
     private timeRemaining = BOSS_PHASE_DURATION;
 
     constructor() {}
 
     addScore(amount: number) {
-        this.score += amount;
+        GlobalPlayer.increase_score(amount);
+    }
+
+    subtractScore(amount: number) {
+        GlobalPlayer.decrease_score(amount);
     }
 
     getScore(): number {
-        return this.score;
+        return GlobalPlayer.get_score();
     }
 
     tickTimer(): number {
@@ -24,8 +29,7 @@ export class BossGameScreenModel {
         return this.timeRemaining;
     }
 
-    reset(): void {
-        this.score = 0;
+    resetTimer(): void {
         this.timeRemaining = BOSS_PHASE_DURATION;
     }
 
