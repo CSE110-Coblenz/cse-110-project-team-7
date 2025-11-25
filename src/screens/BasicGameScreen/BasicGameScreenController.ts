@@ -1,9 +1,10 @@
-import { ScreenController } from "../../types.ts";
+    import { ScreenController } from "../../types.ts";
 import type { ScreenSwitcher } from "../../types.ts";
 import { BasicGameScreenModel } from "./BasicGameScreenModel.ts";
 import { BasicGameScreenView } from "./BasicGameScreenView.ts";
 import { spawnEnemy } from '../../utils/enemyFactory.ts';
 import type { BasicEnemy } from '../../models/BasicEnemyModel.ts';
+import { GlobalPlayer } from "../../GlobalPlayer.ts";
 
 export class BasicGameScreenController extends ScreenController {
     private model: BasicGameScreenModel;
@@ -18,6 +19,7 @@ export class BasicGameScreenController extends ScreenController {
         
         this.spawnNewEnemy();
         this.loadCurrentEnemy();
+        this.view.updateScore(GlobalPlayer.get_score());
     }
 
     getView(): BasicGameScreenView {
@@ -49,11 +51,13 @@ export class BasicGameScreenController extends ScreenController {
             this.model.defeatCurrentEnemy();
             this.model.incrementCorrectAnswers();
             this.view.updateProgress(this.model.getCorrectAnswers(), this.model.MAX_LEVELS);
+            this.view.updateScore(GlobalPlayer.increase_score(10));
             
             await this.sleep(2000);
             
             if (this.model.hasReachedMaxLevel()) {
                 this.view.switchToBossScreen();
+                this.view.updateScore(GlobalPlayer.increase_score(15))
                 return;
             }
             
@@ -68,6 +72,7 @@ export class BasicGameScreenController extends ScreenController {
             
             this.model.decreasePlayerHealth();
             this.view.updateHealthDisplay(this.model.getPlayerHealth());
+            this.view.updateScore(GlobalPlayer.decrease_score(5));
             
             await this.sleep(2000);
             this.view.updateMonsterImage('src/assets/monster.png');

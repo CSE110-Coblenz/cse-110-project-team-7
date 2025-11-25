@@ -16,6 +16,7 @@ export class BasicGameScreenView implements View {
     private hearts: Konva.Image[] = [];
     private controller: BasicGameScreenController;
     private currentSelectedRect?: Konva.Rect;
+    private scoreText: Konva.Text;
     
     constructor(controller: BasicGameScreenController) {
         this.controller = controller;
@@ -85,6 +86,16 @@ export class BasicGameScreenView implements View {
             fill: "black",
         });
         this.group.add(this.enemyHealthText);
+
+        this.scoreText = new Konva.Text({
+            x: 20,
+            y: 100,
+            text: "Score: ",
+            fontSize: 36,
+            fontFamily: "Calibri",
+            fill: "black"
+        });
+        this.group.add(this.scoreText);
     }
 
     private createHelpButton(): void {
@@ -289,6 +300,11 @@ export class BasicGameScreenView implements View {
 
     updateProgress(correctAnswers: number, maxLevels: number): void {
         this.levelText.text(`Progress: ${correctAnswers}/${maxLevels}`);
+        this.group.getLayer()?.draw();
+    }
+
+    updateScore(newScore: number): void {
+        this.scoreText.text(`Score: ${newScore}`);
         this.group.getLayer()?.draw();
     }
 
