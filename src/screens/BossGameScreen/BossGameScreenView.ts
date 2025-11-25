@@ -237,7 +237,7 @@ export class BossGameScreenView implements View {
 	}
 
 	startEquationPulsate(): void {
-		console.log("starting equation pulsate");
+		//console.log("starting equation pulsate");
 		if (this.equationPulseAnim) return; // already pulsing
 
 		const text = this.entryEquationText;
