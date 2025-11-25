@@ -2,28 +2,99 @@ import { ScreenController } from "../../types.ts";
 import type { ScreenSwitcher } from "../../types.ts";
 import { BasicGameScreenModel } from "./BasicGameScreenModel.ts";
 import { BasicGameScreenView } from "./BasicGameScreenView.ts";
-import { Player } from '../../models/PlayerModel.ts'
-import { BasicEnemy } from '../../models/BasicEnemyModel.ts'
+import { spawnEnemy } from '../../utils/enemyFactory.ts';
+import type { BasicEnemy } from '../../models/BasicEnemyModel.ts';
 
-/**
- * BaiscGameScreenController - Coordinates game logic between Model and View
- */
 export class BasicGameScreenController extends ScreenController {
-	private model: BasicGameScreenModel;
-	private view: BasicGameScreenView;
-	private screenSwitcher: ScreenSwitcher;
-	
+    private model: BasicGameScreenModel;
+    private view: BasicGameScreenView;
+    private screenSwitcher: ScreenSwitcher;
+    
     constructor(screenSwitcher: ScreenSwitcher) {
-		super();
-		this.screenSwitcher = screenSwitcher;
-		this.model = new BasicGameScreenModel();
-		this.view = new BasicGameScreenView();
+        super();
+        this.screenSwitcher = screenSwitcher;
+        this.model = new BasicGameScreenModel();
+        this.view = new BasicGameScreenView(this);
+        
+        this.spawnNewEnemy();
+        this.loadCurrentEnemy();
     }
-	/**
-	 * Get the view group
-	 */
-	getView(): BasicGameScreenView {
-		return this.view;
-	}
-}
 
+    getView(): BasicGameScreenView {
+        return this.view;
+    }
+
+    private spawnNewEnemy(): void {
+        const newEnemy = spawnEnemy("normal", 1, this.model.getEquationMode()) as BasicEnemy;
+        this.model.setEnemy(newEnemy);
+    }
+
+    loadCurrentEnemy(): void {
+        const enemy = this.model.getCurrentEnemy();
+        if (enemy) {
+            const enemyHealth = this.model.getEnemyHealth();
+            const equationOptions = this.model.getEquationOptions();
+            
+            this.view.displayEnemyChallenge(enemyHealth, equationOptions);
+        }
+    }
+
+    async handleAnswer(selected: string): Promise<void> {
+        const isCorrect = this.model.checkAnswer(selected);
+        
+        if (isCorrect) {
+            this.view.showCorrectFeedback();
+            this.view.updateMonsterImage('src/assets/monstersln.png');
+            
+            this.model.defeatCurrentEnemy();
+            this.model.incrementCorrectAnswers();
+            this.view.updateProgress(this.model.getCorrectAnswers(), this.model.MAX_LEVELS);
+            
+            await this.sleep(2000);
+            
+            if (this.model.hasReachedMaxLevel()) {
+                this.view.switchToBossScreen();
+                return;
+            }
+            
+            // Controller spawns new enemy using factory
+            this.spawnNewEnemy();
+            this.view.updateMonsterImage('src/assets/monster.png');
+            this.loadCurrentEnemy();
+            
+        } else {
+            this.view.showWrongFeedback();
+            this.view.updateMonsterImage('src/assets/monsteratk.png');
+            
+            this.model.decreasePlayerHealth();
+            this.view.updateHealthDisplay(this.model.getPlayerHealth());
+            
+            await this.sleep(2000);
+            this.view.updateMonsterImage('src/assets/monster.png');
+            
+            if (!this.model.isPlayerAlive()) {
+                this.view.showGameOver();
+            }
+        }
+    }
+
+    getPlayerHealth(): number {
+        return this.model.getPlayerHealth();
+    }
+
+    getMaxHealth(): number {
+        return this.model.MAX_HEALTH;
+    }
+
+    getCorrectAnswers(): number {
+        return this.model.getCorrectAnswers();
+    }
+
+    getMaxLevels(): number {
+        return this.model.MAX_LEVELS;
+    }
+
+    private sleep(ms: number): Promise<void> {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+}

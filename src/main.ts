@@ -58,8 +58,8 @@ class App implements ScreenSwitcher {
 		// Draw the layer (render everything to the canvas)
 		this.layer.draw();
 
-		// Start with boss selection screen visible
-		this.switchToScreen({ type: "boss_game" });
+		// Start with tower selection screen visible
+		this.switchToScreen({ type: "basic_game" });
 	}
 
 	/**
