@@ -1,4 +1,4 @@
-const MAX_HEALTH = 3;
+const MAX_HEALTH = 5;
 
 export class Player {
     health: number;
