@@ -1,7 +1,7 @@
 import { BasicEnemy } from '../../models/BasicEnemyModel'
 import { generateEquationOptions } from "../../utils/generateEquation.ts";
 import { evaluate } from "../../utils/equationSolver.ts";
-
+import { GlobalPlayer } from '../../GlobalPlayer.ts';
 export type EquationMode = "any" | "addition" | "subtraction" | "multiplication" | "division";
 
 export class BasicGameScreenModel {
@@ -9,9 +9,9 @@ export class BasicGameScreenModel {
     tower: number;
     enemy: BasicEnemy | null = null;
     
-    private playerHealth: number = 3;
+    private playerHealth = GlobalPlayer.get_health();
     private correctAnswers: number = 0;
-    private equationMode: EquationMode = "subtraction";
+    private equationMode: EquationMode = "division";
     private equationOptions: string[] = [];
     
     readonly MAX_HEALTH = 3;
@@ -46,6 +46,8 @@ export class BasicGameScreenModel {
                 this.equationMode = "any";
                 break;
         }
+
+        GlobalPlayer.reset_health();
     }
 
     reset_level(): void {

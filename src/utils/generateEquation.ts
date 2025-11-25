@@ -8,6 +8,17 @@ export function generateEquation(target: number, length: number, count: number, 
  
     let res: string[] = [];
 
+    function getNumberRange(): [number, number] {
+        const hasAddOrMult = operations.includes('+') || operations.includes('*');
+        if (hasAddOrMult) {
+            return [1, 9]; // Single digits are fine when we can increase
+        }
+        // For subtraction/division only, use larger range
+        return [1, 99];
+    }
+
+    const [minNum, maxNum] = getNumberRange();
+
     function backtrack(curr: string, idx: number, val: number, prev: number, last_op: string | null = null): void{
         if (res.length >= count){
             return;
@@ -26,7 +37,7 @@ export function generateEquation(target: number, length: number, count: number, 
                 backtrack(curr + op, idx + 1, val, prev, op);
             });
         } else {
-            for (let i = 1; i < 10; i ++){
+            for (let i = minNum; i <= maxNum; i ++){
                 let updated_str = curr + i.toString();
 
                 if (idx == 0){
@@ -41,7 +52,9 @@ export function generateEquation(target: number, length: number, count: number, 
                 } else if (last_op == '*'){
                     backtrack(updated_str, idx + 1, val - prev + (prev * i), prev * i, null);
                 } else if (last_op == '/'){
-                    backtrack(updated_str, idx + 1, val - prev + Math.floor(prev / i), Math.floor(prev / i), null);
+                    if (prev % i == 0){
+                        backtrack(updated_str, idx + 1, val - prev + Math.floor(prev / i), Math.floor(prev / i), null);
+                    }
                 }
 
             }
@@ -54,6 +67,7 @@ export function generateEquation(target: number, length: number, count: number, 
 
 export function generateEquationOptions(target: number, equationMode: EquationMode): string[] {
         // Generate correct equations
+        let equationLength = 3;
         let operations: string[];
         if (equationMode == 'addition'){
             operations = ['+'];
@@ -66,7 +80,7 @@ export function generateEquationOptions(target: number, equationMode: EquationMo
         } else{
             operations = ['+', '-', '*', '/'];
         }
-        const correctEquations = generateEquation(target, 3, 5, operations);
+        const correctEquations = generateEquation(target, equationLength, 50, operations);
         
         let guaranteedCorrect = 
             correctEquations.length > 0
@@ -79,7 +93,7 @@ export function generateEquationOptions(target: number, equationMode: EquationMo
         // Generate 3 wrong options
         const wrongOptions: string[] = [];
         while (wrongOptions.length < 3) {
-            const fakeEq = generateFakeEquation(equationMode);
+            const fakeEq = generateFakeEquation(target, equationLength, equationMode);
             const fakeResult = evaluate(fakeEq);
             
             // Make sure it's different from the target and not already in the list
@@ -137,9 +151,13 @@ function buildGuaranteedEquation(target: number, mode: EquationMode): string {
     }
 }
 
-function generateFakeEquation(equationMode: EquationMode): string {
-    const a = Math.floor(Math.random() * 10);
-    const b = Math.floor(Math.random() * 10);
+function generateFakeEquation(target: number, length: number, equationMode: EquationMode): string {
+    // Determine number range based on operations (same logic as generateEquation)
+    const hasAddOrMult = equationMode === 'addition' || equationMode === 'multiplication' || equationMode === 'any';
+    const [minNum, maxNum] = hasAddOrMult ? [1, 9] : [1, 99];
+    
+    // Build an equation of the specified length
+    let equation = '';
     let ops: string[] = [];
     
     switch (equationMode) {
@@ -159,6 +177,17 @@ function generateFakeEquation(equationMode: EquationMode): string {
             ops = ["+", "-", "*", "/"];
     }
     
-    const op = ops[Math.floor(Math.random() * ops.length)];
-    return `${a}${op}${b}`;
+    for (let i = 0; i < length; i++) {
+        if (i % 2 === 0) {
+            // Add a number
+            const num = Math.floor(Math.random() * (maxNum - minNum + 1)) + minNum;
+            equation += num;
+        } else {
+            // Add an operator
+            const op = ops[Math.floor(Math.random() * ops.length)];
+            equation += op;
+        }
+    }
+    
+    return equation;
 }

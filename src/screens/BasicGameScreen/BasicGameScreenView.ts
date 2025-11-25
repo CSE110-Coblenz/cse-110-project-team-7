@@ -24,6 +24,8 @@ export class BasicGameScreenView implements View {
     }
 
     private initializeUI(): void {
+        const maxHealth = this.controller.getMaxHealth();
+        this.hearts = new Array(maxHealth);
         const bg = new Konva.Rect({
             x: 0,
             y: 0,
@@ -47,7 +49,7 @@ export class BasicGameScreenView implements View {
             this.group.getLayer()?.draw();
         });
 
-        for (let i = 0; i < this.controller.getMaxHealth(); i++) {
+        for (let i = 0; i < maxHealth; i++) {
             Konva.Image.fromURL('src/assets/heart.png', (heart) => {
                 heart.setAttrs({
                     x: 20 + i * 40,
@@ -57,7 +59,7 @@ export class BasicGameScreenView implements View {
 					image: heart.image()
                 });
                 this.group.add(heart);
-                this.hearts.push(heart);
+                this.hearts[i] = heart;
                 this.group.getLayer()?.draw();
             });
         }

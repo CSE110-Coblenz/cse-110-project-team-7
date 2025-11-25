@@ -3,7 +3,7 @@ import { BasicEnemy } from '../models/BasicEnemyModel'
 import { BossEnemyModel, type BossPhase } from '../models/BossEnemyModel'
 import type { EquationMode } from '../screens/BasicGameScreen/BasicGameScreenModel';
 
-const MAX_HEALTH = 100;
+const MAX_HEALTH = 30;
 const MIN_HEALTH = 10;
 
 function randomInt(): number {
