@@ -11,9 +11,8 @@ export function generateEquation(target: number, length: number, count: number, 
     function getNumberRange(): [number, number] {
         const hasAddOrMult = operations.includes('+') || operations.includes('*');
         if (hasAddOrMult) {
-            return [1, 9]; // Single digits are fine when we can increase
+            return [1, 99]; 
         }
-        // For subtraction/division only, use larger range
         return [1, 99];
     }
 
@@ -66,7 +65,6 @@ export function generateEquation(target: number, length: number, count: number, 
 }   
 
 export function generateEquationOptions(target: number, equationMode: EquationMode): string[] {
-        // Generate correct equations
         let equationLength = 3;
         let operations: string[];
         if (equationMode == 'addition'){
@@ -82,6 +80,7 @@ export function generateEquationOptions(target: number, equationMode: EquationMo
         }
         const correctEquations = generateEquation(target, equationLength, 50, operations);
         
+        console.log(correctEquations);
         let guaranteedCorrect = 
             correctEquations.length > 0
             ? correctEquations
