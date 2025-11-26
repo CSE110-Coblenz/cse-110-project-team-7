@@ -1,15 +1,17 @@
-const MAX_HEALTH = 5;
+const MAX_HEALTH = 3;
 
 export class Player {
     health: number;
     name: string;
     score: number;
+    highestTowerUnlocked: number;
 
     // add more player attributes as needed
     constructor(name: any = null){
         this.health = MAX_HEALTH;
         this.name = name;
         this.score = 0;
+        this.highestTowerUnlocked = 1;
     }
 
     get_health(): number {
@@ -42,9 +44,20 @@ export class Player {
         return this.score;
     }
 
-    get_score(): number{
+    get_score(): number { 
         return this.score;
     }
     
+    get_highest_tower(): number {
+        return this.highestTowerUnlocked;
+    }
+
+    unlock_next_tower(): void {
+        this.highestTowerUnlocked += 1;
+    }
+
+    is_tower_unlocked(tower: number): boolean {
+        return this.highestTowerUnlocked >= tower;
+    }
 
 }

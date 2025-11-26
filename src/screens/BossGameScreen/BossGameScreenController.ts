@@ -114,6 +114,10 @@ export class BossGameScreenController extends ScreenController {
 				this.model.resetTimer();
 			} else {
 				// End game if final phase completed
+				if (this.tower === GlobalPlayer.get_highest_tower()) {
+                    GlobalPlayer.unlock_next_tower();
+                }
+				this.screenSwitcher.switchToScreen({ type: 'tower_select' })
 				this.endGame();
 			}
 		} else {
@@ -208,5 +212,10 @@ export class BossGameScreenController extends ScreenController {
 		return val === this.boss.getCurrentPhase().targetNumber;
 	}
 
-
+	setTower(tower: number): void {
+        this.tower = tower;
+        const equationMode = this.getEquationModeForTower(tower);
+        
+        this.boss = this.spawnBoss();
+    }
 }
