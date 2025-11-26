@@ -17,6 +17,7 @@ import { LoginScreenController } from "./screens/LoginScreen/LoginScreenControll
  * Key concept: All screens are added to the same layer, but only one is
  * visible at a time. This is managed by the switchToScreen() method.
  */
+
 class App implements ScreenSwitcher {
 	private stage: Konva.Stage;
 	private layer: Konva.Layer;
@@ -25,7 +26,6 @@ class App implements ScreenSwitcher {
 	private bossgamecontroller: BossGameScreenController;
 	private towerselectcontroller: TowerSelectScreenController;
 	private logincontroller: LoginScreenController;
-	
 
 	constructor(container: string) {
 		// Initialize Konva stage (the main canvas)
@@ -59,7 +59,7 @@ class App implements ScreenSwitcher {
 		this.layer.draw();
 
 		// Start with tower selection screen visible
-		this.switchToScreen({ type: "tower_select" });
+		this.switchToScreen({ type: "basic_game" });
 	}
 
 	/**
@@ -85,6 +85,7 @@ class App implements ScreenSwitcher {
 				this.basicgamecontroller.show();
 				break;
 			case "boss_game":
+				console.log("on boss game screen");
 				this.bossgamecontroller.show();
 				this.bossgamecontroller.startGame();
 				break;

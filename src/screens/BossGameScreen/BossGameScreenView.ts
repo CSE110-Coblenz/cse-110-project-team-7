@@ -11,12 +11,19 @@ export class BossGameScreenView implements View {
 	private group: Konva.Group;
 	private scoreText: Konva.Text;
 	private timerText: Konva.Text;
-	private tiles: Tile[] = []
+	private tiles: Tile[] = [];
 
 	private entryBox: Konva.Rect;
 	private inventory: Konva.Rect;
 
 	private entryEquationText: Konva.Text;
+
+	//entry submission box
+	private submitText: Konva.Text;
+	private submitRect: Konva.Rect;
+
+	//health pngs
+	private hearts?: Konva.Image[] = [];
 
 	//boss png
 	private bossImageNode?: Konva.Image;
@@ -26,6 +33,8 @@ export class BossGameScreenView implements View {
 
 	private onTileEntry?: (tile: Tile) => void;
 	private onTileRemoval?: (tile: Tile) => void;
+
+	private onSubmitPress?: (rect: Konva.Rect) => void;
 
 	private equationPulseAnim?: Konva.Animation;
 	private bossNumPulseAnim?: Konva.Animation;
@@ -73,7 +82,7 @@ export class BossGameScreenView implements View {
 		this.timerText = new Konva.Text({
 			x: STAGE_WIDTH - 150,
 			y: 20,
-			text: "Time: 60",
+			text: "Time: 30",
 			fontSize: 32,
 			fontFamily: "Arial",
 			fill: "red",
@@ -123,18 +132,6 @@ export class BossGameScreenView implements View {
 		});
 		this.group.add(this.entryBox);
 
-		// var highlightRect = new Konva.Rect({
-		// 	x: 0, // left edge
-		// 	y: STAGE_HEIGHT / 2 + 50, // start halfway down
-		// 	width: this.entryBox.width(), // Match the width of the text
-		// 	height: this.entryBox.height(), // Match the height of the text
-		// 	fill: 'white', // Choose your highlight color
-		// 	opacity: 1, // Adjust transparency
-		// 	listening: false // Make sure it doesn't interfere with text clicks
-		// });
-		// this.group.add(highlightRect);
-		// highlightRect.moveToTop();
-
 		//small text box that shows the inputted equation
 		this.entryEquationText = new Konva.Text({
 			x: STAGE_WIDTH / 2 - 50,
@@ -142,12 +139,29 @@ export class BossGameScreenView implements View {
 			width: this.entryBox.width() - 20,
 			align: "left",
 			text: "Current: ",
-			fontSize: 22,
+			fontSize: 50,
 			fontFamily: "Impact",
 			fill: "white",
 		});
 		this.group.add(this.entryEquationText);
 
+		// submission 
+		this.submitRect = new Konva.Rect({
+			x: STAGE_WIDTH / 2 - 300,
+			y: this.entryBox.y() - 60,
+			width: 200,
+			height: 50,
+			fill: "#c1c1c1ff",
+			stroke: "black",
+			strokeWidth: 3,
+			cornerRadius: 1
+		})
+		this.group.add(this.submitRect);
+
+		this.submitRect.on('click', () => {
+			console.log("submission presssed");
+			if (this.onSubmitPress) this.onSubmitPress(this.submitRect);
+		});
 
 		// Label for Entry Box
 		const entryLabel = new Konva.Text({
@@ -162,7 +176,7 @@ export class BossGameScreenView implements View {
 		});
 		this.group.add(entryLabel);
 
-		// ===== Inventory (bottom-right quadrant) =====
+		// Inventory (bottom-right quadrant)
 		this.inventory = new Konva.Rect({
 			x: STAGE_WIDTH / 2, // right half
 			y: STAGE_HEIGHT / 2 + 50, // bottom half
@@ -187,6 +201,8 @@ export class BossGameScreenView implements View {
 			fill: "black",
 		});
 		this.group.add(inventoryLabel);
+
+
 
 	}
 
@@ -214,6 +230,10 @@ export class BossGameScreenView implements View {
 
 	setOnTileRemoval(callback: (tile: Tile) => void): void {
 		this.onTileRemoval = callback;
+	}
+
+	setOnSubmitPress(callback: (rect: Konva.Rect) => void): void {
+		this.onSubmitPress = callback;
 	}
 
 	//update the score
@@ -253,6 +273,7 @@ export class BossGameScreenView implements View {
 	}
 
 	startEquationPulsate(): void {
+		//console.log("starting equation pulsate");
 		if (this.equationPulseAnim) return; // already pulsing
 
 		const text = this.entryEquationText;
@@ -268,6 +289,16 @@ export class BossGameScreenView implements View {
 		}, text.getLayer());
 
 		this.equationPulseAnim.start();
+	}
+
+	stopEquationPulsate(): void {
+		if (this.equationPulseAnim) {
+			this.equationPulseAnim.stop();
+			this.equationPulseAnim = undefined;
+			// optional: reset the color
+			this.entryEquationText.fill("white");
+			this.entryEquationText.getLayer()?.draw();
+		}
 	}
 
 	startBossNumPulsate(): void {
@@ -287,15 +318,7 @@ export class BossGameScreenView implements View {
 		this.bossNumPulseAnim.start();
 	}
 
-	stopEquationPulsate(): void {
-		if (this.equationPulseAnim) {
-			this.equationPulseAnim.stop();
-			this.equationPulseAnim = undefined;
-			// optional: reset the color
-			this.entryEquationText.fill("white");
-			this.entryEquationText.getLayer()?.draw();
-		}
-	}
+
 
 	stopBossNumPulsate(): void {
 		if (this.bossNumPulseAnim) {
@@ -326,6 +349,32 @@ export class BossGameScreenView implements View {
 				this.group.getLayer()?.draw();
 			}
 		}, interval);
+
+		setTimeout(() => this.startEquationPulsate(), 1000);
+	}
+
+	flashEquationRed(duration: number = 1000, flashes: number = 3): void{
+		if (!this.entryEquationText) return;
+		this.stopEquationPulsate();
+
+		const text = this.entryEquationText;
+		const originalColor = text.fill();
+		const interval = duration / (flashes * 2);
+		let count = 0;
+
+		const flashInterval = setInterval(() => {
+			text.fill(count % 2 === 0 ? 'red' : originalColor);
+			this.group.getLayer()?.draw();
+
+			count++;
+			if (count >= flashes * 2) {
+				clearInterval(flashInterval);
+				text.fill(originalColor);
+				this.group.getLayer()?.draw();
+			}
+		}, interval);
+
+		setTimeout(() => this.startEquationPulsate(), 1000);
 	}
 
 	updateBossNum(newnum: string): void {
@@ -361,6 +410,40 @@ export class BossGameScreenView implements View {
 		};
 		img.src = path;
 	}
+
+	updateHealth(numHearts: number): void {
+		const HEART_PATH = "src/assets/heart.png";
+
+		const img = new Image();
+		img.onload = () => {
+			// Remove old hearts
+			this.hearts.forEach(h => h.destroy());
+			this.hearts = [];
+
+			const heartSize = 40;
+			const spacing = 10;
+			const startX = 20;
+			const startY = 70;
+
+			for (let i = 0; i < numHearts; i++) {
+				const heartNode = new Konva.Image({
+					x: startX + i * (heartSize + spacing),
+					y: startY,
+					image: img,
+					width: heartSize,
+					height: heartSize,
+				});
+				this.group.add(heartNode);
+				this.hearts.push(heartNode);
+			}
+
+			this.group.getLayer()?.draw();
+		};
+
+		img.onerror = () => console.error("Failed to load heart image:", HEART_PATH);
+		img.src = HEART_PATH;
+	}
+
 
 	updatePhaseTiles(newParts: string[]): void {
 		// Remove old tiles from the stage

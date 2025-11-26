@@ -3,9 +3,10 @@ import type { ScreenSwitcher } from "../../types.ts";
 import { BossGameScreenModel } from "./BossGameScreenModel.ts";
 import { BossGameScreenView } from "./BossGameScreenView.ts";
 import { BossEnemyModel } from "../../models/BossEnemyModel.ts";
-import { GAME_DURATION } from "../../constants.ts";
 import type { Tile } from "./Tile.ts";
 import { evaluate } from "../../utils/equationSolver.ts";
+import { GlobalPlayer } from "../../GlobalPlayer.ts";
+import Konva from "konva";
 
 /**
  * BaiscGameScreenController - Coordinates game logic between Model and View
@@ -35,12 +36,17 @@ export class BossGameScreenController extends ScreenController {
 			this.removeTile(tile)
 		});
 
+		this.view.setOnSubmitPress((_: Konva.Rect) => {
+			this.checkSubmit();
+		});
+
 		this.boss = new BossEnemyModel([
-			{ targetNumber: 12, tiles: ["3", "+", "9"], imagePath: "https://p7.hiclipart.com/preview/79/102/357/pac-man-world-3-ghosts-clip-art-pac-man-ghost-png-transparent-image-thumbnail.jpg" },
+			{ targetNumber: 12, tiles: ["30", "+", "9", "-", "9", '-'], imagePath: "https://p7.hiclipart.com/preview/79/102/357/pac-man-world-3-ghosts-clip-art-pac-man-ghost-png-transparent-image-thumbnail.jpg" },
 			{ targetNumber: 8, tiles: ["4", "x", "2"], imagePath: "https://p7.hiclipart.com/preview/79/102/357/pac-man-world-3-ghosts-clip-art-pac-man-ghost-png-transparent-image-thumbnail.jpg" },
 			{ targetNumber: 5, tiles: ["7", "-", "2"], imagePath: "https://p7.hiclipart.com/preview/79/102/357/pac-man-world-3-ghosts-clip-art-pac-man-ghost-png-transparent-image-thumbnail.jpg" },
 			{ targetNumber: 20, tiles: ["4", "x", "5"], imagePath: "https://p7.hiclipart.com/preview/79/102/357/pac-man-world-3-ghosts-clip-art-pac-man-ghost-png-transparent-image-thumbnail.jpg" }
 		]);
+
 
 		// Pause functionality
 		this.view.setOnPauseClick(() => {
@@ -61,21 +67,12 @@ export class BossGameScreenController extends ScreenController {
 	 */
 	startGame(): void {
 		// Reset model state
-		this.model.reset();
+		this.model.resetTimer();
 		this.boss.reset();
-
-		// Update view
-		// this.view.updateScore(this.model.getScore());
-		// this.view.updateTimer(GAME_DURATION);
-		// this.view.show();
-
-		// console.log(this.model.getNums())
-		// this.view.updateBossNum(this.model.getNums().toString());
-
-		// this.startTimer();
 
 		this.loadPhaseIntoView();
 		this.view.show();
+		this.view.updateHealth(GlobalPlayer.get_health());
 		this.startTimer();
 	}
 
@@ -92,7 +89,9 @@ export class BossGameScreenController extends ScreenController {
 		this.tileSet.add(tile);
 		const eq = this.makeEquation();
 		this.view.updateEquationText(eq);
+	}
 
+	checkSubmit(): void {
 		if (this.checkEQ()) {
 			console.log("EQUATION COMPLETE");
 			this.view.flashEquationGreen();
@@ -103,10 +102,18 @@ export class BossGameScreenController extends ScreenController {
 				this.boss.nextPhase();
 				this.tileSet.clear(); // Clear current tile selections
 				this.loadPhaseIntoView();
+				this.model.resetTimer();
 			} else {
 				// End game if final phase completed
 				this.endGame();
 			}
+		} else {
+			console.log("equation failed");
+			this.view.flashEquationRed();
+			this.model.subtractScore(7);
+			GlobalPlayer.take_damage(1);
+			this.view.updateScore(this.model.getScore());
+			this.view.updateHealth(GlobalPlayer.get_health());
 		}
 	}
 
@@ -114,21 +121,6 @@ export class BossGameScreenController extends ScreenController {
 		this.tileSet.delete(tile);
 		const eq = this.makeEquation();
 		this.view.updateEquationText(eq);
-
-		if (this.checkEQ()) {
-			console.log("EQUATION COMPLETE");
-			this.view.flashEquationGreen();
-
-			// Advance to next phase
-			if (!this.boss.isFinalPhase()) {
-				this.boss.nextPhase();
-				this.tileSet.clear(); // Clear current tile selections
-				this.loadPhaseIntoView();
-			} else {
-				// End game if final phase completed
-				this.endGame();
-			}
-		}
 	}
 
 
@@ -141,7 +133,7 @@ export class BossGameScreenController extends ScreenController {
 			this.view.updateTimer(timeRemaining);
 
 			if (timeRemaining <= 0) {
-				this.endGame();
+				this.endPhase();
 			}
 		}, 1000);
 	}
@@ -178,12 +170,28 @@ export class BossGameScreenController extends ScreenController {
 	}
 	
 	private stopTimer(): void {
-		// TODO: Task 3 - Stop the timer using clearInterval
-
 		if (this.gameTimer != null) {
 			clearInterval(this.gameTimer);
 			this.gameTimer = null;
 		}
+
+	}
+
+	private endPhase(): void {
+		//The user failed to complete the phase, just keep it as is
+		this.loadPhaseIntoView();
+		this.model.subtractScore(5)
+		GlobalPlayer.take_damage(1);
+		this.view.updateScore(this.model.getScore());
+		this.view.updateHealth(GlobalPlayer.get_health());
+
+		// Clear any tiles user placed (otherwise old equation persists)
+		this.tileSet.clear();
+		this.view.updateEquationText("");
+
+		// Load the **same boss phase**, but reset timer first
+		this.model.resetTimer(); // you MUST implement this if not already
+		this.loadPhaseIntoView();
 
 	}
 
@@ -214,6 +222,7 @@ export class BossGameScreenController extends ScreenController {
 
 	private checkEQ(): boolean {
 		// check if the equation made by makeEquation() equals the boss num
+		//return true if it does equal boss num
 
 		const val: number = evaluate(this.makeEquation());
 

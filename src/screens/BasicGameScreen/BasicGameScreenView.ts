@@ -1,559 +1,398 @@
 import Konva from "konva";
 import type { View } from "../../types.ts";
 import { STAGE_WIDTH, STAGE_HEIGHT } from "../../constants.ts";
-import { generateEquation } from "../../utils/generateEquation.ts";
-import type { KonvaNodeEvent } from "konva/lib/types";
-import { Stage } from "konva/lib/Stage";
 import { BossGameScreenView } from "../BossGameScreen/BossGameScreenView.ts";
-import { evaluate } from "../../utils/equationSolver.ts";
+import type { BasicGameScreenController } from "./BasicGameScreenController.ts";
 
 let bossScreen: BossGameScreenView | null = null;
 
-/**
- * GameScreenView - Renders the game UI using Konva
- */
-
-let equationMode: "any" | "addition" | "subtraction" | "multiplication" | "division" = "any";
-
-export let correctAnswers = 0;
-export const MAX_LEVELS = 20;
-
-
-const questions = generateQuestionSet();
-
-function generateQuestionSet() {
-	const questions = [];
-
-	for (let i = 0; i < 5; i++) {
-		const target = Math.floor(Math.random() * 30);
-		const eqs = generateEquation(target, 3, 5);
-		if (eqs.length === 0) {
-			i--;
-			continue;
-		}
-
-		const eq = eqs[Math.floor(Math.random() * eqs.length)];
-		const answer = evaluate(eq).toString();
-
-		const wrong: string[] = [];
-		while (wrong.length < 3) {
-			const fake = generateFakeOption();
-			if (fake !== answer && !wrong.includes(fake)) wrong.push(fake);
-		}
-
-		const options = [eq, ...wrong].sort(() => Math.random() - 0.5);
-
-		questions.push({
-			equation: eq,
-			answer,
-			options
-		});
-	}
-
-	return questions;
-}
-
-
-function generateFakeOption(): string {
-	const a = Math.floor(Math.random() * 10);
-	const b = Math.floor(Math.random() * 10);
-	let ops: string[] = [];
-	switch (equationMode) {
-		case "addition":
-			ops = ["+"];
-			break;
-		case "subtraction":
-			ops = ["-"];
-			break;
-		case "multiplication":
-			ops = ["*"];
-			break;
-		case "division":
-			ops = ["/"];
-			break;
-		default:
-			ops = ["+", "-", "*", "/"];
-	}
-	
-	const op = ops[Math.floor(Math.random() * ops.length)];
-	return `${a}${op}${b}`;
-}
-
-let currentQuestionIndex = 0;
-let health = 3;
 
 export class BasicGameScreenView implements View {
-	private group: Konva.Group;
-	private questionText: Konva.Text;
-	private levelText: Konva.Text;
-	private choiceButtons: Konva.Group[] = [];
-	private monster?: Konva.Image;
-	// Pause game functionality
-	private pauseOverlay?: Konva.Rect;
-	private pauseMenuCloseBtn?: Konva.Text;
-	private onPauseClick?: () => void;
-	setOnPause(callback: () => void): void {
-		this.onPauseClick = callback;
-	}
-	
-    constructor() {
-		this.group = new Konva.Group({ visible: false });
-
-
-		const bg = new Konva.Rect({
-			x:0,
-			y:0,
-			width: STAGE_WIDTH,
-			height: STAGE_HEIGHT,
-			fill: "#f0f0f0",
-		});
-		this.group.add(bg);
-
-		Konva.Image.fromURL('src/assets/monster.png', (monsterNode) => {
-			this.monster = monsterNode;
-			monsterNode.setAttrs({
-				x: STAGE_WIDTH / 2.5,
-				y: STAGE_HEIGHT * 0.05,
-				scaleX: 0.5,
-				scaleY: 0.5,
-				cornerRadius: 20
-			});
-			this.group.add(monsterNode)
-			this.group.getLayer()?.draw();
-		});
-
-		for (let i = 0; i < 3; i++){
-			Konva.Image.fromURL('src/assets/heart.png', (heart) => {
-				heart.setAttrs({
-					x: 20 + i * 40,
-					y: 20,
-					scaleX: 0.15,
-					scaleY: 0.15,
-				});
-				this.group.add(heart);
-				this.hearts.push(heart);
-				this.group.getLayer()?.draw();
-			})
-		}
-
-		const helpGroup = new Konva.Group({
-			x: STAGE_WIDTH - 70,
-			y: 20,
-			cursor: "pointer",
-		});
-
-		const helpBox = new Konva.Rect({
-			width: 50,
-			height: 50,
-			fill: "lightblue",
-			stroke: "blue",
-			strokeWidth: 2,
-			cornerRadius: 1,
-			listening: true,
-		});
-
-		const helpText = new Konva.Text({
-			text: "?",
-			fontSize: 36,
-			fontFamily: "Calibri",
-			fill: "blue",
-			width: 50,
-			height: 50,
-			align: "center",
-			offsetY: -5,
-			listening: false,
-		});
-
-		helpGroup.on("mouseover", () => {
-			helpBox.fill("darkblue")
-			this.group.getLayer()?.batchDraw();
-		});
-
-		helpGroup.on("mouseout", () => {
-			helpBox.fill("lightblue")
-			this.group.getLayer()?.batchDraw();
-		});
-
-		helpGroup.on("click", () => {
-			this.showHelpPopup();
-		});
-
-		helpGroup.add(helpBox);
-		helpGroup.add(helpText);
-		this.group.add(helpGroup);
-
-		this.levelText = new Konva.Text({
-			x: STAGE_WIDTH - 180,
-			y: STAGE_HEIGHT - 50,
-			text: `Progress: ${correctAnswers}/${MAX_LEVELS}`,
-			fontSize: 28,
-			fontFamily: "Calibri",
-			fill: "black",
-		});
-		this.group.add(this.levelText);
-
-		this.questionText = new Konva.Text({
-			x: 0,
-			y: STAGE_WIDTH * 0.15,
-			width: STAGE_WIDTH,
-			text: "",
-			fontSize: 36,
-			fontFamily: "Calibri",
-			fill: "black",
-			align: "center",
-		});
-
-		this.group.add(this.questionText);
-
-		this.loadQuestion(currentQuestionIndex);
-
-		// Pause Button
-	const pauseButton = new Konva.Circle({
- 	   x: STAGE_WIDTH - 70,
-    	y: 100,
-    	radius: 30,
-    	fill: "#F7C500",
-    	stroke: "black",
-    	strokeWidth: 2,
-    	cursor: "pointer",
-	});
-
-	pauseButton.name("pauseButton");
-
-	pauseButton.on("mouseover", () => {
-    	pauseButton.fill("#D1A700");
-    	this.group.getLayer()?.draw();
-	});
-
-	pauseButton.on("mouseout", () => {
-    	pauseButton.fill("#F7C500");
-    	this.group.getLayer()?.draw();
-	});
-
-	pauseButton.on("click", () => {
-		console.log("Pause button clicked");
-		pauseButton.visible(false);
-		console.log("Pause button hidden");
-		this.showPauseOverlay();
-		console.log("Overlay shown");
-    	if (this.onPauseClick) {
-			console.log("Calling onPauseClick callback");
-			this.onPauseClick();
-		}
-	});
-
-	this.group.add(pauseButton);
+    private group: Konva.Group;
+    private enemyHealthText!: Konva.Text;
+    private levelText!: Konva.Text;
+    private choiceButtons: Konva.Group[] = [];
+    private monster?: Konva.Image;
+    private hearts: Konva.Image[] = [];
+    private controller: BasicGameScreenController;
+    private currentSelectedRect?: Konva.Rect;
+    private scoreText?: Konva.Text;
+    private timerText?: Konva.Text;
+    
+    constructor(controller: BasicGameScreenController) {
+        this.controller = controller;
+        this.group = new Konva.Group({ visible: false });
+        this.initializeUI();
     }
 
-	//Pause Menu Overlay
-	showPauseOverlay() {
+    private initializeUI(): void {
+        const maxHealth = this.controller.getMaxHealth();
+        this.hearts = new Array(maxHealth);
+        const bg = new Konva.Rect({
+            x: 0,
+            y: 0,
+            width: STAGE_WIDTH,
+            height: STAGE_HEIGHT,
+            fill: "#f0f0f0",
+        });
+        this.group.add(bg);
 
-		if (this.pauseOverlay) return; // already shown
+        Konva.Image.fromURL('src/assets/monster.png', (monsterNode) => {
+            this.monster = monsterNode;
+            monsterNode.setAttrs({
+                x: STAGE_WIDTH / 2.5,
+                y: -10,
+                scaleX: 0.5,
+                scaleY: 0.5,
+                cornerRadius: 20,
+				image: monsterNode.image()
+            });
+            this.group.add(monsterNode);
+            this.group.getLayer()?.draw();
+        });
 
-		this.pauseOverlay = new Konva.Rect({ //overlay background
-			x: 0,
-			y: 0,
-			width: STAGE_WIDTH,
-			height: STAGE_HEIGHT,
-			fill: "black",
-			opacity: 0.4,
-			listening: true,
-		});
+        for (let i = 0; i < maxHealth; i++) {
+            Konva.Image.fromURL('src/assets/heart.png', (heart) => {
+                heart.setAttrs({
+                    x: 20 + i * 40,
+                    y: 20,
+                    scaleX: 0.15,
+                    scaleY: 0.15,
+					image: heart.image()
+                });
+                this.group.add(heart);
+                this.hearts[i] = heart;
+                this.group.getLayer()?.draw();
+            });
+        }
 
-		const pauseMenuCloseBtn = new Konva.Text({ // close button 
-			x: STAGE_WIDTH - 60,
-			y: 100,
-			text: "X",
-			fontSize: 40,
-			fontFamily: "Calibri",
-			fill: "red",
-			cursor: "pointer",
-		});
+        this.createHelpButton();
 
-		this.pauseMenuCloseBtn = pauseMenuCloseBtn;
+        this.levelText = new Konva.Text({
+            x: STAGE_WIDTH - 180,
+            y: STAGE_HEIGHT - 50,
+            text: `Progress: ${this.controller.getCorrectAnswers()}/${this.controller.getMaxLevels()}`,
+            fontSize: 28,
+            fontFamily: "Calibri",
+            fill: "black",
+        });
+        this.group.add(this.levelText);
 
-		pauseMenuCloseBtn.on("click", () => {
-			console.log("Close button clicked");
-			this.hidePauseOverlay();
-			console.log("Overlay hidden");
-			const pauseButton = this.group.findOne(".pauseButton");
-			if (pauseButton) {
-				pauseButton.visible(true);
-				console.log("Pause button shown");
-			}
-			if (this.onPauseClick) {
-				console.log("Calling onPauseClick callback");
-				this.onPauseClick();
-			}
-		});
+        this.enemyHealthText = new Konva.Text({
+            x: STAGE_WIDTH / 2,
+            y: 0,
+            text: "",
+            fontSize: 36,
+            fontFamily: "Calibri",
+            fill: "black",
+        });
+        this.group.add(this.enemyHealthText);
 
-		
-		this.group.add(this.pauseOverlay);
-		this.group.add(this.pauseMenuCloseBtn);
-		this.pauseOverlay.moveToTop();
-		pauseMenuCloseBtn.moveToTop();
-		this.group.getLayer()?.batchDraw();
-	}
+        this.scoreText = new Konva.Text({
+            x: 20,
+            y: 100,
+            text: "Score: ",
+            fontSize: 36,
+            fontFamily: "Calibri",
+            fill: "black"
+        });
+        this.group.add(this.scoreText);
 
-	hidePauseOverlay() {
-		this.pauseOverlay?.destroy();
-		this.pauseMenuCloseBtn?.destroy();
-		this.pauseOverlay = undefined;
-		this.pauseMenuCloseBtn = undefined;
-		this.group.getLayer()?.draw();
-	}
+        this.timerText = new Konva.Text({
+            x: 20,
+            y: 150,
+            text: "Time: ",
+            fontSize: 36,
+            fontFamily: "Calibri",
+            fill: "black"
+        });
+        this.group.add(this.timerText);
+    }
 
+    private createHelpButton(): void {
+        const helpGroup = new Konva.Group({
+            x: STAGE_WIDTH - 70,
+            y: 20,
+            cursor: "pointer",
+        });
 
-	showHelpPopup() {
-		const overlay = new Konva.Rect({
-			x: 0,
-			y: 0,
-			width: STAGE_WIDTH,
-			height: STAGE_HEIGHT,
-			fill: "black",
-			opacity: 0.6,
-		});
-	
-		const popup = new Konva.Group({
-			x: STAGE_WIDTH / 2 - 200,
-			y: STAGE_HEIGHT / 2 - 150,
-		});
-	
-		const box = new Konva.Rect({
-			width: 400,
-			height: 300,
-			fill: "white",
-			cornerRadius: 10,
-			shadowColor: "black",
-			shadowBlur: 10,
-			shadowOpacity: 0.5,
-		});
-	
-		const text = new Konva.Text({
-			text: "How to play:\n\n1. Each monster has a number appear near them \n2. Select the answer with your mouse that has the correct equation to match.\n3. Be Careful! If you select the wrong answer, you’ll lose a life. Three strikes and you’re out...\n4. Keep defeating monsters to climb the tower.",
-			width: 380,
-			padding: 10,
-			fontSize: 20,
-			fontFamily: "Calibri",
-			fill: "black",
-			align: "left",
-		});
-	
-		const closeBtn = new Konva.Text({
-			x: 360,
-			y: 10,
-			text: "X",
-			fontSize: 24,
-			fontFamily: "Calibri",
-			fill: "red",
-			cursor: "pointer",
-		});
-	
-		closeBtn.on("click", () => {
-			popup.destroy();
-			overlay.destroy();
-			this.group.getLayer()?.draw();
-		});
-	
-		popup.add(box);
-		popup.add(text);
-		popup.add(closeBtn);
-	
-		this.group.add(overlay);
-		this.group.add(popup);
+        const helpBox = new Konva.Rect({
+            x: 0,
+            y: 0,
+            width: 50,
+            height: 50,
+            fill: "lightblue",
+            stroke: "blue",
+            strokeWidth: 2,
+            cornerRadius: 5,
+        });
 
-		overlay.moveToTop();
-		popup.moveToTop();
-		this.group.getLayer()?.draw();
-	}
-	
+        const helpText = new Konva.Text({
+            x: 0,
+            y: 0,
+            text: "?",
+            fontSize: 36,
+            fontFamily: "Calibri",
+            fill: "blue",
+            width: 50,
+            height: 50,
+            align: "center",
+            verticalAlign: "middle",
+            listening: false,
+        });
 
-	private hearts: Konva.Image[] = [];
-	updateHealth() {
-		if (health <= 0) return;
+        helpGroup.on("mouseover", () => {
+            helpBox.fill("darkblue");
+            this.group.getLayer()?.batchDraw();
+        });
 
-		health--;
+        helpGroup.on("mouseout", () => {
+            helpBox.fill("lightblue");
+            this.group.getLayer()?.batchDraw();
+        });
 
-		const heart = this.hearts[health];
-		heart.visible(false);
-		this.group.getLayer()?.draw();
+        helpGroup.on("click", () => {
+            this.showHelpPopup();
+        });
 
-		if (health === 0){
-			this.showGameOver();
-		}
-	}
+        helpGroup.add(helpBox);
+        helpGroup.add(helpText);
+        this.group.add(helpGroup);
+    }
 
-	updateLevelText() {
-		this.levelText.text(`Progress: ${correctAnswers}/${MAX_LEVELS}`);
-		this.group.getLayer()?.draw();
-	}
+    showHelpPopup(): void {
+        const overlay = new Konva.Rect({
+            x: 0,
+            y: 0,
+            width: STAGE_WIDTH,
+            height: STAGE_HEIGHT,
+            fill: "black",
+            opacity: 0.6,
+        });
 
-	showGameOver(){
-		const text = new Konva.Text({
-			x: 0,
-			y: STAGE_HEIGHT / 2 - 50,
-			width: STAGE_WIDTH,
-			align: "center",
-			text: "GAME OVER",
-			fontSize: 60,
-			fontFamily: "Calibri",
-			fill: "red"
-		});
-		this.group.add(text);
-		this.group.getLayer()?.draw();
-		this.choiceButtons.forEach(btn => btn.off("click"));
-	}
+        const popup = new Konva.Group({
+            x: STAGE_WIDTH / 2 - 200,
+            y: STAGE_HEIGHT / 2 - 150,
+        });
 
-	loadQuestion(index: number){
-		const question = questions[index];
-		this.updateEquationText(`${question.answer}`, 20, 20);
+        const box = new Konva.Rect({
+            width: 400,
+            height: 300,
+            fill: "white",
+            cornerRadius: 10,
+            shadowColor: "black",
+            shadowBlur: 10,
+            shadowOpacity: 0.5,
+        });
 
-		this.choiceButtons.forEach(btn => btn.destroy());
-		this.choiceButtons = [];
+        const text = new Konva.Text({
+            text: "How to play:\n\n1. Each monster has a number (their health) displayed \n2. Select the equation that equals the monster's health\n3. Be Careful! If you select the wrong answer, you'll lose a life. Three strikes and you're out...\n4. Keep defeating monsters to climb the tower.",
+            width: 380,
+            padding: 10,
+            fontSize: 20,
+            fontFamily: "Calibri",
+            fill: "black",
+            align: "left",
+        });
 
-		const buttonWidth = STAGE_WIDTH * 0.4;
-		const buttonHeight = 60;
-		const startY = STAGE_HEIGHT * 0.35;
-		const spacing = 20;
+        const closeBtn = new Konva.Text({
+            x: 360,
+            y: 10,
+            text: "X",
+            fontSize: 24,
+            fontFamily: "Calibri",
+            fill: "red",
+            cursor: "pointer",
+        });
 
-		question.options.forEach((choice, i) => {
-			const buttonGroup = new Konva.Group({
-				x: STAGE_WIDTH / 2 - buttonWidth / 2,
-				y: startY + i * (buttonHeight + spacing),
-			});
+        closeBtn.on("click", () => {
+            popup.destroy();
+            overlay.destroy();
+            this.group.getLayer()?.draw();
+        });
 
-			const rect = new Konva.Rect({
-				width: buttonWidth,
-				height: buttonHeight,
-				fill: '#ddd',
-				stroke: '#555',
-				strokeWidth: 4,
-				cornerRadius: 10,
-				shadowColor: "black",
-				shadowBlur: 5,
-				shadowOpacity: 0.2,
-			});
-			
-			const text = new Konva.Text({
-				width: buttonWidth,
-				height: buttonHeight,
-				text: choice,
-				fontSize: 24,
-				fontFamily: "Calibri",
-				fill: "black",
-				align: "center",
-				verticalAlign: "middle",
-			});
+        popup.add(box);
+        popup.add(text);
+        popup.add(closeBtn);
 
-			buttonGroup.on("mouseover", () => {
-				rect.fill("#bbb");
-				this.group.getLayer()?.batchDraw();
-			});
-			buttonGroup.on("mouseout", () => {
-				rect.fill("#ddd");	
-				this.group.getLayer()?.batchDraw();
-			});
+        this.group.add(overlay);
+        this.group.add(popup);
 
-			buttonGroup.on("click", () => {
-				this.handleAnswer(choice, rect);
-			});
+        overlay.moveToTop();
+        popup.moveToTop();
+        this.group.getLayer()?.draw();
+    }
 
-			buttonGroup.add(rect);
-			buttonGroup.add(text);
-			this.group.add(buttonGroup);
-			this.choiceButtons.push(buttonGroup);
-		});
+    displayEnemyChallenge(enemyHealth: number, equationOptions: string[]): void {
+        this.enemyHealthText.text(enemyHealth.toString());
+        this.choiceButtons.forEach(btn => btn.destroy());
+        this.choiceButtons = [];
 
-		this.group.getLayer()?.draw();
-	}
+        const buttonWidth = STAGE_WIDTH * 0.4;
+        const buttonHeight = 60;
+        const startY = STAGE_HEIGHT * 0.35;
+        const spacing = 20;
 
-	async handleAnswer(selected: string, rect: Konva.Rect){
-		const question = questions[currentQuestionIndex];
+        equationOptions.forEach((equation, i) => {
+            const buttonGroup = new Konva.Group({
+                x: STAGE_WIDTH / 2 - buttonWidth / 2,
+                y: startY + i * (buttonHeight + spacing),
+            });
 
-		if (selected === question.equation){
-			correctAnswers++;
-			this.updateLevelText();
-			rect.fill("#58b85a");
-			console.log("correct");
-			this.updateMonsterImage('src/assets/monstersln.png')
-			await this.sleep(2000);
-			rect.fill("#ddd");
-			this.updateMonsterImage('src/assets/monster.png')
-			currentQuestionIndex++;
+            const rect = new Konva.Rect({
+                width: buttonWidth,
+                height: buttonHeight,
+                fill: '#ddd',
+                stroke: '#555',
+                strokeWidth: 4,
+                cornerRadius: 10,
+                shadowColor: "black",
+                shadowBlur: 5,
+                shadowOpacity: 0.2,
+            });
 
-			if (correctAnswers >= MAX_LEVELS) {
-				console.log("Switching to boss screen...");
-	
-				this.hide();
-	
-				if (!bossScreen) bossScreen = new BossGameScreenView();
-				bossScreen.show();
-	
-				return;
-			}
+            const text = new Konva.Text({
+                width: buttonWidth,
+                height: buttonHeight,
+                text: equation,
+                fontSize: 24,
+                fontFamily: "Calibri",
+                fill: "black",
+                align: "center",
+                verticalAlign: "middle",
+            });
 
-			if (currentQuestionIndex < questions.length) {
-				this.loadQuestion(currentQuestionIndex);
-			} else {
-				console.log("finished")
-			}
+            buttonGroup.on("mouseover", () => {
+                rect.fill("#bbb");
+                this.group.getLayer()?.batchDraw();
+            });
 
-		} else {
-			rect.fill("#bd2c19")
-			console.log("wrong")
-			this.updateMonsterImage('src/assets/monsteratk.png')
-			this.updateHealth();
-			await this.sleep(2000);
-			this.updateMonsterImage('src/assets/monster.png')
-		}
-	}
-	
-	updateEquationText(text: string, x?: number, y?: number){
-		this.questionText.text(text);
+            buttonGroup.on("mouseout", () => {
+                rect.fill("#ddd");
+                this.group.getLayer()?.batchDraw();
+            });
 
-		if (x !== undefined) this.questionText.x(x);
-		if (y !== undefined) this.questionText.y(y);
+            buttonGroup.on("click", () => {
+                // Notify controller about answer selection
+                this.currentSelectedRect = rect;
+                this.controller.handleAnswer(equation);
+            });
 
-		this.group.getLayer()?.draw();
-	}
+            buttonGroup.add(rect);
+            buttonGroup.add(text);
+            this.group.add(buttonGroup);
+            this.choiceButtons.push(buttonGroup);
+        });
 
-	updateMonsterImage(newUrl: string){
-		Konva.Image.fromURL(newUrl, (newMonster) => {
-			newMonster.position(this.monster!.position());
-			newMonster.scale(this.monster!.scale());
+        this.group.getLayer()?.draw();
+    }
 
-			this.monster?.destroy();
-			this.monster = newMonster;
-			this.group.add(newMonster);
-			this.group.getLayer()?.draw();
-		});
-	}
-	
-	
+    showCorrectFeedback(): void {
+        if (this.currentSelectedRect) {
+            this.currentSelectedRect.fill("#58b85a");
+            this.group.getLayer()?.draw();
+        }
+    }
 
+    showWrongFeedback(): void {
+        if (this.currentSelectedRect) {
+            this.currentSelectedRect.fill("#bd2c19");
+            this.group.getLayer()?.draw();
+        }
+    }
 
-	sleep(ms: number): Promise<void> {
-		return new Promise(resolve => setTimeout(resolve, ms));
-	}
+    updateHealthDisplay(currentHealth: number): void {
+        const maxHealth = this.controller.getMaxHealth();
+        for (let i = 0; i < maxHealth; i++) {
+            this.hearts[i].visible(i < currentHealth);
+        }
+        this.group.getLayer()?.draw();
+    }
 
+    updateProgress(correctAnswers: number, maxLevels: number): void {
+        this.levelText.text(`Progress: ${correctAnswers}/${maxLevels}`);
+        this.group.getLayer()?.draw();
+    }
 
-	show(): void {
-		this.group.visible(true);
-		this.group.getLayer()?.draw();
-	}
+    updateScore(newScore: number): void {
+        this.scoreText.text(`Score: ${newScore}`);
+        this.group.getLayer()?.draw();
+    }
 
-	hide(): void {
-		this.group.visible(false);
-		this.group.getLayer()?.draw();
-	}
+    updateTimer(timeRemaining: number): void {
+        this.timerText?.text(`Time: ${timeRemaining}`);
+        this.group.getLayer()?.draw();
+    }
 
-	getGroup(): Konva.Group {
-		return this.group;
-	}
+    /**
+     * Update monster image
+     */
+    updateMonsterImage(newUrl: string): void {
+        Konva.Image.fromURL(newUrl, (newMonster) => {
+            newMonster.position(this.monster!.position());
+            newMonster.scale(this.monster!.scale());
 
-	getChoiceButtons(){ // gets the choice buttons for enabling/disabling
-		return this.choiceButtons;
-	}
-	
+            this.monster?.destroy();
+            this.monster = newMonster;
+            this.group.add(newMonster);
+            this.group.getLayer()?.draw();
+        });
+    }
+
+    /**
+     * Show game over screen
+     */
+    showGameOver(): void {
+        const text = new Konva.Text({
+            x: 0,
+            y: STAGE_HEIGHT / 2 - 50,
+            width: STAGE_WIDTH,
+            align: "center",
+            text: "GAME OVER",
+            fontSize: 60,
+            fontFamily: "Calibri",
+            fill: "red"
+        });
+        this.group.add(text);
+        this.group.getLayer()?.draw();
+        
+        // Disable all buttons
+        this.choiceButtons.forEach(btn => btn.off("click"));
+    }
+
+    /**
+     * Switch to boss screen
+     */
+    switchToBossScreen(): void {
+        console.log("Switching to boss screen...");
+        this.hide();
+
+        if (!bossScreen) {
+            bossScreen = new BossGameScreenView();
+        }
+        bossScreen.show();
+    }
+
+    /**
+     * Show the view
+     */
+    show(): void {
+        this.group.visible(true);
+        this.group.getLayer()?.draw();
+    }
+
+    /**
+     * Hide the view
+     */
+    hide(): void {
+        this.group.visible(false);
+        this.group.getLayer()?.draw();
+    }
+
+    /**
+     * Get the Konva group
+     */
+    getGroup(): Konva.Group {
+        return this.group;
+    }
 }
-
