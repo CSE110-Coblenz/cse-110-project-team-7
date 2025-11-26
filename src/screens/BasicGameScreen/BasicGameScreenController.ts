@@ -154,4 +154,14 @@ export class BasicGameScreenController extends ScreenController {
         this.view.getChoiceButtons().forEach(btn => btn.listening(true));
     }
     
+    public returnToTowerSelect(): void {
+        this.stopTimer();
+        const quitButton = this.view.getQuitButton();
+        if (quitButton) quitButton.visible(false);
+        this.view.hidePauseOverlay();
+        GlobalPlayer.reset_health();
+        this.model.resetTimer();
+        this.model.reset_level();
+        this.screenSwitcher.switchToScreen({ type: "tower_select" });
+    }
 }

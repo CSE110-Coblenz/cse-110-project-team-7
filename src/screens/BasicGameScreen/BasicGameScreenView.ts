@@ -20,6 +20,7 @@ export class BasicGameScreenView implements View {
     private timerText?: Konva.Text;
     private pauseOverlay?: Konva.Rect;
     private pauseCloseBtn?: Konva.Text;
+    private quitBtn?: Konva.Rect | Konva.Text | Konva.Group;
     
     constructor(controller: BasicGameScreenController) {
         this.controller = controller;
@@ -273,8 +274,31 @@ export class BasicGameScreenView implements View {
             this.controller.togglePaused();
         });
 
+        if (!this.quitBtn) {
+            const quitBtn = new Konva.Rect({
+                x: STAGE_WIDTH / 2 - 75,
+                y: STAGE_HEIGHT / 2 - 25,
+                width: 150,
+                height: 50,
+                fill: "Blue",
+                stroke: "DarkBlue",
+                strokeWidth: 3,
+                cornerRadius: 10,
+                cursor: "pointer",
+            });
+            this.quitBtn = quitBtn;
+            quitBtn.on("click", () => {
+                this.controller.returnToTowerSelect();
+            });
+        }
+        
         this.group.add(this.pauseOverlay);
         this.group.add(this.pauseCloseBtn);
+        if (this.quitBtn){
+            this.group.add(this.quitBtn);
+            this.quitBtn.visible(true);
+            this.quitBtn.moveToTop();
+        } 
         this.group.getLayer()?.draw();
     }
 
@@ -283,15 +307,19 @@ export class BasicGameScreenView implements View {
         this.pauseCloseBtn?.destroy();
         this.pauseOverlay = undefined;
         this.pauseCloseBtn = undefined;
-
         const pauseButton = this.group.findOne(".pauseButton");
         if (pauseButton) pauseButton.visible(true);
-        
+
+        this.quitBtn?.visible(false);           
         this.group.getLayer()?.draw();
     }
 
     getChoiceButtons(): Konva.Group[] {
         return this.choiceButtons;
+    }
+
+    getQuitButton(): Konva.Rect | Konva.Text | Konva.Group | undefined {
+        return this.quitBtn;
     }
 
     displayEnemyChallenge(enemyHealth: number, equationOptions: string[]): void {
