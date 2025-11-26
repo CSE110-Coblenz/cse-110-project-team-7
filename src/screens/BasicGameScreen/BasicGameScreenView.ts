@@ -18,6 +18,8 @@ export class BasicGameScreenView implements View {
     private currentSelectedRect?: Konva.Rect;
     private scoreText?: Konva.Text;
     private timerText?: Konva.Text;
+    private pauseOverlay?: Konva.Rect;
+    private pauseCloseBtn?: Konva.Text;
     
     constructor(controller: BasicGameScreenController) {
         this.controller = controller;
@@ -67,6 +69,25 @@ export class BasicGameScreenView implements View {
         }
 
         this.createHelpButton();
+        const pauseButton = new Konva.Text({
+            x: STAGE_WIDTH - 70,
+            y: 100,
+            text: "II",
+            fontSize: 36,
+            fontFamily: "Calibri",
+            fill: "black",
+            cursor: "pointer",
+        });
+
+        pauseButton.name("pauseButton");
+        
+        pauseButton.on("click", () => {
+            pauseButton.visible(false);
+            this.controller.togglePaused();
+        });
+
+        this.group.add(pauseButton);
+
 
         this.levelText = new Konva.Text({
             x: STAGE_WIDTH - 180,
@@ -221,6 +242,56 @@ export class BasicGameScreenView implements View {
         overlay.moveToTop();
         popup.moveToTop();
         this.group.getLayer()?.draw();
+    }
+
+    showPauseOverlay(): void {
+        if (this.pauseOverlay) return; // Already shown
+
+        const pauseButton = this.group.findOne(".pauseButton");
+        if (pauseButton) pauseButton.visible(false);
+
+        this.pauseOverlay = new Konva.Rect({
+            x: 0,
+            y: 0,
+            width: STAGE_WIDTH,
+            height: STAGE_HEIGHT,
+            fill: "black",
+            opacity: 0.4,
+        });
+
+        this.pauseCloseBtn = new Konva.Text({
+            x: STAGE_WIDTH - 60,
+            y: 90,
+            text: "X",
+            fontSize: 40,
+            fontFamily: "Calibri",
+            fill: "red",
+            cursor: "pointer",
+        });
+
+        this.pauseCloseBtn.on("click", () => {
+            this.controller.togglePaused();
+        });
+
+        this.group.add(this.pauseOverlay);
+        this.group.add(this.pauseCloseBtn);
+        this.group.getLayer()?.draw();
+    }
+
+    hidePauseOverlay(): void {
+        this.pauseOverlay?.destroy();
+        this.pauseCloseBtn?.destroy();
+        this.pauseOverlay = undefined;
+        this.pauseCloseBtn = undefined;
+
+        const pauseButton = this.group.findOne(".pauseButton");
+        if (pauseButton) pauseButton.visible(true);
+        
+        this.group.getLayer()?.draw();
+    }
+
+    getChoiceButtons(): Konva.Group[] {
+        return this.choiceButtons;
     }
 
     displayEnemyChallenge(enemyHealth: number, equationOptions: string[]): void {
