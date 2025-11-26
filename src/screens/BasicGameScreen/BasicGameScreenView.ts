@@ -88,7 +88,9 @@ export class BasicGameScreenView implements View {
 	private levelText: Konva.Text;
 	private choiceButtons: Konva.Group[] = [];
 	private monster?: Konva.Image;
-	// Pause game button functionality
+	// Pause game functionality
+	private pauseOverlay?: Konva.Rect;
+	private pauseMenuCloseBtn?: Konva.Text;
 	private onPauseClick?: () => void;
 	setOnPause(callback: () => void): void {
 		this.onPauseClick = callback;
@@ -216,6 +218,8 @@ export class BasicGameScreenView implements View {
     	cursor: "pointer",
 	});
 
+	pauseButton.name("pauseButton");
+
 	pauseButton.on("mouseover", () => {
     	pauseButton.fill("#D1A700");
     	this.group.getLayer()?.draw();
@@ -227,12 +231,78 @@ export class BasicGameScreenView implements View {
 	});
 
 	pauseButton.on("click", () => {
-    	if (this.onPauseClick) this.onPauseClick();
+		console.log("Pause button clicked");
+		pauseButton.visible(false);
+		console.log("Pause button hidden");
+		this.showPauseOverlay();
+		console.log("Overlay shown");
+    	if (this.onPauseClick) {
+			console.log("Calling onPauseClick callback");
+			this.onPauseClick();
+		}
 	});
 
 	this.group.add(pauseButton);
-
     }
+
+	//Pause Menu Overlay
+	showPauseOverlay() {
+
+		if (this.pauseOverlay) return; // already shown
+
+		this.pauseOverlay = new Konva.Rect({ //overlay background
+			x: 0,
+			y: 0,
+			width: STAGE_WIDTH,
+			height: STAGE_HEIGHT,
+			fill: "black",
+			opacity: 0.4,
+			listening: true,
+		});
+
+		const pauseMenuCloseBtn = new Konva.Text({ // close button 
+			x: STAGE_WIDTH - 60,
+			y: 100,
+			text: "X",
+			fontSize: 40,
+			fontFamily: "Calibri",
+			fill: "red",
+			cursor: "pointer",
+		});
+
+		this.pauseMenuCloseBtn = pauseMenuCloseBtn;
+
+		pauseMenuCloseBtn.on("click", () => {
+			console.log("Close button clicked");
+			this.hidePauseOverlay();
+			console.log("Overlay hidden");
+			const pauseButton = this.group.findOne(".pauseButton");
+			if (pauseButton) {
+				pauseButton.visible(true);
+				console.log("Pause button shown");
+			}
+			if (this.onPauseClick) {
+				console.log("Calling onPauseClick callback");
+				this.onPauseClick();
+			}
+		});
+
+		
+		this.group.add(this.pauseOverlay);
+		this.group.add(this.pauseMenuCloseBtn);
+		this.pauseOverlay.moveToTop();
+		pauseMenuCloseBtn.moveToTop();
+		this.group.getLayer()?.batchDraw();
+	}
+
+	hidePauseOverlay() {
+		this.pauseOverlay?.destroy();
+		this.pauseMenuCloseBtn?.destroy();
+		this.pauseOverlay = undefined;
+		this.pauseMenuCloseBtn = undefined;
+		this.group.getLayer()?.draw();
+	}
+
 
 	showHelpPopup() {
 		const overlay = new Konva.Rect({
@@ -479,6 +549,10 @@ export class BasicGameScreenView implements View {
 
 	getGroup(): Konva.Group {
 		return this.group;
+	}
+
+	getChoiceButtons(){ // gets the choice buttons for enabling/disabling
+		return this.choiceButtons;
 	}
 	
 }
