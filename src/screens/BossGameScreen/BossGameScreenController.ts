@@ -100,6 +100,7 @@ export class BossGameScreenController extends ScreenController {
 				this.model.resetTimer();
 			} else {
 				// End game if final phase completed
+				this.screenSwitcher.switchToScreen({ type: 'tower_select' })
 				this.endGame();
 			}
 		} else {
@@ -194,5 +195,5 @@ export class BossGameScreenController extends ScreenController {
 		return val === this.boss.getCurrentPhase().targetNumber;
 	}
 
-
+	
 }
