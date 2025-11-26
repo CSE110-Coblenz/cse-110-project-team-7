@@ -18,7 +18,7 @@ export class BasicGameScreenModel {
     private timeRemaining = BASE_GAME_DURATION; //refers to time remaining per question
     
     readonly MAX_HEALTH = 3;
-    readonly MAX_LEVELS = 20;
+    readonly MAX_LEVELS = 2;
 
     constructor(level: number = 0, tower: number = 1) {
         this.level = level;
