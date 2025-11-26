@@ -2,6 +2,7 @@ import { BasicEnemy } from '../../models/BasicEnemyModel'
 import { generateEquationOptions } from "../../utils/generateEquation.ts";
 import { evaluate } from "../../utils/equationSolver.ts";
 import { GlobalPlayer } from '../../GlobalPlayer.ts';
+import { BASE_GAME_DURATION, BOSS_PHASE_DURATION } from "../../constants.ts"
 export type EquationMode = "any" | "addition" | "subtraction" | "multiplication" | "division";
 
 export class BasicGameScreenModel {
@@ -13,6 +14,8 @@ export class BasicGameScreenModel {
     private correctAnswers: number = 0;
     private equationMode: EquationMode = "addition";
     private equationOptions: string[] = [];
+
+    private timeRemaining = BASE_GAME_DURATION; //refers to time remaining per question
     
     readonly MAX_HEALTH = 3;
     readonly MAX_LEVELS = 20;
@@ -122,5 +125,17 @@ export class BasicGameScreenModel {
 
     setEquationMode(mode: EquationMode): void {
         this.equationMode = mode;
+    }
+
+    tickTimer(): number {
+        return this.timeRemaining--;
+    }
+
+    getTime(): number {
+        return this.timeRemaining;
+    }
+    
+    resetTimer(): void {
+        this.timeRemaining = BASE_GAME_DURATION;
     }
 }
