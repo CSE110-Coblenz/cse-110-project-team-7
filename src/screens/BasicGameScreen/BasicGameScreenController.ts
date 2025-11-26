@@ -62,9 +62,7 @@ export class BasicGameScreenController extends ScreenController {
                 this.view.updateScore(GlobalPlayer.increase_score(15))
                 return;
             }
-
-            this.model.resetTimer();
-            // Controller spawns new enemy using factory
+            
             this.spawnNewEnemy();
             this.view.updateMonsterImage('src/assets/monster.png');
             this.loadCurrentEnemy();
@@ -121,6 +119,9 @@ export class BasicGameScreenController extends ScreenController {
         return this.model.MAX_LEVELS;
     }
 
+    getTower(): number {
+        return this.model.tower;
+    }
     private sleep(ms: number): Promise<void> {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
