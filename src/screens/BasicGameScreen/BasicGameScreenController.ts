@@ -87,6 +87,24 @@ export class BasicGameScreenController extends ScreenController {
         }
     }
 
+    setTower(tower: number): void {
+        this.model.setTower(tower);
+        this.view.updateProgress(0, this.model.MAX_LEVELS);
+        
+        GlobalPlayer.reset_health();
+        this.view.updateHealthDisplay(GlobalPlayer.get_health());
+        
+        this.spawnNewEnemy();
+        this.loadCurrentEnemy();
+        
+        this.model.resetTimer();
+        this.stopTimer();
+        this.startTimer();
+    }
+
+    getTower(): number {
+        return this.model.tower;
+    }
     getPlayerHealth(): number {
         return this.model.getPlayerHealth();
     }

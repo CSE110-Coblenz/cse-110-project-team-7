@@ -11,9 +11,8 @@ export function generateEquation(target: number, length: number, count: number, 
     function getNumberRange(): [number, number] {
         const hasAddOrMult = operations.includes('+') || operations.includes('*');
         if (hasAddOrMult) {
-            return [1, 9]; // Single digits are fine when we can increase
+            return [1, 99]; 
         }
-        // For subtraction/division only, use larger range
         return [1, 99];
     }
 
@@ -49,7 +48,7 @@ export function generateEquation(target: number, length: number, count: number, 
                     backtrack(updated_str, idx + 1, val + i, i, null);
                 } else if (last_op == '-'){
                     backtrack(updated_str, idx + 1, val - i, -i, null);
-                } else if (last_op == '*'){
+                } else if (last_op == 'x'){
                     backtrack(updated_str, idx + 1, val - prev + (prev * i), prev * i, null);
                 } else if (last_op == '/'){
                     if (prev % i == 0){
@@ -66,7 +65,6 @@ export function generateEquation(target: number, length: number, count: number, 
 }   
 
 export function generateEquationOptions(target: number, equationMode: EquationMode): string[] {
-        // Generate correct equations
         let equationLength = 3;
         let operations: string[];
         if (equationMode == 'addition'){
@@ -74,14 +72,15 @@ export function generateEquationOptions(target: number, equationMode: EquationMo
         } else if (equationMode == 'subtraction'){
             operations = ['-'];
         } else if (equationMode == 'multiplication'){
-            operations = ['*'];
+            operations = ['x'];
         } else if (equationMode == 'division'){
             operations = ['/'];
         } else{
-            operations = ['+', '-', '*', '/'];
+            operations = ['+', '-', 'x', '/'];
         }
         const correctEquations = generateEquation(target, equationLength, 50, operations);
         
+        console.log(correctEquations);
         let guaranteedCorrect = 
             correctEquations.length > 0
             ? correctEquations
@@ -168,13 +167,13 @@ function generateFakeEquation(target: number, length: number, equationMode: Equa
             ops = ["-"];
             break;
         case "multiplication":
-            ops = ["*"];
+            ops = ["x"];
             break;
         case "division":
             ops = ["/"];
             break;
         default:
-            ops = ["+", "-", "*", "/"];
+            ops = ["+", "-", "x", "/"];
     }
     
     for (let i = 0; i < length; i++) {
