@@ -3,9 +3,10 @@ import type { ScreenSwitcher } from "../../types.ts";
 import { BossGameScreenModel } from "./BossGameScreenModel.ts";
 import { BossGameScreenView } from "./BossGameScreenView.ts";
 import { BossEnemyModel } from "../../models/BossEnemyModel.ts";
-import { GAME_DURATION } from "../../constants.ts";
 import type { Tile } from "./Tile.ts";
 import { evaluate } from "../../utils/equationSolver.ts";
+import { GlobalPlayer } from "../../GlobalPlayer.ts";
+import Konva from "konva";
 
 /**
  * BaiscGameScreenController - Coordinates game logic between Model and View
@@ -35,12 +36,17 @@ export class BossGameScreenController extends ScreenController {
 			this.removeTile(tile)
 		});
 
+		this.view.setOnSubmitPress((_: Konva.Rect) => {
+			this.checkSubmit();
+		});
+
 		this.boss = new BossEnemyModel([
 			{ targetNumber: 12, tiles: ["3", "+", "9"], imagePath: "https://p7.hiclipart.com/preview/79/102/357/pac-man-world-3-ghosts-clip-art-pac-man-ghost-png-transparent-image-thumbnail.jpg" },
 			{ targetNumber: 8, tiles: ["4", "x", "2"], imagePath: "https://p7.hiclipart.com/preview/79/102/357/pac-man-world-3-ghosts-clip-art-pac-man-ghost-png-transparent-image-thumbnail.jpg" },
 			{ targetNumber: 5, tiles: ["7", "-", "2"], imagePath: "https://p7.hiclipart.com/preview/79/102/357/pac-man-world-3-ghosts-clip-art-pac-man-ghost-png-transparent-image-thumbnail.jpg" },
 			{ targetNumber: 20, tiles: ["4", "x", "5"], imagePath: "https://p7.hiclipart.com/preview/79/102/357/pac-man-world-3-ghosts-clip-art-pac-man-ghost-png-transparent-image-thumbnail.jpg" }
 		]);
+
 	}
 
 
@@ -71,6 +77,7 @@ export class BossGameScreenController extends ScreenController {
 
 		this.loadPhaseIntoView();
 		this.view.show();
+		this.view.updateHealth(GlobalPlayer.get_health());
 		this.startTimer();
 	}
 
@@ -88,6 +95,24 @@ export class BossGameScreenController extends ScreenController {
 		const eq = this.makeEquation();
 		this.view.updateEquationText(eq);
 
+		// if (this.checkEQ()) {
+		// 	console.log("EQUATION COMPLETE");
+		// 	this.view.flashEquationGreen();
+		// 	this.model.addScore(10);
+		// 	this.view.updateScore(this.model.getScore());
+		// 	// Advance to next phase
+		// 	if (!this.boss.isFinalPhase()) {
+		// 		this.boss.nextPhase();
+		// 		this.tileSet.clear(); // Clear current tile selections
+		// 		this.loadPhaseIntoView();
+		// 	} else {
+		// 		// End game if final phase completed
+		// 		this.endGame();
+		// 	}
+		// }
+	}
+
+	checkSubmit(): void {
 		if (this.checkEQ()) {
 			console.log("EQUATION COMPLETE");
 			this.view.flashEquationGreen();
@@ -102,6 +127,10 @@ export class BossGameScreenController extends ScreenController {
 				// End game if final phase completed
 				this.endGame();
 			}
+		}else{
+			console.log("equation failed");
+			GlobalPlayer.take_damage(1);
+			this.view.updateHealth(GlobalPlayer.get_health());
 		}
 	}
 
@@ -110,20 +139,20 @@ export class BossGameScreenController extends ScreenController {
 		const eq = this.makeEquation();
 		this.view.updateEquationText(eq);
 
-		if (this.checkEQ()) {
-			console.log("EQUATION COMPLETE");
-			this.view.flashEquationGreen();
+		// if (this.checkEQ()) {
+		// 	console.log("EQUATION COMPLETE");
+		// 	this.view.flashEquationGreen();
 
-			// Advance to next phase
-			if (!this.boss.isFinalPhase()) {
-				this.boss.nextPhase();
-				this.tileSet.clear(); // Clear current tile selections
-				this.loadPhaseIntoView();
-			} else {
-				// End game if final phase completed
-				this.endGame();
-			}
-		}
+		// 	// Advance to next phase
+		// 	if (!this.boss.isFinalPhase()) {
+		// 		this.boss.nextPhase();
+		// 		this.tileSet.clear(); // Clear current tile selections
+		// 		this.loadPhaseIntoView();
+		// 	} else {
+		// 		// End game if final phase completed
+		// 		this.endGame();
+		// 	}
+		// }
 	}
 
 
@@ -179,6 +208,7 @@ export class BossGameScreenController extends ScreenController {
 
 	private checkEQ(): boolean {
 		// check if the equation made by makeEquation() equals the boss num
+		//return true if it does equal boss num
 
 		const val: number = evaluate(this.makeEquation());
 

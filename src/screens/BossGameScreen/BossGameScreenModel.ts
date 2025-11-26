@@ -1,9 +1,10 @@
+import { BOSS_PHASE_DURATION } from "../../constants"; 
 /**
  * GameScreenModel - Manages game state
  */
 export class BossGameScreenModel {
     private score = 0;
-    private timeRemaining = 60;
+    private timeRemaining = BOSS_PHASE_DURATION;
 
     constructor() {}
 
@@ -25,7 +26,7 @@ export class BossGameScreenModel {
 
     reset(): void {
         this.score = 0;
-        this.timeRemaining = 120;
+        this.timeRemaining = BOSS_PHASE_DURATION;
     }
 
 
