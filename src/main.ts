@@ -59,7 +59,7 @@ class App implements ScreenSwitcher {
 		this.layer.draw();
 
 		// Start with tower selection screen visible
-		this.switchToScreen({ type: "basic_game" });
+		this.switchToScreen({ type: "boss_game" });
 	}
 
 	/**
@@ -85,7 +85,8 @@ class App implements ScreenSwitcher {
 				this.basicgamecontroller.show();
 				break;
 			case "boss_game":
-				console.log("on boss game screen");
+				let curr_tower = this.basicgamecontroller.getTower();
+				this.bossgamecontroller.tower = curr_tower;
 				this.bossgamecontroller.show();
 				this.bossgamecontroller.startGame();
 				break;

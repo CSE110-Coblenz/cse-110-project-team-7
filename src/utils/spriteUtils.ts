@@ -5,10 +5,7 @@ const normal_sprites = {
     'bat': 'sprite'}
 
 const boss_sprites = {
-    'ogre': 'sprite',
-    'witch': 'sprite',
-    'giant': 'sprite', 
-    'werewolf': 'sprite'}
+    'ghost': "https://p7.hiclipart.com/preview/79/102/357/pac-man-world-3-ghosts-clip-art-pac-man-ghost-png-transparent-image-thumbnail.jpg"}
 
 
 function getRandomKey<T extends object>(dict: T): keyof T {
