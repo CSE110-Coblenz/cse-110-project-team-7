@@ -59,13 +59,11 @@ export class BasicGameScreenController extends ScreenController {
             await this.sleep(2000);
 
             if (this.model.hasReachedMaxLevel()) {
-                this.view.switchToBossScreen();
+                this.screenSwitcher.switchToScreen({type: 'boss_game'})
                 this.view.updateScore(GlobalPlayer.increase_score(15))
                 return;
             }
-
-            this.model.resetTimer();
-            // Controller spawns new enemy using factory
+            
             this.spawnNewEnemy();
             this.view.updateMonsterImage('src/assets/monster.png');
             this.loadCurrentEnemy();
@@ -88,6 +86,24 @@ export class BasicGameScreenController extends ScreenController {
         }
     }
 
+    setTower(tower: number): void {
+        this.model.setTower(tower);
+        this.view.updateProgress(0, this.model.MAX_LEVELS);
+        
+        GlobalPlayer.reset_health();
+        this.view.updateHealthDisplay(GlobalPlayer.get_health());
+        
+        this.spawnNewEnemy();
+        this.loadCurrentEnemy();
+        
+        this.model.resetTimer();
+        this.stopTimer();
+        this.startTimer();
+    }
+
+    getTower(): number {
+        return this.model.tower;
+    }
     getPlayerHealth(): number {
         return this.model.getPlayerHealth();
     }
@@ -104,6 +120,9 @@ export class BasicGameScreenController extends ScreenController {
         return this.model.MAX_LEVELS;
     }
 
+    getTower(): number {
+        return this.model.tower;
+    }
     private sleep(ms: number): Promise<void> {
         return new Promise(resolve => setTimeout(resolve, ms));
     }

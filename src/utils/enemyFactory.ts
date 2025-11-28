@@ -1,6 +1,7 @@
 import { getRandomSprite } from './spriteUtils';
 import { BasicEnemy } from '../models/BasicEnemyModel'
 import { BossEnemyModel, type BossPhase } from '../models/BossEnemyModel'
+import { generateEquation } from './generateEquation';
 import type { EquationMode } from '../screens/BasicGameScreen/BasicGameScreenModel';
 
 const MAX_HEALTH = 30;
@@ -10,30 +11,47 @@ function randomInt(): number {
   return Math.floor(Math.random() * (MAX_HEALTH - MIN_HEALTH + 1)) + MIN_HEALTH;
 }
 
-function generateBossPhase(): BossPhase {
+function generateBossPhase(operations: string[]): BossPhase {
+  let target = randomInt();
+  let equations = generateEquation(target, 5, 50, operations);
+  console.log(equations, target);
   return {
-        targetNumber: randomInt(),
-        tiles: [], 
-        imagePath: `boss_phase_${Math.floor(Math.random() * 3) + 1}.png`
+        targetNumber: target,
+        tiles: equations[Math.floor(Math.random() * equations.length)].split(''), 
+        imagePath: "https://p7.hiclipart.com/preview/79/102/357/pac-man-world-3-ghosts-clip-art-pac-man-ghost-png-transparent-image-thumbnail.jpg"
     };
 }
 
-function generatePhases(count: number = 3): BossPhase[] {
-  return Array.from({ length: count }, () => generateBossPhase());
+function generatePhases(count: number = 3, operations: string[]): BossPhase[] {
+  return Array.from({ length: count }, () => generateBossPhase(operations));
 }
 
-export function spawnEnemy(
-    type: "normal" | "boss" = "normal", 
-    damage: number = 1,
-    equationMode?: EquationMode
-): BasicEnemy | BossEnemyModel {
+function getOperationsFromMode(equationMode: EquationMode): string[] {
+    switch (equationMode) {
+        case "addition":
+            return ["+"];
+        case "subtraction":
+            return ["-"];
+        case "multiplication":
+            return ["x"];
+        case "division":
+            return ["/"];
+        case "any":
+            return ["+", "-", "x", "/"];
+        default:
+            return ["+", "-", "x", "/"];
+    }
+}
+
+export function spawnEnemy( type: "normal" | "boss" = "normal",  damage: number = 1, equationMode: EquationMode): BasicEnemy | BossEnemyModel {
     const spriteData = getRandomSprite(type);
     if (!spriteData) throw new Error("getRandomSprite() returned undefined!");
 
     const [name, sprite] = spriteData;
 
     if (type === "boss") {
-        const phases = generatePhases();
+        const ops = getOperationsFromMode(equationMode);
+        const phases = generatePhases(3, ops);
         return new BossEnemyModel(phases);
     }
 
