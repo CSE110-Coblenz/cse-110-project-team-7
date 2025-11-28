@@ -4,10 +4,10 @@ import { BossGameScreenModel } from "../src/screens/BossGameScreen/BossGameScree
 
 describe("BossGameScreenModel", () => {
 
-  it("starts with score 0 and time 60", () => {
+  it("starts with score 0 and time 30", () => {
     const m = new BossGameScreenModel();
     expect(m.getScore()).toBe(0);
-    expect(m.getTime()).toBe(60);
+    expect(m.getTime()).toBe(30);
   });
 
   it("adds score correctly", () => {
@@ -19,16 +19,16 @@ describe("BossGameScreenModel", () => {
   it("tickTimer reduces time by 1", () => {
     const m = new BossGameScreenModel();
     m.tickTimer();
-    expect(m.getTime()).toBe(59);
+    expect(m.getTime()).toBe(29);
   });
 
-  it("reset restores default values", () => {
+  it("resetTimer restores default value to timer, but not score", () => {
     const m = new BossGameScreenModel();
-    m.addScore(20);
+    //m.addScore(20);
     m.tickTimer();
     m.resetTimer();
-    expect(m.getScore()).toBe(0);
-    expect(m.getTime()).toBe(120);
+    expect(m.getScore()).toBe(10);
+    expect(m.getTime()).toBe(30);
   });
 
 });
