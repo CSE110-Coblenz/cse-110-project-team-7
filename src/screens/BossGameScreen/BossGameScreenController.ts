@@ -87,6 +87,7 @@ export class BossGameScreenController extends ScreenController {
 		this.loadPhaseIntoView();
 		this.view.show();
 		this.view.updateHealth(GlobalPlayer.get_health());
+		this.view.updateScore(GlobalPlayer.get_score());
 		this.startTimer();
 	}
 
