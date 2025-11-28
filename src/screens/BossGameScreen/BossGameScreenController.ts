@@ -132,6 +132,9 @@ export class BossGameScreenController extends ScreenController {
 			GlobalPlayer.take_damage(1);
 			this.view.updateScore(this.model.getScore());
 			this.view.updateHealth(GlobalPlayer.get_health());
+			if(GlobalPlayer.get_health() <= 0){
+				this.handleDeath();
+			}
 		}
 	}
 
@@ -253,4 +256,8 @@ export class BossGameScreenController extends ScreenController {
         
         this.boss = this.spawnBoss();
     }
+
+	handleDeath(): void {
+		this.view.showGameOver();
+	}
 }

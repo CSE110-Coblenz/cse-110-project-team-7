@@ -53,7 +53,7 @@ export class BossGameScreenView implements View {
 			y: 0,
 			width: STAGE_WIDTH,
 			height: STAGE_HEIGHT,
-			fill: "#87CEEB", // Sky blue
+			fill: "#ffffffff", // Sky blue
 		});
 		this.group.add(bg);
 
@@ -86,6 +86,7 @@ export class BossGameScreenView implements View {
 			fontSize: 32,
 			fontFamily: "Arial",
 			fill: "red",
+			fontStyle: 'bold'
 		});
 		this.group.add(this.timerText);
 
@@ -125,7 +126,7 @@ export class BossGameScreenView implements View {
 			y: STAGE_HEIGHT / 2 + 50, // start halfway down
 			width: STAGE_WIDTH / 2,
 			height: STAGE_HEIGHT / 2 - 50,
-			fill: "#aeffaaff",
+			fill: "#555",
 			stroke: "black",
 			strokeWidth: 3,
 			cornerRadius: 10,
@@ -134,33 +135,53 @@ export class BossGameScreenView implements View {
 
 		//small text box that shows the inputted equation
 		this.entryEquationText = new Konva.Text({
-			x: STAGE_WIDTH / 2 - 50,
+			x: STAGE_WIDTH / 2 - 200,
 			y: this.entryBox.y() - 60, // just above the "Entry Box" label
-			width: this.entryBox.width() - 20,
+			width: 700,
 			align: "left",
 			text: "Current: ",
 			fontSize: 50,
 			fontFamily: "Impact",
-			fill: "white",
+			fill: "black",
 		});
 		this.group.add(this.entryEquationText);
 
 		// submission 
 		this.submitRect = new Konva.Rect({
-			x: STAGE_WIDTH / 2 - 300,
-			y: this.entryBox.y() - 60,
+			x: STAGE_WIDTH / 4 - 100,
+			y: STAGE_HEIGHT - 100,
 			width: 200,
 			height: 50,
-			fill: "#c1c1c1ff",
+			fill: "#f0f0f0",
 			stroke: "black",
 			strokeWidth: 3,
 			cornerRadius: 1
 		})
 		this.group.add(this.submitRect);
 
+		this.submitText = new Konva.Text({
+			text: "Submit",
+			x: this.submitRect.x(),
+			y: this.submitRect.y(),
+			width: this.submitRect.width(),
+			height: this.submitRect.height(),
+			align: "center",
+			verticalAlign: "middle",
+			fontSize: 45,
+			listening: false
+		});
+		this.group.add(this.submitText);
+
 		this.submitRect.on('click', () => {
 			console.log("submission presssed");
 			if (this.onSubmitPress) this.onSubmitPress(this.submitRect);
+		});
+
+		this.submitRect.on("mouseover", () => {
+			document.body.style.cursor = "pointer";
+		});
+		this.submitRect.on("mouseout", () => {
+			document.body.style.cursor = "default";
 		});
 
 		// Label for Entry Box
@@ -273,18 +294,26 @@ export class BossGameScreenView implements View {
 	}
 
 	startEquationPulsate(): void {
-		//console.log("starting equation pulsate");
-		if (this.equationPulseAnim) return; // already pulsing
+		if (this.equationPulseAnim) return;
 
 		const text = this.entryEquationText;
 		if (!text) return;
 
 		let t = 0;
+
 		this.equationPulseAnim = new Konva.Animation((frame) => {
+			if (!frame) return;
+
 			t += frame.timeDiff / 500;
-			const r = 255;
-			const g = 255;
-			const b = Math.floor(255 * (0.5 + 0.5 * Math.sin(t)));
+
+			// Multiplier goes 0 → 1 → 0 → ...
+			const mix = 0.5 + 0.5 * Math.sin(t);
+
+			// Black -> Dark Blue (0,0,180)
+			const r = 0;
+			const g = 0;
+			const b = Math.floor(180 * mix);
+
 			text.fill(`rgb(${r},${g},${b})`);
 		}, text.getLayer());
 
@@ -296,7 +325,7 @@ export class BossGameScreenView implements View {
 			this.equationPulseAnim.stop();
 			this.equationPulseAnim = undefined;
 			// optional: reset the color
-			this.entryEquationText.fill("white");
+			this.entryEquationText.fill("black");
 			this.entryEquationText.getLayer()?.draw();
 		}
 	}
@@ -339,7 +368,7 @@ export class BossGameScreenView implements View {
 		let count = 0;
 
 		const flashInterval = setInterval(() => {
-			text.fill(count % 2 === 0 ? 'green' : originalColor);
+			text.fill(count % 2 === 0 ? '#58b85a' : originalColor);
 			this.group.getLayer()?.draw();
 
 			count++;
@@ -353,7 +382,7 @@ export class BossGameScreenView implements View {
 		setTimeout(() => this.startEquationPulsate(), 1000);
 	}
 
-	flashEquationRed(duration: number = 1000, flashes: number = 3): void{
+	flashEquationRed(duration: number = 1000, flashes: number = 3): void {
 		if (!this.entryEquationText) return;
 		this.stopEquationPulsate();
 
@@ -363,7 +392,7 @@ export class BossGameScreenView implements View {
 		let count = 0;
 
 		const flashInterval = setInterval(() => {
-			text.fill(count % 2 === 0 ? 'red' : originalColor);
+			text.fill(count % 2 === 0 ? '#bd2c19' : originalColor);
 			this.group.getLayer()?.draw();
 
 			count++;
@@ -421,7 +450,7 @@ export class BossGameScreenView implements View {
 			this.hearts = [];
 
 			const heartSize = 40;
-			const spacing = 10;
+			const spacing = 0;
 			const startX = 20;
 			const startY = 70;
 
@@ -496,6 +525,23 @@ export class BossGameScreenView implements View {
 			});
 		});
 
+		this.group.getLayer()?.draw();
+	}
+
+	showGameOver(): void {
+		const text = new Konva.Text({
+			x: 0,
+			y: STAGE_HEIGHT / 2 - 50,
+			width: STAGE_WIDTH,
+			align: "center",
+			text: "GAME OVER",
+			fontSize: 150,
+			fontFamily: "Calibri",
+			fontStyle: "bold",
+			fill: "red"
+		});
+		this.group.getLayer()?.listening(false);
+		this.group.add(text);
 		this.group.getLayer()?.draw();
 	}
 
