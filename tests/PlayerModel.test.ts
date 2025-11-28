@@ -3,7 +3,7 @@ import { Player } from "../src/models/PlayerModel"
 describe("PlayerModel Class", () => {
     test("initializes with max health and score 0", () => {
         const p = new Player("Test");
-        expect(p.get_health()).toBe(5);
+        expect(p.get_health()).toBe(3);
         expect(p.get_score()).toBe(0);
         expect(p.name).toBe("Test");
     });
@@ -11,10 +11,10 @@ describe("PlayerModel Class", () => {
     test("reset_health sets health back to MAX_HEALTH", () => {
         const p = new Player();
         p.take_damage(3);
-        expect(p.get_health()).toBe(2);
+        expect(p.get_health()).toBe(0);
 
         p.reset_health();
-        expect(p.get_health()).toBe(5);
+        expect(p.get_health()).toBe(3);
     });
 
     test("is_alive returns true when health > 0", () => {
@@ -28,7 +28,7 @@ describe("PlayerModel Class", () => {
     test("take_damage reduces health correctly", () => {
         const p = new Player();
         p.take_damage(2);
-        expect(p.get_health()).toBe(3);
+        expect(p.get_health()).toBe(1);
     });
 
     test("increase_score adds to score and returns new score", () => {
