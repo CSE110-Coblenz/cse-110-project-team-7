@@ -10,6 +10,7 @@ export class BasicGameScreenController extends ScreenController {
     private model: BasicGameScreenModel;
     private view: BasicGameScreenView;
     private screenSwitcher: ScreenSwitcher;
+    private isPaused = false;
     private gameTimer: number | null = null;
 
     constructor(screenSwitcher: ScreenSwitcher) {
@@ -149,5 +150,37 @@ export class BasicGameScreenController extends ScreenController {
         this.view.updateHealthDisplay(this.model.getPlayerHealth());
         this.view.updateScore(GlobalPlayer.decrease_score(5));
         this.model.resetTimer();
+    }
+
+    togglePaused(): void {
+        this.isPaused = !this.isPaused;
+        if (this.isPaused) {
+            this.pauseGame();
+        } else {
+            this.resumeGame();
+        }
+    }
+     
+    private pauseGame(): void {
+        this.stopTimer();
+        this.view.showPauseOverlay();
+        this.view.getChoiceButtons().forEach(btn => btn.listening(false));
+    }
+
+    private resumeGame(): void {
+        this.startTimer();
+        this.view.hidePauseOverlay();
+        this.view.getChoiceButtons().forEach(btn => btn.listening(true));
+    }
+    
+    public returnToTowerSelect(): void {
+        this.stopTimer();
+        const quitButton = this.view.getQuitButton();
+        if (quitButton) quitButton.visible(false);
+        this.view.hidePauseOverlay();
+        GlobalPlayer.reset_health();
+        this.model.resetTimer();
+        this.model.reset_level();
+        this.screenSwitcher.switchToScreen({ type: "tower_select" });
     }
 }

@@ -44,6 +44,11 @@ export class BossGameScreenController extends ScreenController {
 		
 		this.boss = this.spawnBoss();
 
+
+		// Pause functionality
+		this.view.setOnPauseClick(() => {
+			this.togglePause();
+		});
 	}
 
 	private spawnBoss(): BossEnemyModel {
@@ -154,11 +159,40 @@ export class BossGameScreenController extends ScreenController {
 	/**
 	 * Stop the timer
 	 */
+
+	private isPaused = false; // Tracks pause state 
+
+	private togglePause(): void {
+		if (this.isPaused) {
+			// Resume the game
+			this.resumeGame();
+		} else {
+			// Pause the game
+			this.pauseGame();
+		}
+		this.isPaused = !this.isPaused;
+	}
+
+	private pauseGame(): void {
+		this.stopTimer();
+		this.view.getGroup().listening(false); // Disable interactions
+		this.view.stopEquationPulsate();
+		this.view.stopBossNumPulsate();
+	}
+
+	private resumeGame(): void {
+		this.startTimer();
+		this.view.getGroup().listening(true); // Enable interactions
+		this.view.startEquationPulsate();
+		this.view.startBossNumPulsate();
+	}
+	
 	private stopTimer(): void {
 		if (this.gameTimer != null) {
 			clearInterval(this.gameTimer);
 			this.gameTimer = null;
 		}
+
 	}
 
 	private endPhase(): void {
@@ -185,6 +219,7 @@ export class BossGameScreenController extends ScreenController {
 		//bring up pop up
 
 	}
+
 
 	private makeEquation(): string {
 		let toReturn: string = ""
