@@ -10,7 +10,7 @@ export class BasicGameScreenModel {
     tower: number;
     enemy: BasicEnemy | null = null;
     
-    private playerHealth = GlobalPlayer.get_health();
+    //private playerHealth = GlobalPlayer.get_health();
     private correctAnswers: number = 0;
     private equationMode: EquationMode = "addition";
     private equationOptions: string[] = [];
@@ -37,17 +37,15 @@ export class BasicGameScreenModel {
 
     // Player health management
     getPlayerHealth(): number {
-        return this.playerHealth;
+        return GlobalPlayer.get_health();
     }
 
     decreasePlayerHealth(): void {
-        if (this.playerHealth > 0) {
-            this.playerHealth--;
-        }
+        GlobalPlayer.take_damage(1);
     }
 
     isPlayerAlive(): boolean {
-        return this.playerHealth > 0;
+        return GlobalPlayer.get_health() > 0;
     }
 
     // Progress tracking
