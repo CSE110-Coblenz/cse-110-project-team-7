@@ -7,7 +7,7 @@ import type { Tile } from "./Tile.ts";
 import type { EquationMode } from "../BasicGameScreen/BasicGameScreenModel.ts";
 import { spawnEnemy } from "../../utils/enemyFactory.ts";
 import { evaluate } from "../../utils/equationSolver.ts";
-import { GlobalPlayer } from "../../GlobalPlayer.ts";
+import { GlobalPlayer, getUsername } from "../../GlobalPlayer.ts";
 import Konva from "konva";
 
 /**
@@ -121,6 +121,7 @@ export class BossGameScreenController extends ScreenController {
 				// End game if final phase completed
 				if (this.tower === GlobalPlayer.get_highest_tower()) {
                     GlobalPlayer.unlock_next_tower();
+					this.saveProgressToBackend(this.tower)
                 }
 				this.screenSwitcher.switchToScreen({ type: 'tower_select' })
 				this.endGame();
@@ -144,7 +145,31 @@ export class BossGameScreenController extends ScreenController {
 		this.view.updateEquationText(eq);
 	}
 
+	private async saveProgressToBackend(towerCompleted:number):Promise<void>{
+		try{
+			const response=await fetch('http://localhost:3000/progress/update',{
+				method:'POST',
+				headers:{'Content=Type':'application/json'},
+				body:JSON.stringify({
+					username:getUsername(),
+					towerCompleted:towerCompleted
+				})
+			})
+			const data=await response.json();
+			if(response.ok){
+				console.log('Progress saved to backend:',data)
+			}else{
+				console.error('Failed to save progress:',data.error)
 
+			}}
+			catch(error){
+				console.error('Network error saving progress',error)
+			}
+		}
+		
+	
+
+	
 	/*
 	Start the timer
 	*/
