@@ -111,6 +111,7 @@ export class BasicGameScreenView implements View {
 				scaleX: 0.5,
 				scaleY: 0.5,
 				cornerRadius: 20,
+				image: monsterNode.image(),
 			});
 			this.group.add(monsterNode);
 			this.group.getLayer()?.draw();
@@ -124,6 +125,7 @@ export class BasicGameScreenView implements View {
 					y: 20,
 					scaleX: 0.15,
 					scaleY: 0.15,
+					image: heart.image(),
 				});
 				this.group.add(heart);
 				this.hearts.push(heart);
