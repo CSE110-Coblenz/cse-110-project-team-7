@@ -1,7 +1,7 @@
 import { BasicEnemy } from '../../models/BasicEnemyModel'
 import { generateEquationOptions } from "../../utils/generateEquation.ts";
 import { evaluate } from "../../utils/equationSolver.ts";
-import { ENEMY_SPRITE_SETS } from '../../assets/enemySprites.ts';
+import { ENEMY_SPRITE_SETS } from '../../utils/spriteUtils.ts';
 
 /**
  * GameScreenModel - Manages game state

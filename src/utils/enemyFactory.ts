@@ -1,27 +1,30 @@
 import { getRandomSprite } from './spriteUtils';
-import { BasicEnemy } from '../models/BasicEnemyModel'
-import { BossEnemy } from '../models/BossEnemyModel'
+import { BasicEnemy } from '../models/BasicEnemyModel';
+import { BossEnemy } from '../models/BossEnemyModel';
 
 const MAX_HEALTH = 100;
 const MIN_HEALTH = 10;
 
-// get random number between min_health, max_health
+// Random number in range
 function randomInt(): number {
   return Math.floor(Math.random() * (MAX_HEALTH - MIN_HEALTH + 1)) + MIN_HEALTH;
 }
 
+export function spawnEnemy(
+  type: "normal" | "boss" = "normal",
+  damage: number = 1
+): BasicEnemy | BossEnemy {
 
-export function spawnEnemy(type: "normal" | "boss" = "normal", damage: number = 1): BasicEnemy | BossEnemy{
-    const health = randomInt();
-    const enemy = getRandomSprite(type);
-    const name = enemy![0];
-    const sprite = enemy![1];
+  const health = randomInt();
 
-    if (type === 'boss'){
-        let health_bars = [randomInt(), randomInt(), randomInt()]
-        return new BossEnemy(health_bars, damage, name, sprite);
-    }
+  // Make sprite utils consistent with model expectations
+  const { name, spriteSet } = getRandomSprite(type); 
+  // ^ We'll update spriteUtils next if needed
 
-    return new BasicEnemy(health, damage, name, sprite);
+  if (type === "boss") {
+    const healthBars = [randomInt(), randomInt(), randomInt()];
+    return new BossEnemy(healthBars, damage, name, spriteSet);
+  }
+
+  return new BasicEnemy(health, damage, name, spriteSet);
 }
-
