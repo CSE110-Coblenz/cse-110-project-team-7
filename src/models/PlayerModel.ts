@@ -31,7 +31,7 @@ export class Player {
     }
 
     increase_score(change: number): number{
-        console.log("pkayer model increase score");
+        //console.log("pkayer model increase score");
         this.score += change;
 
         return this.score;
