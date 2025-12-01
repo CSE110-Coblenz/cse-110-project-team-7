@@ -78,7 +78,7 @@ export function generateEquationOptions(target: number, equationMode: EquationMo
         } else{
             operations = ['+', '-', 'x', '/'];
         }
-        const correctEquations = generateEquation(target, equationLength, 50, operations);
+        const correctEquations = generateEquation(target, equationLength, 10, operations);
         
         console.log(correctEquations);
         let guaranteedCorrect = 

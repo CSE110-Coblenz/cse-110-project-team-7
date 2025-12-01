@@ -19,7 +19,7 @@ export class BossGameScreenController extends ScreenController {
 	private view: BossGameScreenView;
 	private screenSwitcher: ScreenSwitcher;
 	private gameTimer: number | null = null;
-	private equationMode: EquationMode;
+	equationMode: EquationMode;
 	private tileSet = new Set<Tile>();
 
 	tower: number = 1;
@@ -29,7 +29,7 @@ export class BossGameScreenController extends ScreenController {
 		this.model = new BossGameScreenModel();
 		this.view = new BossGameScreenView();
 		this.equationMode = this.getEquationModeForTower(this.tower);
-
+		console.log(this.equationMode)
 		this.view.setOnTileEntry((tile: Tile) => {
 			this.addTile(tile);
 		});
@@ -54,7 +54,7 @@ export class BossGameScreenController extends ScreenController {
 	private spawnBoss(): BossEnemyModel {
 		return spawnEnemy('boss', 1, this.equationMode) as BossEnemyModel;
 	}
-	private getEquationModeForTower(tower: number): EquationMode {
+	getEquationModeForTower(tower: number): EquationMode {
 		switch (tower) {
 			case 1:
 				return "addition";
@@ -123,6 +123,7 @@ export class BossGameScreenController extends ScreenController {
 				if (this.tower === GlobalPlayer.get_highest_tower()) {
                     GlobalPlayer.unlock_next_tower();
                 }
+				this.tileSet.clear();
 				this.screenSwitcher.switchToScreen({ type: 'tower_select' })
 				this.endGame();
 			}
@@ -253,9 +254,10 @@ export class BossGameScreenController extends ScreenController {
 
 	setTower(tower: number): void {
         this.tower = tower;
-        const equationMode = this.getEquationModeForTower(tower);
+        this.equationMode = this.getEquationModeForTower(tower);
         
         this.boss = this.spawnBoss();
+		this.model.resetTimer();
     }
 
 	handleDeath(): void {
