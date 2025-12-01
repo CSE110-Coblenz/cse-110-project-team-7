@@ -31,7 +31,8 @@ export class BasicGameScreenView implements View {
     private initializeUI(): void {
         const maxHealth = this.controller.getMaxHealth();
         this.hearts = new Array(maxHealth);
-        const bg = new Konva.Rect({
+// initial commit for branch testing
+		const bg = new Konva.Rect({
             x: 0,
             y: 0,
             width: STAGE_WIDTH,
