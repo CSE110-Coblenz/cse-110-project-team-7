@@ -13,7 +13,7 @@ function randomInt(): number {
 
 function generateBossPhase(operations: string[]): BossPhase {
   let target = randomInt();
-  let equations = generateEquation(target, 5, 50, operations);
+  let equations = generateEquation(target, 5, 10, operations);
   console.log(equations, target);
   return {
         targetNumber: target,
