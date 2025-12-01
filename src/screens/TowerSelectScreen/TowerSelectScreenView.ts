@@ -571,6 +571,73 @@ export class TowerSelectScreenView implements View {
 		return group;
 	}
 
+	public showLockedPopup(): void {
+        // 1. Create a dark overlay
+        const overlay = new Konva.Rect({
+            x: 0,
+            y: 0,
+            width: STAGE_WIDTH,
+            height: STAGE_HEIGHT,
+            fill: "rgba(0,0,0,0.7)",
+        });
+
+        // 2. Create the popup box
+        const width = 400;
+        const height = 200;
+        const group = new Konva.Group({
+            x: STAGE_WIDTH / 2 - width / 2,
+            y: STAGE_HEIGHT / 2 - height / 2,
+        });
+
+        const rect = new Konva.Rect({
+            width: width,
+            height: height,
+            fill: "#e74c3c", // Red color for 'Locked'
+            stroke: "white",
+            strokeWidth: 4,
+            cornerRadius: 10,
+            shadowColor: "black",
+            shadowBlur: 10,
+            shadowOpacity: 0.5,
+        });
+
+        // 3. Add text
+        const text = new Konva.Text({
+            x: 20,
+            y: 20,
+            width: width - 40,
+            text: "LOCKED!\n\nYou must complete the previous tower to unlock this one. \n\n(Press anywhere to close)",
+            fontSize: 24,
+            fontFamily: "Arial",
+            fill: "white",
+            align: "center",
+            fontStyle: "bold"
+        });
+        
+        // Center the text vertically
+        text.y((height - text.height()) / 2);
+
+        // 4. Close button logic
+        const closePopup = () => {
+            group.destroy();
+            overlay.destroy();
+            this.group.getLayer()?.draw();
+        };
+
+        // Click anywhere to close
+        overlay.on('click', closePopup);
+        group.on('click', closePopup);
+
+        group.add(rect);
+        group.add(text);
+
+        this.group.add(overlay);
+        this.group.add(group);
+        overlay.moveToTop();
+        group.moveToTop();
+        this.group.getLayer()?.draw();
+    }
+
 	setOnTowerSelect(callback: (towerType: TowerType) => void): void {
 		this.onTowerSelect = callback;
 	}
