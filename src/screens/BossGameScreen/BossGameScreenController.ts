@@ -19,7 +19,7 @@ export class BossGameScreenController extends ScreenController {
 	private view: BossGameScreenView;
 	private screenSwitcher: ScreenSwitcher;
 	private gameTimer: number | null = null;
-	private equationMode: EquationMode;
+	equationMode: EquationMode;
 	private tileSet = new Set<Tile>();
 
 	tower: number = 1;
@@ -29,7 +29,7 @@ export class BossGameScreenController extends ScreenController {
 		this.model = new BossGameScreenModel();
 		this.view = new BossGameScreenView();
 		this.equationMode = this.getEquationModeForTower(this.tower);
-
+		console.log(this.equationMode)
 		this.view.setOnTileEntry((tile: Tile) => {
 			this.addTile(tile);
 		});
@@ -54,7 +54,7 @@ export class BossGameScreenController extends ScreenController {
 	private spawnBoss(): BossEnemyModel {
 		return spawnEnemy('boss', 1, this.equationMode) as BossEnemyModel;
 	}
-	private getEquationModeForTower(tower: number): EquationMode {
+	getEquationModeForTower(tower: number): EquationMode {
 		switch (tower) {
 			case 1:
 				return "addition";
@@ -87,6 +87,7 @@ export class BossGameScreenController extends ScreenController {
 		this.loadPhaseIntoView();
 		this.view.show();
 		this.view.updateHealth(GlobalPlayer.get_health());
+		this.view.updateScore(GlobalPlayer.get_score());
 		this.startTimer();
 	}
 
@@ -121,7 +122,9 @@ export class BossGameScreenController extends ScreenController {
 				// End game if final phase completed
 				if (this.tower === GlobalPlayer.get_highest_tower()) {
                     GlobalPlayer.unlock_next_tower();
+					this.saveProgressToBackend(this.tower)
                 }
+				this.tileSet.clear();
 				this.screenSwitcher.switchToScreen({ type: 'tower_select' })
 				this.endGame();
 			}
@@ -144,7 +147,31 @@ export class BossGameScreenController extends ScreenController {
 		this.view.updateEquationText(eq);
 	}
 
+	private async saveProgressToBackend(towerCompleted:number):Promise<void>{
+		try{
+			const response=await fetch('http://localhost:3000/progress/update',{
+				method:'POST',
+				headers:{'Content-Type':'application/json'},
+				body:JSON.stringify({
+					username:GlobalPlayer.get_username(),
+					towerCompleted:towerCompleted
+				})
+			})
+			const data=await response.json();
+			if(response.ok){
+				console.log('Progress saved to backend:',data)
+			}else{
+				console.error('Failed to save progress:',data.error)
 
+			}}
+			catch(error){
+				console.error('Network error saving progress',error)
+			}
+		}
+		
+	
+
+	
 	/*
 	Start the timer
 	*/
@@ -252,12 +279,18 @@ export class BossGameScreenController extends ScreenController {
 
 	setTower(tower: number): void {
         this.tower = tower;
-        const equationMode = this.getEquationModeForTower(tower);
+        this.equationMode = this.getEquationModeForTower(tower);
         
         this.boss = this.spawnBoss();
+		this.model.resetTimer();
     }
 
 	handleDeath(): void {
 		this.view.showGameOver();
+	}
+
+	resetEq(): void{
+		this.tileSet.clear();
+		this.view.updateEquationText("");
 	}
 }

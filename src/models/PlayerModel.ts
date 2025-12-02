@@ -14,6 +14,14 @@ export class Player {
         this.highestTowerUnlocked = 1;
     }
 
+    set_username(username:string):void{
+        this.name=username;
+    }
+
+    get_username():string{
+        return this.name;
+    }
+
     get_health(): number {
         return this.health;
     }
@@ -31,7 +39,7 @@ export class Player {
     }
 
     increase_score(change: number): number{
-        console.log("pkayer model increase score");
+        //console.log("pkayer model increase score");
         this.score += change;
 
         return this.score;
@@ -50,6 +58,10 @@ export class Player {
     
     get_highest_tower(): number {
         return this.highestTowerUnlocked;
+    }
+
+    set_highest_tower(level:number):number{
+        return this.highestTowerUnlocked=level;
     }
 
     unlock_next_tower(): void {

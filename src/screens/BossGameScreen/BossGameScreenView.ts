@@ -504,6 +504,12 @@ export class BossGameScreenView implements View {
 		const startX = invX + (invWidth - totalWidth) / 2;
 		const startY = invY + (invHeight - tileSize) / 2;
 
+		//shuffle the tiles
+		for (let i = newParts.length - 1; i > 0; i--) {
+			const j = Math.floor(Math.random() * (i + 1));
+			[newParts[i], newParts[j]] = [newParts[j], newParts[i]]; // Swap elements
+		}
+
 		// Create the tiles
 		newParts.forEach((label, index) => {
 			const x = startX + index * (tileSize + tileSpacing);

@@ -78,7 +78,7 @@ export function generateEquationOptions(target: number, equationMode: EquationMo
         } else{
             operations = ['+', '-', 'x', '/'];
         }
-        const correctEquations = generateEquation(target, equationLength, 50, operations);
+        const correctEquations = generateEquation(target, equationLength, 10, operations);
         
         console.log(correctEquations);
         let guaranteedCorrect = 
@@ -150,9 +150,10 @@ function buildGuaranteedEquation(target: number, mode: EquationMode): string {
     }
 }
 
-function generateFakeEquation(target: number, length: number, equationMode: EquationMode): string {
+function generateFakeEquation(_target: number, length: number, equationMode: EquationMode): string {
     // Determine number range based on operations (same logic as generateEquation)
     const hasAddOrMult = equationMode === 'addition' || equationMode === 'multiplication' || equationMode === 'any';
+    //const [minNum, maxNum] = [1, 9];
     const [minNum, maxNum] = hasAddOrMult ? [1, 9] : [1, 99];
     
     // Build an equation of the specified length
