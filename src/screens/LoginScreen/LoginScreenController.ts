@@ -2,7 +2,7 @@ import { ScreenController } from "../../types.ts";
 import type { ScreenSwitcher } from "../../types.ts";
 import { LoginScreenModel } from "./LoginScreenModel.ts";
 import { LoginScreenView } from "./LoginScreenView.ts";
-import {setUsername,setHighestTowerUnlocked} from '../../GlobalPlayer.ts'
+import {GlobalPlayer} from '../../GlobalPlayer.ts'
 
 /**
  * BaiscGameScreenController - Coordinates game logic between Model and View
@@ -40,8 +40,8 @@ export class LoginScreenController extends ScreenController {
 				return;
 			}
 			console.log("Login Success",data)
-			setUsername(data.username)
-			setHighestTowerUnlocked(data.highestTowerUnlocked)
+			GlobalPlayer.set_username(data.username)
+			GlobalPlayer.set_highest_tower(data.highestTowerUnlocked)
 			this.screenSwitcher.switchToScreen({type:"tower_select"});
 		}
 		catch(error){
@@ -71,8 +71,8 @@ export class LoginScreenController extends ScreenController {
 				return;
 			}
 			console.log("SignUp Success:",data)
-			setUsername(data.username)
-			setHighestTowerUnlocked(data.highestTowerUnlocked)
+			GlobalPlayer.set_username(data.username)
+			GlobalPlayer.set_highest_tower(data.highestTowerUnlocked)
 			this.screenSwitcher.switchToScreen({type:"tower_select"});
 		
    	 	}

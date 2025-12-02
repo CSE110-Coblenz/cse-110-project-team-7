@@ -7,7 +7,7 @@ import type { Tile } from "./Tile.ts";
 import type { EquationMode } from "../BasicGameScreen/BasicGameScreenModel.ts";
 import { spawnEnemy } from "../../utils/enemyFactory.ts";
 import { evaluate } from "../../utils/equationSolver.ts";
-import { GlobalPlayer, getUsername } from "../../GlobalPlayer.ts";
+import { GlobalPlayer } from "../../GlobalPlayer.ts";
 import Konva from "konva";
 
 /**
@@ -151,7 +151,7 @@ export class BossGameScreenController extends ScreenController {
 				method:'POST',
 				headers:{'Content-Type':'application/json'},
 				body:JSON.stringify({
-					username:getUsername(),
+					username:GlobalPlayer.get_username(),
 					towerCompleted:towerCompleted
 				})
 			})
