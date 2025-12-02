@@ -7,7 +7,7 @@ import type { Tile } from "./Tile.ts";
 import type { EquationMode } from "../BasicGameScreen/BasicGameScreenModel.ts";
 import { spawnEnemy } from "../../utils/enemyFactory.ts";
 import { evaluate } from "../../utils/equationSolver.ts";
-import { GlobalPlayer } from "../../GlobalPlayer.ts";
+import { GlobalPlayer } from "../../GlobalPlayer.ts"; //used for non-health and score operations
 import Konva from "konva";
 
 /**
@@ -196,7 +196,7 @@ export class BossGameScreenController extends ScreenController {
 	Start the timer
 	*/
 	private startTimer(): void {
-		console.log("timer started")
+		//console.log("timer started")
 		this.gameTimer = setInterval(() => {
 			const timeRemaining = this.model.tickTimer(); // decrement every tick
 			this.view.updateTimer(timeRemaining);
@@ -317,6 +317,7 @@ export class BossGameScreenController extends ScreenController {
 	}
 
 	handleDeath(): void {
+		this.stopTimer();
 		this.view.showGameOver();
 	}
 
