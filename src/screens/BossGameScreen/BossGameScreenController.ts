@@ -47,7 +47,11 @@ export class BossGameScreenController extends ScreenController {
 
 		// Pause functionality
 		this.view.setOnPauseClick(() => {
-			this.togglePause();
+        	this.togglePause();
+		});
+
+		this.view.setOnQuitClick(() => {
+    		this.returnToTowerSelect();
 		});
 	}
 
@@ -191,6 +195,7 @@ export class BossGameScreenController extends ScreenController {
 	 */
 
 	private isPaused = false; // Tracks pause state 
+			
 
 	private togglePause(): void {
 		if (this.isPaused) {
@@ -205,16 +210,27 @@ export class BossGameScreenController extends ScreenController {
 
 	private pauseGame(): void {
 		this.stopTimer();
-		this.view.getGroup().listening(false); // Disable interactions
+		this.view.showPauseOverlay(); 
+    	this.view.getTiles().forEach(tile => tile.getNode().listening(false));
 		this.view.stopEquationPulsate();
 		this.view.stopBossNumPulsate();
 	}
 
 	private resumeGame(): void {
+		this.view.hidePauseOverlay(); // Add this line
 		this.startTimer();
-		this.view.getGroup().listening(true); // Enable interactions
+    	this.view.getTiles().forEach(tile => tile.getNode().listening(false));
 		this.view.startEquationPulsate();
 		this.view.startBossNumPulsate();
+	}
+	public returnToTowerSelect(): void {
+    	this.stopTimer();
+    	this.view.hidePauseOverlay();
+    	this.tileSet.clear();
+    	GlobalPlayer.reset_health();
+    	this.model.resetTimer();
+    	this.isPaused = false; // Reset pause state
+    	this.screenSwitcher.switchToScreen({ type: "tower_select" });
 	}
 	
 	private stopTimer(): void {

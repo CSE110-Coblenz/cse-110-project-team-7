@@ -68,7 +68,7 @@ class App implements ScreenSwitcher {
 		this.layer.draw();
 
 		// Start with tower selection screen visible
-		this.switchToScreen({ type: "login" });
+		this.switchToScreen({ type: "boss_game" });
 	}
 
 	/**
