@@ -15,13 +15,17 @@ router.post("/signup", async (req:Request, res:Response): Promise<void>=> {
 
     const hash = await bcrypt.hash(password, 10);
 
-    await User.create({
+    const newUser=await User.create({
         username,
         passwordHash: hash,
-        towerNumber: 1,
+        highestTowerUnlocked: 1,
     });
 
-    res.json({ message: "Signup successful!" });
+    res.json({ message: "Signup successful!",
+    username:newUser.username,
+    highestTowerUnlocked:newUser.highestTowerUnlocked,
+    });
+    
 });
 
 router.post("/login", async (req: Request, res: Response) :Promise<void>=> {
@@ -43,8 +47,42 @@ router.post("/login", async (req: Request, res: Response) :Promise<void>=> {
     res.json({
         message: "Login success",
         username: user.username,
+        highestTowerUnlocked:user.highestTowerUnlocked
     });
 });
+router.get('progress/:username',async(req:Request,res:Response):Promise<void>=>{
+    const{username}=req.params;
+    const user=await User.findOne({username})
+    if(!user){
+        res.status(404).json({error:'User not found'})
+        return
+    }
+    res.json({
+        username:user.username,
+        highestTowerUnlocked:user.highestTowerUnlocked
+    })
+})
+router.post('/progress/update',async(req:Request,res:Response):Promise<void>=>{
+    const{username,towerCompleted}=req.body
+    if(!username || !towerCompleted){
+        res.status(400).json({error:'Missing required fields'})
+        return
+    }
+    const user=await User.findOne({username})
+    if(!user){
+        res.status(404).json({error:'User not found'})
+        return
+    }
+    if(towerCompleted==user.highestTowerUnlocked && towerCompleted<5){
+        user.highestTowerUnlocked=towerCompleted+1
+    }
+    await user.save();
+
+    res.json({
+        message:'Progress updated',
+        highestTowerUnlocked:user.highestTowerUnlocked
+    })
+})
 
 export default router;
 
