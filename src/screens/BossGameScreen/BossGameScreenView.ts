@@ -4,7 +4,7 @@ import { STAGE_WIDTH, STAGE_HEIGHT } from "../../constants.ts";
 import { Tile } from "./Tile.ts"
 
 /**
- * GameScreenView - Renders the game UI using Konva
+ * BossGameScreenView - Renders the game UI using Konva
  */
 export class BossGameScreenView implements View {
 	//private parts: string[] = ["0", "x", "0"]
@@ -31,9 +31,11 @@ export class BossGameScreenView implements View {
 	//boss number
 	private bossNumber: Konva.Text;
 
+	//tile callbacks
 	private onTileEntry?: (tile: Tile) => void;
 	private onTileRemoval?: (tile: Tile) => void;
 
+	//submit press callbacks
 	private onSubmitPress?: (rect: Konva.Rect) => void;
 
 	private equationPulseAnim?: Konva.Animation;
@@ -48,6 +50,7 @@ export class BossGameScreenView implements View {
 	constructor() {
 		this.group = new Konva.Group({ visible: false });
 
+		//static background
 		const bg = new Konva.Rect({
 			x: 0,
 			y: 0,
@@ -57,6 +60,7 @@ export class BossGameScreenView implements View {
 		});
 		this.group.add(bg);
 
+		//boss number (targe number) that appears over the boss image
 		this.bossNumber = new Konva.Text({
 			x: STAGE_WIDTH / 2 - 25,
 			y: 10,
@@ -68,7 +72,7 @@ export class BossGameScreenView implements View {
 		});
 		this.group.add(this.bossNumber);
 
-
+		//the current score (to be rendered later from controller)
 		this.scoreText = new Konva.Text({
 			x: 20,
 			y: 20,
@@ -79,6 +83,7 @@ export class BossGameScreenView implements View {
 		});
 		this.group.add(this.scoreText);
 
+		//timer text (initalizes to 0)
 		this.timerText = new Konva.Text({
 			x: STAGE_WIDTH - 150,
 			y: 20,
@@ -102,6 +107,7 @@ export class BossGameScreenView implements View {
 		});
 		this.group.add(pauseButton);
 
+		// pause button interactability
 		pauseButton.on("mouseover", () => {
 			document.body.style.cursor = "pointer";
 			pauseButton.fill("#D1A700");
@@ -120,7 +126,7 @@ export class BossGameScreenView implements View {
 		});
 
 
-		// ===== Entry Box (bottom-left quadrant) =====
+		// Entry Box (bottom-left quadrant)
 		this.entryBox = new Konva.Rect({
 			x: 0, // left edge
 			y: STAGE_HEIGHT / 2 + 50, // start halfway down
@@ -133,7 +139,20 @@ export class BossGameScreenView implements View {
 		});
 		this.group.add(this.entryBox);
 
-		//small text box that shows the inputted equation
+		// Label for Entry Box
+		const entryLabel = new Konva.Text({
+			x: this.entryBox.x(),
+			y: this.entryBox.y() - 30,
+			width: this.entryBox.width(),
+			align: "center",
+			text: "Entry Box",
+			fontSize: 20,
+			fontFamily: "Arial",
+			fill: "black",
+		});
+		this.group.add(entryLabel);
+
+		// small text box that shows the inputted equation
 		this.entryEquationText = new Konva.Text({
 			x: STAGE_WIDTH / 2 - 200,
 			y: this.entryBox.y() - 60, // just above the "Entry Box" label
@@ -146,7 +165,7 @@ export class BossGameScreenView implements View {
 		});
 		this.group.add(this.entryEquationText);
 
-		// submission 
+		// submission (needs to be interactable)
 		this.submitRect = new Konva.Rect({
 			x: STAGE_WIDTH / 4 - 100,
 			y: STAGE_HEIGHT - 100,
@@ -184,26 +203,13 @@ export class BossGameScreenView implements View {
 			document.body.style.cursor = "default";
 		});
 
-		// Label for Entry Box
-		const entryLabel = new Konva.Text({
-			x: this.entryBox.x(),
-			y: this.entryBox.y() - 30,
-			width: this.entryBox.width(),
-			align: "center",
-			text: "Entry Box",
-			fontSize: 20,
-			fontFamily: "Arial",
-			fill: "black",
-		});
-		this.group.add(entryLabel);
-
 		// Inventory (bottom-right quadrant)
 		this.inventory = new Konva.Rect({
 			x: STAGE_WIDTH / 2, // right half
 			y: STAGE_HEIGHT / 2 + 50, // bottom half
 			width: STAGE_WIDTH / 2,
 			height: STAGE_HEIGHT / 2 - 50,
-			fill: "#d2b48c", // tan
+			fill: "#d2b48c", 
 			stroke: "black",
 			strokeWidth: 3,
 			cornerRadius: 10,
@@ -222,8 +228,6 @@ export class BossGameScreenView implements View {
 			fill: "black",
 		});
 		this.group.add(inventoryLabel);
-
-
 
 	}
 
@@ -293,6 +297,7 @@ export class BossGameScreenView implements View {
 		return this.group;
 	}
 
+	//using konva animations, blue component goes 0->180->0, with a period of 3s
 	startEquationPulsate(): void {
 		if (this.equationPulseAnim) return;
 
@@ -324,7 +329,7 @@ export class BossGameScreenView implements View {
 		if (this.equationPulseAnim) {
 			this.equationPulseAnim.stop();
 			this.equationPulseAnim = undefined;
-			// optional: reset the color
+			// reset the color
 			this.entryEquationText.fill("black");
 			this.entryEquationText.getLayer()?.draw();
 		}
@@ -347,13 +352,12 @@ export class BossGameScreenView implements View {
 		this.bossNumPulseAnim.start();
 	}
 
-
-
 	stopBossNumPulsate(): void {
 		if (this.bossNumPulseAnim) {
 			this.bossNumPulseAnim.stop();
 			this.bossNumPulseAnim = undefined;
-			this.bossNumber.fill("black"); // reset color
+			// reset color
+			this.bossNumber.fill("black"); 
 			this.bossNumber.getLayer()?.draw();
 		}
 	}
@@ -419,6 +423,7 @@ export class BossGameScreenView implements View {
 		return parseInt(this.bossNumber.text());
 
 	}
+
 	updateBossImage(path: string): void {
 		const img = new Image();
 		img.onload = () => {
@@ -472,7 +477,6 @@ export class BossGameScreenView implements View {
 		img.onerror = () => console.error("Failed to load heart image:", HEART_PATH);
 		img.src = HEART_PATH;
 	}
-
 
 	updatePhaseTiles(newParts: string[]): void {
 		// Remove old tiles from the stage
@@ -550,6 +554,5 @@ export class BossGameScreenView implements View {
 		this.group.add(text);
 		this.group.getLayer()?.draw();
 	}
-
 
 }

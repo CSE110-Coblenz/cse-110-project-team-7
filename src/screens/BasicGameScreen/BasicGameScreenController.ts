@@ -59,6 +59,7 @@ export class BasicGameScreenController extends ScreenController {
             await this.sleep(2000);
 
             if (this.model.hasReachedMaxLevel()) {
+                this.stopTimer();
                 this.screenSwitcher.switchToScreen({type: 'boss_game'})
                 this.view.updateScore(GlobalPlayer.increase_score(15))
                 return;
