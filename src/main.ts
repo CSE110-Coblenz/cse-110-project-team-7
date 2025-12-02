@@ -97,6 +97,7 @@ class App implements ScreenSwitcher {
 				let curr_tower = this.basicgamecontroller.getTower();
 				// this.bossgamecontroller.equationMode = this.bossgamecontroller.getEquationModeForTower(curr_tower);
 				this.bossgamecontroller.setTower(curr_tower);
+				this.bossgamecontroller.resetEq();
 				this.bossgamecontroller.show();
 				this.bossgamecontroller.startGame();
 				break;

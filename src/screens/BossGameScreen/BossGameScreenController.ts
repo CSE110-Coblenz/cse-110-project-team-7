@@ -263,4 +263,9 @@ export class BossGameScreenController extends ScreenController {
 	handleDeath(): void {
 		this.view.showGameOver();
 	}
+
+	resetEq(): void{
+		this.tileSet.clear();
+		this.view.updateEquationText("");
+	}
 }
