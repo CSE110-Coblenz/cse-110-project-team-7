@@ -10,7 +10,7 @@ export class LoginScreenView implements View {
 
 	private cursor: Konva.Text;
 	private cursorVisible: boolean = true;
-	private cursorIntervalId: number | null = null;
+	private _cursorIntervalId: number | null = null;
 
 	private activeField: "username" | "password" | null = null;
 
