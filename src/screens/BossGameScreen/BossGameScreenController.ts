@@ -219,7 +219,7 @@ export class BossGameScreenController extends ScreenController {
 	private resumeGame(): void {
 		this.view.hidePauseOverlay(); // Add this line
 		this.startTimer();
-    	this.view.getTiles().forEach(tile => tile.getNode().listening(false));
+    	this.view.getTiles().forEach(tile => tile.getNode().listening(true));
 		this.view.startEquationPulsate();
 		this.view.startBossNumPulsate();
 	}

@@ -47,6 +47,7 @@ export class BossGameScreenView implements View {
 	private pauseOverlay?: Konva.Rect;
 	private pauseCloseBtn?: Konva.Text;
 	private quitBtn?: Konva.Group;
+	private pauseButton!: Konva.Text;
 	private onQuitClick?: () => void;
 	setOnQuitClick(callback: () => void): void {
 		this.onQuitClick = callback;
@@ -102,30 +103,34 @@ export class BossGameScreenView implements View {
 		this.group.add(this.timerText);
 
 		//Pause Button (top-right corner)
-		const pauseButton = new Konva.Circle({
+		this.pauseButton = new Konva.Text({
 			x: STAGE_WIDTH - 70,
 			y: 100,
-			radius: 30,
+			text: "II",
+			fontSize: 40,
+			fontFamily: "Arial",
 			fill: "#F7C500",
 			stroke: "black",
 			strokeWidth: 2,
-			cornerRadius: 10,
+			cursor: "pointer",
+			fontStyle: "bold"
 		});
-		this.group.add(pauseButton);
+		this.group.add(this.pauseButton);
+		
 
-		pauseButton.on("mouseover", () => {
+		this.pauseButton.on("mouseover", () => {
 			document.body.style.cursor = "pointer";
-			pauseButton.fill("#D1A700");
+			this.pauseButton.fill("#D1A700");
 			this.group.getLayer()?.draw();
 		});
 
-		pauseButton.on("mouseout", () => {
+		this.pauseButton.on("mouseout", () => {
 			document.body.style.cursor = "default";
-			pauseButton.fill("#F7C500");
+			this.pauseButton.fill("#F7C500");
 			this.group.getLayer()?.draw();
 		});
 
-		pauseButton.on("click", () => {
+		this.pauseButton.on("click", () => {
 			// Implement pause functionality here
 			if (this.onPauseClick) this.onPauseClick();
 		});
@@ -564,6 +569,7 @@ export class BossGameScreenView implements View {
 	//Pause Overlay
 	showPauseOverlay(): void {
 		if (this.pauseOverlay) return; // Already shown
+		this.pauseButton?.hide();
 
 		this.pauseOverlay = new Konva.Rect({
 			x: 0,
@@ -681,6 +687,7 @@ export class BossGameScreenView implements View {
 	}
 
 	hidePauseOverlay(): void {
+		this.pauseButton?.show();
     	this.pauseOverlay?.destroy();
     	this.pauseCloseBtn?.destroy();
     	this.quitBtn?.destroy();
