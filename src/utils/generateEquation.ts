@@ -2,67 +2,73 @@
 // returns list of all generated equations as strings
 import { EquationMode } from "../screens/BasicGameScreen/BasicGameScreenModel";
 import { evaluate } from "./equationSolver";
-export function generateEquation(target: number, length: number, count: number, operations: string[]): string[]{
+function shuffledArray<T>(arr: T[]): T[] {
+    return arr
+        .map(x => [Math.random(), x] as [number, T])
+        .sort((a, b) => a[0] - b[0])
+        .map(x => x[1]);
+}
+
+export function generateEquation(target: number, length: number, count: number, operations: string[]): string[] {
     if (count <= 0) return [];
-    if (length <= 2 || length % 2 === 0 ) return [];
- 
-    let res: string[] = [];
+    if (length <= 2 || length % 2 === 0) return [];
 
-    function getNumberRange(): [number, number] {
-        const hasAddOrMult = operations.includes('+') || operations.includes('*');
-        if (hasAddOrMult) {
-            return [1, 99]; 
-        }
-        return [1, 99];
-    }
+    const res: string[] = [];
 
-    const [minNum, maxNum] = getNumberRange();
+    const [minNum, maxNum] = [1, 99];
 
-    function backtrack(curr: string, idx: number, val: number, prev: number, last_op: string | null = null): void{
-        if (res.length >= count){
-            return;
-        }
-        
-        if (idx == length){
-            if (val == target){
+    // Pre-generate a shuffled list of all candidate numbers
+    const allNumbers = shuffledArray(
+        Array.from({ length: maxNum - minNum + 1 }, (_, i) => minNum + i)
+    );
+
+    function backtrack(curr: string, idx: number, val: number, prev: number, lastOp: string | null) {
+        if (res.length >= count) return;
+
+        if (idx === length) {
+            if (val === target) {
                 res.push(curr);
             }
-
             return;
         }
 
-        if (idx % 2 == 1){
-            operations.forEach(op =>{
+        if (idx % 2 === 1) {
+            // operator slot — loop through randomized operators
+            for (const op of operations) {
                 backtrack(curr + op, idx + 1, val, prev, op);
-            });
+            }
         } else {
-            for (let i = minNum; i <= maxNum; i ++){
-                let updated_str = curr + i.toString();
+            // number slot — loop through randomized numbers
+            for (const num of allNumbers) {
+                const nextStr = curr + num;
 
-                if (idx == 0){
-                    backtrack(updated_str, idx + 1, i, i, null);
+                if (idx === 0) {
+                    backtrack(nextStr, 1, num, num, null);
                     continue;
                 }
 
-                if (last_op == '+'){
-                    backtrack(updated_str, idx + 1, val + i, i, null);
-                } else if (last_op == '-'){
-                    backtrack(updated_str, idx + 1, val - i, -i, null);
-                } else if (last_op == 'x'){
-                    backtrack(updated_str, idx + 1, val - prev + (prev * i), prev * i, null);
-                } else if (last_op == '/'){
-                    if (prev % i == 0){
-                        backtrack(updated_str, idx + 1, val - prev + Math.floor(prev / i), Math.floor(prev / i), null);
+                // handle math
+                if (lastOp === "+") {
+                    backtrack(nextStr, idx + 1, val + num, num, null);
+                } else if (lastOp === "-") {
+                    backtrack(nextStr, idx + 1, val - num, -num, null);
+                } else if (lastOp === "x") {
+                    const newPrev = prev * num;
+                    backtrack(nextStr, idx + 1, val - prev + newPrev, newPrev, null);
+                } else if (lastOp === "/") {
+                    if (prev % num === 0) {
+                        const newPrev = prev / num;
+                        backtrack(nextStr, idx + 1, val - prev + newPrev, newPrev, null);
                     }
                 }
-
             }
         }
     }
 
-    backtrack('', 0, 0, 0);
+    backtrack("", 0, 0, 0, null);
     return res;
-}   
+}
+
 
 export function generateEquationOptions(target: number, equationMode: EquationMode): string[] {
         let equationLength = 3;
