@@ -44,6 +44,17 @@ export class BossGameScreenView implements View {
 	setOnPauseClick(callback: () => void): void {
 		this.onPauseClick = callback;
 	}
+	private pauseOverlay?: Konva.Rect;
+	private pauseCloseBtn?: Konva.Text;
+	private quitBtn?: Konva.Group;
+	private onQuitClick?: () => void;
+	setOnQuitClick(callback: () => void): void {
+		this.onQuitClick = callback;
+	}
+	getTiles(): Tile[] {
+    	return this.tiles;
+	}
+
 
 	constructor() {
 		this.group = new Konva.Group({ visible: false });
@@ -222,7 +233,6 @@ export class BossGameScreenView implements View {
 			fill: "black",
 		});
 		this.group.add(inventoryLabel);
-
 
 
 	}
@@ -549,6 +559,137 @@ export class BossGameScreenView implements View {
 		this.group.getLayer()?.listening(false);
 		this.group.add(text);
 		this.group.getLayer()?.draw();
+	}
+
+	//Pause Overlay
+	showPauseOverlay(): void {
+		if (this.pauseOverlay) return; // Already shown
+
+		this.pauseOverlay = new Konva.Rect({
+			x: 0,
+			y: 0,
+			width: STAGE_WIDTH,
+			height: STAGE_HEIGHT,
+			fill: "black",
+			opacity: 0.6,
+		});
+		
+		this.pauseCloseBtn = new Konva.Text({
+			x: STAGE_WIDTH - 80,
+			y: 90,
+			text: "X",
+			fontSize: 50,
+			fontFamily: "Arial",
+			fill: "red",
+			cursor: "pointer",
+			fontStyle: "bold"
+		});
+
+		this.pauseCloseBtn.on("click", () => {
+			if (this.onPauseClick) this.onPauseClick();
+		});
+
+		this.pauseCloseBtn.on("mouseover", () => {
+			document.body.style.cursor = "pointer";
+			if (this.pauseCloseBtn) this.pauseCloseBtn.fill("darkred");
+        	this.group.getLayer()?.draw();
+		});
+
+    	this.pauseCloseBtn.on("mouseout", () => {
+        	document.body.style.cursor = "default";
+        	if (this.pauseCloseBtn) this.pauseCloseBtn.fill("red");
+        	this.group.getLayer()?.draw();
+    	});		
+
+		const quitGroup = new Konva.Group({
+        	x: STAGE_WIDTH / 2 - 100,
+        	y: STAGE_HEIGHT / 2 - 25,
+        	cursor: "pointer",
+    	});
+
+		const quitRect = new Konva.Rect({
+        	x: 0,
+        	y: 0,
+        	width: 200,
+        	height: 60,
+        	fill: "#e74c3c",
+        	stroke: "#c0392b",
+        	strokeWidth: 3,
+        	cornerRadius: 10,
+    	});
+
+		const quitText = new Konva.Text({
+        	x: 0,
+        	y: 0,
+        	width: 200,
+        	height: 60,
+        	text: "Quit to Tower",
+        	fontSize: 24,
+        	fontFamily: "Arial",
+        	fill: "white",
+        	align: "center",
+        	verticalAlign: "middle",
+        	fontStyle: "bold",
+        	listening: false,
+    	});
+
+		quitGroup.on("click", () => {
+        	if (this.onQuitClick) this.onQuitClick();
+    	});
+
+		quitGroup.on("mouseover", () => {
+        	document.body.style.cursor = "pointer";
+        	quitRect.fill("#c0392b");
+        	this.group.getLayer()?.draw();
+    	});
+
+    	quitGroup.on("mouseout", () => {
+        	document.body.style.cursor = "default";
+        	quitRect.fill("#e74c3c");
+        	this.group.getLayer()?.draw();
+    	});
+
+    	quitGroup.add(quitRect);
+    	quitGroup.add(quitText);
+    	this.quitBtn = quitGroup;
+
+    	// Add PAUSED text
+    	const pausedText = new Konva.Text({
+        	x: 0,
+        	y: STAGE_HEIGHT / 2 - 100,
+        	width: STAGE_WIDTH,
+        	text: "PAUSED",
+        	fontSize: 80,
+        	fontFamily: "Arial",
+        	fill: "white",
+        	align: "center",
+        	fontStyle: "bold",
+    	});
+
+    	// Add everything to the stage
+    	this.group.add(this.pauseOverlay);
+    	this.group.add(pausedText);
+    	this.group.add(this.pauseCloseBtn);
+    	this.group.add(this.quitBtn);
+		// Make sure they're on top
+    	this.pauseOverlay.moveToTop();
+    	pausedText.moveToTop();
+    	this.pauseCloseBtn.moveToTop();
+    	this.quitBtn.moveToTop();
+
+    	this.group.getLayer()?.draw();
+	}
+
+	hidePauseOverlay(): void {
+    	this.pauseOverlay?.destroy();
+    	this.pauseCloseBtn?.destroy();
+    	this.quitBtn?.destroy();
+    
+    	this.pauseOverlay = undefined;
+    	this.pauseCloseBtn = undefined;
+    	this.quitBtn = undefined;
+    
+    	this.group.getLayer()?.draw();
 	}
 
 
