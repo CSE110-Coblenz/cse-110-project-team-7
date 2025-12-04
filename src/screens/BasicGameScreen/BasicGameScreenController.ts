@@ -96,9 +96,11 @@ export class BasicGameScreenController extends ScreenController {
         
         this.spawnNewEnemy();
         this.loadCurrentEnemy();
+        this.isPaused = false; 
+        this.stopTimer();
         
         this.model.resetTimer();
-        this.stopTimer();
+        //this.stopTimer();
         this.startTimer();
     }
 
@@ -126,6 +128,9 @@ export class BasicGameScreenController extends ScreenController {
     }
 
     private startTimer(): void {
+        if (this.gameTimer !== null) {
+            return; // If a timer is already running, don't make a new one
+        }
         this.gameTimer = setInterval(() => {
             const timeRemaining = this.model.tickTimer(); // decrement every tick
             this.view.updateTimer(timeRemaining);
