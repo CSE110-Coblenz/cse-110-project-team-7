@@ -3,9 +3,12 @@ import type { ScreenSwitcher } from "../../types.ts";
 import { BossGameScreenModel } from "./BossGameScreenModel.ts";
 import { BossGameScreenView } from "./BossGameScreenView.ts";
 import { BossEnemyModel } from "../../models/BossEnemyModel.ts";
-import { GAME_DURATION } from "../../constants.ts";
 import type { Tile } from "./Tile.ts";
+import type { EquationMode } from "../BasicGameScreen/BasicGameScreenModel.ts";
+import { spawnEnemy } from "../../utils/enemyFactory.ts";
 import { evaluate } from "../../utils/equationSolver.ts";
+import { GlobalPlayer } from "../../GlobalPlayer.ts";
+import Konva from "konva";
 
 /**
  * BaiscGameScreenController - Coordinates game logic between Model and View
@@ -15,18 +18,18 @@ export class BossGameScreenController extends ScreenController {
 	private model: BossGameScreenModel;
 	private view: BossGameScreenView;
 	private screenSwitcher: ScreenSwitcher;
-
 	private gameTimer: number | null = null;
-
+	equationMode: EquationMode;
 	private tileSet = new Set<Tile>();
 
+	tower: number = 1;
 	constructor(screenSwitcher: ScreenSwitcher) {
 		super();
 		this.screenSwitcher = screenSwitcher;
-
 		this.model = new BossGameScreenModel();
 		this.view = new BossGameScreenView();
-
+		this.equationMode = this.getEquationModeForTower(this.tower);
+		console.log(this.equationMode)
 		this.view.setOnTileEntry((tile: Tile) => {
 			this.addTile(tile);
 		});
@@ -35,15 +38,41 @@ export class BossGameScreenController extends ScreenController {
 			this.removeTile(tile)
 		});
 
-		this.boss = new BossEnemyModel([
-			{ targetNumber: 12, tiles: ["3", "+", "9"], imagePath: "https://p7.hiclipart.com/preview/79/102/357/pac-man-world-3-ghosts-clip-art-pac-man-ghost-png-transparent-image-thumbnail.jpg" },
-			{ targetNumber: 8, tiles: ["4", "x", "2"], imagePath: "https://p7.hiclipart.com/preview/79/102/357/pac-man-world-3-ghosts-clip-art-pac-man-ghost-png-transparent-image-thumbnail.jpg" },
-			{ targetNumber: 5, tiles: ["7", "-", "2"], imagePath: "https://p7.hiclipart.com/preview/79/102/357/pac-man-world-3-ghosts-clip-art-pac-man-ghost-png-transparent-image-thumbnail.jpg" },
-			{ targetNumber: 20, tiles: ["4", "x", "5"], imagePath: "https://p7.hiclipart.com/preview/79/102/357/pac-man-world-3-ghosts-clip-art-pac-man-ghost-png-transparent-image-thumbnail.jpg" }
-		]);
+		this.view.setOnSubmitPress((_: Konva.Rect) => {
+			this.checkSubmit();
+		});
+		
+		this.boss = this.spawnBoss();
+
+
+		// Pause functionality
+		this.view.setOnPauseClick(() => {
+        	this.togglePause();
+		});
+
+		this.view.setOnQuitClick(() => {
+    		this.returnToTowerSelect();
+		});
 	}
 
-
+	private spawnBoss(): BossEnemyModel {
+		return spawnEnemy('boss', 1, this.equationMode) as BossEnemyModel;
+	}
+	getEquationModeForTower(tower: number): EquationMode {
+		switch (tower) {
+			case 1:
+				return "addition";
+			case 2:
+				return "subtraction";
+			case 3:
+				return "multiplication";
+			case 4:
+				return "division";
+			case 5:
+			default:
+				return "any";
+		}
+	}
 	/**
 	 * Get the view group
 	 */
@@ -56,21 +85,13 @@ export class BossGameScreenController extends ScreenController {
 	 */
 	startGame(): void {
 		// Reset model state
-		this.model.reset();
+		this.model.resetTimer();
 		this.boss.reset();
-
-		// Update view
-		// this.view.updateScore(this.model.getScore());
-		// this.view.updateTimer(GAME_DURATION);
-		// this.view.show();
-
-		// console.log(this.model.getNums())
-		// this.view.updateBossNum(this.model.getNums().toString());
-
-		// this.startTimer();
 
 		this.loadPhaseIntoView();
 		this.view.show();
+		this.view.updateHealth(GlobalPlayer.get_health());
+		this.view.updateScore(GlobalPlayer.get_score());
 		this.startTimer();
 	}
 
@@ -87,7 +108,9 @@ export class BossGameScreenController extends ScreenController {
 		this.tileSet.add(tile);
 		const eq = this.makeEquation();
 		this.view.updateEquationText(eq);
+	}
 
+	checkSubmit(): void {
 		if (this.checkEQ()) {
 			console.log("EQUATION COMPLETE");
 			this.view.flashEquationGreen();
@@ -98,9 +121,26 @@ export class BossGameScreenController extends ScreenController {
 				this.boss.nextPhase();
 				this.tileSet.clear(); // Clear current tile selections
 				this.loadPhaseIntoView();
+				this.model.resetTimer();
 			} else {
 				// End game if final phase completed
+				if (this.tower === GlobalPlayer.get_highest_tower()) {
+                    GlobalPlayer.unlock_next_tower();
+					this.saveProgressToBackend(this.tower)
+                }
+				this.tileSet.clear();
+				this.screenSwitcher.switchToScreen({ type: 'tower_select' })
 				this.endGame();
+			}
+		} else {
+			console.log("equation failed");
+			this.view.flashEquationRed();
+			this.model.subtractScore(7);
+			GlobalPlayer.take_damage(1);
+			this.view.updateScore(this.model.getScore());
+			this.view.updateHealth(GlobalPlayer.get_health());
+			if(GlobalPlayer.get_health() <= 0){
+				this.handleDeath();
 			}
 		}
 	}
@@ -109,24 +149,33 @@ export class BossGameScreenController extends ScreenController {
 		this.tileSet.delete(tile);
 		const eq = this.makeEquation();
 		this.view.updateEquationText(eq);
-
-		if (this.checkEQ()) {
-			console.log("EQUATION COMPLETE");
-			this.view.flashEquationGreen();
-
-			// Advance to next phase
-			if (!this.boss.isFinalPhase()) {
-				this.boss.nextPhase();
-				this.tileSet.clear(); // Clear current tile selections
-				this.loadPhaseIntoView();
-			} else {
-				// End game if final phase completed
-				this.endGame();
-			}
-		}
 	}
 
+	private async saveProgressToBackend(towerCompleted:number):Promise<void>{
+		try{
+			const response=await fetch('http://localhost:3000/progress/update',{
+				method:'POST',
+				headers:{'Content-Type':'application/json'},
+				body:JSON.stringify({
+					username:GlobalPlayer.get_username(),
+					towerCompleted:towerCompleted
+				})
+			})
+			const data=await response.json();
+			if(response.ok){
+				console.log('Progress saved to backend:',data)
+			}else{
+				console.error('Failed to save progress:',data.error)
 
+			}}
+			catch(error){
+				console.error('Network error saving progress',error)
+			}
+		}
+		
+	
+
+	
 	/*
 	Start the timer
 	*/
@@ -136,7 +185,7 @@ export class BossGameScreenController extends ScreenController {
 			this.view.updateTimer(timeRemaining);
 
 			if (timeRemaining <= 0) {
-				this.endGame();
+				this.endPhase();
 			}
 		}, 1000);
 	}
@@ -144,13 +193,70 @@ export class BossGameScreenController extends ScreenController {
 	/**
 	 * Stop the timer
 	 */
-	private stopTimer(): void {
-		// TODO: Task 3 - Stop the timer using clearInterval
 
+	private isPaused = false; // Tracks pause state 
+			
+
+	private togglePause(): void {
+		if (this.isPaused) {
+			// Resume the game
+			this.resumeGame();
+		} else {
+			// Pause the game
+			this.pauseGame();
+		}
+		this.isPaused = !this.isPaused;
+	}
+
+	private pauseGame(): void {
+		this.stopTimer();
+		this.view.showPauseOverlay(); 
+    	this.view.getTiles().forEach(tile => tile.getNode().listening(false));
+		this.view.stopEquationPulsate();
+		this.view.stopBossNumPulsate();
+	}
+
+	private resumeGame(): void {
+		this.view.hidePauseOverlay(); // Add this line
+		this.startTimer();
+    	this.view.getTiles().forEach(tile => tile.getNode().listening(true));
+		this.view.startEquationPulsate();
+		this.view.startBossNumPulsate();
+	}
+	public returnToTowerSelect(): void {
+    	this.stopTimer();
+    	this.view.hidePauseOverlay();
+    	this.tileSet.clear();
+    	GlobalPlayer.reset_health();
+    	this.model.resetTimer();
+    	this.isPaused = false; // Reset pause state
+    	this.screenSwitcher.switchToScreen({ type: "tower_select" });
+	}
+	
+	private stopTimer(): void {
 		if (this.gameTimer != null) {
 			clearInterval(this.gameTimer);
 			this.gameTimer = null;
 		}
+
+	}
+
+	private endPhase(): void {
+		//The user failed to complete the phase, just keep it as is
+		this.loadPhaseIntoView();
+		this.model.subtractScore(5)
+		GlobalPlayer.take_damage(1);
+		this.view.updateScore(this.model.getScore());
+		this.view.updateHealth(GlobalPlayer.get_health());
+
+		// Clear any tiles user placed (otherwise old equation persists)
+		this.tileSet.clear();
+		this.view.updateEquationText("");
+
+		// Load the **same boss phase**, but reset timer first
+		this.model.resetTimer(); // you MUST implement this if not already
+		this.loadPhaseIntoView();
+
 	}
 
 	private endGame(): void {
@@ -159,6 +265,7 @@ export class BossGameScreenController extends ScreenController {
 		//bring up pop up
 
 	}
+
 
 	private makeEquation(): string {
 		let toReturn: string = ""
@@ -179,11 +286,27 @@ export class BossGameScreenController extends ScreenController {
 
 	private checkEQ(): boolean {
 		// check if the equation made by makeEquation() equals the boss num
+		//return true if it does equal boss num
 
 		const val: number = evaluate(this.makeEquation());
 
 		return val === this.boss.getCurrentPhase().targetNumber;
 	}
 
+	setTower(tower: number): void {
+        this.tower = tower;
+        this.equationMode = this.getEquationModeForTower(tower);
+        
+        this.boss = this.spawnBoss();
+		this.model.resetTimer();
+    }
 
+	handleDeath(): void {
+		this.view.showGameOver();
+	}
+
+	resetEq(): void{
+		this.tileSet.clear();
+		this.view.updateEquationText("");
+	}
 }

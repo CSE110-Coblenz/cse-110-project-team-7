@@ -17,15 +17,15 @@ import { LoginScreenController } from "./screens/LoginScreen/LoginScreenControll
  * Key concept: All screens are added to the same layer, but only one is
  * visible at a time. This is managed by the switchToScreen() method.
  */
+
 class App implements ScreenSwitcher {
 	private stage: Konva.Stage;
 	private layer: Konva.Layer;
 
-    private basicgamecontroller: BasicGameScreenController;
+	private basicgamecontroller: BasicGameScreenController;
 	private bossgamecontroller: BossGameScreenController;
 	private towerselectcontroller: TowerSelectScreenController;
 	private logincontroller: LoginScreenController;
-	
 
 	constructor(container: string) {
 		// Initialize Konva stage (the main canvas)
@@ -33,6 +33,15 @@ class App implements ScreenSwitcher {
 			container,
 			width: STAGE_WIDTH,
 			height: STAGE_HEIGHT,
+		});
+
+		window.addEventListener("resize", () => {
+			const stage = Konva.stages?.[0];
+			if (stage) {
+				stage.width(window.innerWidth);
+				stage.height(window.innerHeight);
+				stage.draw();
+			}
 		});
 
 		// Create a layer (screens will be added to this layer)
@@ -45,7 +54,7 @@ class App implements ScreenSwitcher {
 		this.bossgamecontroller = new BossGameScreenController(this);
 		this.towerselectcontroller = new TowerSelectScreenController(this);
 		this.logincontroller = new LoginScreenController(this);
-		
+
 
 		// Add all screen groups to the layer
 		// All screens exist simultaneously but only one is visible at a time
@@ -53,7 +62,7 @@ class App implements ScreenSwitcher {
 		this.layer.add(this.bossgamecontroller.getView().getGroup());
 		this.layer.add(this.towerselectcontroller.getView().getGroup());
 		this.layer.add(this.logincontroller.getView().getGroup());
-		
+
 
 		// Draw the layer (render everything to the canvas)
 		this.layer.draw();
@@ -77,7 +86,7 @@ class App implements ScreenSwitcher {
 		this.bossgamecontroller.hide();
 		this.towerselectcontroller.hide();
 		this.logincontroller.hide();
-		
+
 
 		// Show the requested screen based on the screen type
 		switch (screen.type) {
@@ -85,6 +94,10 @@ class App implements ScreenSwitcher {
 				this.basicgamecontroller.show();
 				break;
 			case "boss_game":
+				let curr_tower = this.basicgamecontroller.getTower();
+				// this.bossgamecontroller.equationMode = this.bossgamecontroller.getEquationModeForTower(curr_tower);
+				this.bossgamecontroller.setTower(curr_tower);
+				this.bossgamecontroller.resetEq();
 				this.bossgamecontroller.show();
 				this.bossgamecontroller.startGame();
 				break;
@@ -97,6 +110,10 @@ class App implements ScreenSwitcher {
 
 			//add more cases as we go
 		}
+	}
+
+	setCurrentTower(tower: number): void {
+		this.basicgamecontroller.setTower(tower);
 	}
 }
 

@@ -30,11 +30,12 @@ export class LoginScreenView implements View {
 		 */
 		const title = new Konva.Text({
 			x: STAGE_WIDTH / 2,
-			y: 80,
-			text: "Math Game Login",
+			y: STAGE_HEIGHT/2-120,
+			text: "Welcome to the Math Game",
 			fontSize: 36,
 			fontFamily: "Arial",
-			fill: "black"
+			fill: "white",
+			align:'center'
 		});
 		title.offsetX(title.width() / 2);
 		this.group.add(title);
@@ -44,7 +45,7 @@ export class LoginScreenView implements View {
 		 */
 		const usernameBox = new Konva.Rect({
 			x: STAGE_WIDTH / 2 - 150,
-			y: 200,
+			y: STAGE_HEIGHT/2-60,
 			width: 300,
 			height: 45,
 			fill: "#ffffff",
@@ -53,9 +54,19 @@ export class LoginScreenView implements View {
 		});
 		this.group.add(usernameBox);
 
+		const usernamePlaceholder =new Konva.Text({
+			x:STAGE_WIDTH/2-140,
+			Y:STAGE_HEIGHT/2-48,
+			text:"Enter Username",
+			fontsize:30,
+			fontFamily:"Arial",
+			fill:'#999999',
+			visible:true
+		})
+		this.group.add(usernamePlaceholder)
 		this.usernameText = new Konva.Text({
 			x: STAGE_WIDTH / 2 - 140,
-			y: 212,
+			y: STAGE_HEIGHT/2-48,
 			text: "",
 			fontSize: 20,
 			fontFamily: "Arial",
@@ -92,7 +103,7 @@ export class LoginScreenView implements View {
 		 */
 		const passwordBox = new Konva.Rect({
 			x: STAGE_WIDTH / 2 - 150,
-			y: 260,
+			y: STAGE_HEIGHT/2,
 			width: 300,
 			height: 45,
 			fill: "#ffffff",
@@ -101,9 +112,20 @@ export class LoginScreenView implements View {
 		});
 		this.group.add(passwordBox);
 
+		const passwordPlaceholder=new Konva.Text({
+			x:STAGE_WIDTH/2-140,
+			y:STAGE_HEIGHT/2+12,
+			text:"Enter Password",
+			fontsize:20,
+			fontFamily:"Arial",
+			fill:'#999999',
+			visible:true
+		});
+		this.group.add(passwordPlaceholder);
+
 		this.passwordText = new Konva.Text({
 			x: STAGE_WIDTH / 2 - 140,
-			y: 272,
+			y: STAGE_HEIGHT/2+12,
 			text: "",
 			fontSize: 20,
 			fontFamily: "Arial",
@@ -155,7 +177,7 @@ export class LoginScreenView implements View {
 		 */
 		const loginButton = new Konva.Rect({
 			x: STAGE_WIDTH / 2 - 150,
-			y: 330,
+			y: STAGE_HEIGHT/2+70,
 			width: 130,
 			height: 45,
 			fill: "#4caf50",
@@ -163,7 +185,7 @@ export class LoginScreenView implements View {
 		});
 		const loginText = new Konva.Text({
 			x: STAGE_WIDTH / 2 - 115,
-			y: 343,
+			y: STAGE_HEIGHT/2+83,
 			text: "Login",
 			fontSize: 22,
 			fill: "white"
@@ -223,7 +245,7 @@ export class LoginScreenView implements View {
 		 */
 		const signUpButton = new Konva.Rect({
 			x: STAGE_WIDTH / 2 + 20,
-			y: 330,
+			y: STAGE_HEIGHT/2+70,
 			width: 130,
 			height: 45,
 			fill: "#2196f3",
@@ -231,7 +253,7 @@ export class LoginScreenView implements View {
 		});
 		const signUpText = new Konva.Text({
 			x: STAGE_WIDTH / 2 + 50,
-			y: 343,
+			y: STAGE_HEIGHT/2+83,
 			text: "Sign Up",
 			fontSize: 22,
 			fill: "white"
@@ -246,6 +268,31 @@ export class LoginScreenView implements View {
 
 		this.group.add(signUpButton);
 		this.group.add(signUpText);
+
+		const loginMessage=new Konva.Text({
+			x:STAGE_WIDTH/2-150,
+			y:STAGE_HEIGHT/2+120,
+			text:"If you already have an account click the Login Button",
+			fontsize:20,
+			fontFamily:"Arial",
+			fill:'white',
+			width:130,
+			align:'center'
+		});
+		this.group.add(loginMessage);
+
+		const signupMessage=new Konva.Text({
+			x:STAGE_WIDTH/2+20,
+			y:STAGE_HEIGHT/2+120,
+			text:"If you're creating a new account click the Sign Up Button",
+			fontsize:20,
+			fontFamily:'Arial',
+			fill:'white',
+			width:130,
+			align:'center'
+		});
+		this.group.add(signupMessage)
+
 
 		/*
 		 * Cursor styling for sing up button
@@ -281,16 +328,24 @@ export class LoginScreenView implements View {
 			if (e.key === "Backspace") {
 				if (this.activeField === "username") {
 					this.usernameText.text(this.usernameText.text().slice(0, -1));
+					if(this.usernameText.text()==""){
+						usernamePlaceholder.visible(true);
+					}
 				} else {
 					this.passwordText.text(this.passwordText.text().slice(0, -1));
+					if(this.passwordText.text()==""){
+						passwordPlaceholder.visible(true)
+					}
 				}
 			} else if (e.key === "Enter") {
 				this.onLogin(this.usernameText.text(), this.passwordText.text());
 			} else if (e.key.length === 1) {
 				if (this.activeField === "username") {
 					this.usernameText.text(this.usernameText.text() + e.key);
+					usernamePlaceholder.visible(false)
 				} else {
 					this.passwordText.text(this.passwordText.text() + "*");
+					passwordPlaceholder.visible(false)
 				}
 			}
 
