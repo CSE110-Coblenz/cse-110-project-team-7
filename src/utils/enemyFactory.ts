@@ -1,6 +1,6 @@
 import { getRandomSprite } from './spriteUtils';
 import { BasicEnemy } from '../models/BasicEnemyModel';
-import { BossEnemyModel } from '../models/BossEnemyModel';
+import { BossEnemyModel, BossPhase } from '../models/BossEnemyModel';
 
 const MAX_HEALTH = 30;
 const MIN_HEALTH = 10;
