@@ -22,8 +22,7 @@ export class BasicGameScreenModel {
     tower: number;
     enemy: BasicEnemy | null = null;
     
-    // Game state
-    private playerHealth: number = 3;
+    private playerHealth = GlobalPlayer.get_health();
     private correctAnswers: number = 0;
     private equationMode: EquationMode = "addition";
     private equationOptions: string[] = [];
@@ -31,13 +30,11 @@ export class BasicGameScreenModel {
     readonly MAX_HEALTH = 3;
     readonly MAX_LEVELS = 20;
 
-    constructor(level: number = BASE_LEVEL, tower: number = BASE_TOWER) {
+    constructor(level: number = 0, tower: number = 1) {
         this.level = level;
         this.tower = tower;
-        this.spawnNewEnemy();
     }
 
-    // Level management
     increment_level(): void {
         this.level += 1;
     }
@@ -62,10 +59,12 @@ export class BasicGameScreenModel {
                 this.equationMode = "any";
                 break;
         }
+
+        GlobalPlayer.reset_health();
     }
 
     reset_level(): void {
-        this.level = BASE_LEVEL;
+        this.level = 0;
     }
 
     // Player health management
@@ -96,7 +95,6 @@ export class BasicGameScreenModel {
         return this.correctAnswers >= this.MAX_LEVELS;
     }
 
-    // Enemy management
     getCurrentEnemy(): BasicEnemy | null {
         return this.enemy;
     }
@@ -127,7 +125,10 @@ export class BasicGameScreenModel {
         return this.equationOptions;
     }
 
-    // Answer validation - check if selected equation equals enemy health
+    getEquationMode(): EquationMode {
+        return this.equationMode;
+    }
+
     checkAnswer(selected: string): boolean {
         if (!this.enemy) return false;
         

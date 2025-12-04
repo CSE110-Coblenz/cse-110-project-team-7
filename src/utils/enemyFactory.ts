@@ -2,7 +2,7 @@ import { getRandomSprite } from './spriteUtils';
 import { BasicEnemy } from '../models/BasicEnemyModel';
 import { BossEnemy } from '../models/BossEnemyModel';
 
-const MAX_HEALTH = 100;
+const MAX_HEALTH = 30;
 const MIN_HEALTH = 10;
 
 // Random number in range
