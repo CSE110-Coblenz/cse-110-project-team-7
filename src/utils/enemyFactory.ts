@@ -1,42 +1,30 @@
 import { getRandomSprite } from './spriteUtils';
-import { BasicEnemy } from '../models/BasicEnemyModel'
-import { BossEnemyModel, type BossPhase } from '../models/BossEnemyModel'
-import type { EquationMode } from '../screens/BasicGameScreen/BasicGameScreenModel';
+import { BasicEnemy } from '../models/BasicEnemyModel';
+import { BossEnemy } from '../models/BossEnemyModel';
 
 const MAX_HEALTH = 30;
 const MIN_HEALTH = 10;
 
+// Random number in range
 function randomInt(): number {
   return Math.floor(Math.random() * (MAX_HEALTH - MIN_HEALTH + 1)) + MIN_HEALTH;
 }
 
-function generateBossPhase(): BossPhase {
-  return {
-        targetNumber: randomInt(),
-        tiles: [], 
-        imagePath: `boss_phase_${Math.floor(Math.random() * 3) + 1}.png`
-    };
-}
-
-function generatePhases(count: number = 3): BossPhase[] {
-  return Array.from({ length: count }, () => generateBossPhase());
-}
-
 export function spawnEnemy(
-    type: "normal" | "boss" = "normal", 
-    damage: number = 1,
-    equationMode?: EquationMode
-): BasicEnemy | BossEnemyModel {
-    const spriteData = getRandomSprite(type);
-    if (!spriteData) throw new Error("getRandomSprite() returned undefined!");
+  type: "normal" | "boss" = "normal",
+  damage: number = 1
+): BasicEnemy | BossEnemy {
 
-    const [name, sprite] = spriteData;
+  const health = randomInt();
 
-    if (type === "boss") {
-        const phases = generatePhases();
-        return new BossEnemyModel(phases);
-    }
+  // Make sprite utils consistent with model expectations
+  const { name, spriteSet } = getRandomSprite(type); 
+  // ^ We'll update spriteUtils next if needed
 
-    const health = randomInt();
-    return new BasicEnemy(health, damage, name, sprite);
+  if (type === "boss") {
+    const healthBars = [randomInt(), randomInt(), randomInt()];
+    return new BossEnemy(healthBars, damage, name, spriteSet);
+  }
+
+  return new BasicEnemy(health, damage, name, spriteSet);
 }

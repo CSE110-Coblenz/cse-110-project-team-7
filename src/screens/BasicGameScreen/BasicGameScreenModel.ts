@@ -1,9 +1,22 @@
 import { BasicEnemy } from '../../models/BasicEnemyModel'
 import { generateEquationOptions } from "../../utils/generateEquation.ts";
 import { evaluate } from "../../utils/equationSolver.ts";
-import { GlobalPlayer } from '../../GlobalPlayer.ts';
-export type EquationMode = "any" | "addition" | "subtraction" | "multiplication" | "division";
+import { ENEMY_SPRITE_SETS } from '../../utils/spriteUtils.ts';
 
+/**
+ * GameScreenModel - Manages game state
+ */
+const BASE_LEVEL = 0;
+const BASE_TOWER = 1;
+const LEVELS_PER_TOWER = 10;
+
+export type EquationMode = "any" | "addition" | "subtraction" | "multiplication" | "division";
+const ENEMY_SPRITES = [
+    'src/assets/monsters/mask.png',
+    'src/assets/monster.png',
+    'src/assets/monsters/redrobot.png',
+    'src/assets/monsters/slimeblue.png'
+]
 export class BasicGameScreenModel {
     level: number;
     tower: number;
@@ -89,11 +102,24 @@ export class BasicGameScreenModel {
     getEnemyHealth(): number {
         return this.enemy ? this.enemy.health : 0;
     }
-
-    setEnemy(enemy: BasicEnemy): void {
-        this.enemy = enemy;
-        this.equationOptions = generateEquationOptions(enemy.health, this.equationMode);
+    
+    private spriteIndex: number = 0;
+    spawnNewEnemy(): void {
+        const targetHealth = Math.floor(Math.random() * 30);
+    
+        const sprites = ENEMY_SPRITE_SETS[this.spriteIndex];
+        this.spriteIndex = (this.spriteIndex + 1) % ENEMY_SPRITE_SETS.length;
+    
+        this.enemy = new BasicEnemy(
+            targetHealth,
+            1,
+            `Monster ${this.correctAnswers + 1}`,
+            sprites
+        );
+    
+        this.equationOptions = generateEquationOptions(targetHealth, this.equationMode);
     }
+    
 
     getEquationOptions(): string[] {
         return this.equationOptions;

@@ -34,17 +34,27 @@ export class BasicGameScreenController extends ScreenController {
         if (enemy) {
             const enemyHealth = this.model.getEnemyHealth();
             const equationOptions = this.model.getEquationOptions();
-            
+    
+            // Update the monster image based on the real enemy sprite
+            this.view.updateMonsterImage(enemy.idleSprite);
+    
             this.view.displayEnemyChallenge(enemyHealth, equationOptions);
         }
+    }
+    
+    getCurrentEnemySprite(): string {
+        const enemy = this.model.getCurrentEnemy();
+        return enemy ? enemy.idleSprite : 'src/assets/monster.png';
     }
 
     async handleAnswer(selected: string): Promise<void> {
         const isCorrect = this.model.checkAnswer(selected);
+        const enemy = this.model.getCurrentEnemy();
+        if (!enemy) return;
         
         if (isCorrect) {
             this.view.showCorrectFeedback();
-            this.view.updateMonsterImage('src/assets/monstersln.png');
+            this.view.updateMonsterImage(enemy.slainSprite);
             
             this.model.defeatCurrentEnemy();
             this.model.incrementCorrectAnswers();
@@ -57,20 +67,19 @@ export class BasicGameScreenController extends ScreenController {
                 return;
             }
             
-            // Controller spawns new enemy using factory
-            this.spawnNewEnemy();
-            this.view.updateMonsterImage('src/assets/monster.png');
+            // Spawn new enemy and load it
+            this.model.spawnNewEnemy();
             this.loadCurrentEnemy();
             
         } else {
             this.view.showWrongFeedback();
-            this.view.updateMonsterImage('src/assets/monsteratk.png');
+            this.view.updateMonsterImage(enemy.attackSprite);
             
             this.model.decreasePlayerHealth();
             this.view.updateHealthDisplay(this.model.getPlayerHealth());
             
             await this.sleep(2000);
-            this.view.updateMonsterImage('src/assets/monster.png');
+            this.view.updateMonsterImage(this.getCurrentEnemySprite());
             
             if (!this.model.isPlayerAlive()) {
                 this.view.showGameOver();
