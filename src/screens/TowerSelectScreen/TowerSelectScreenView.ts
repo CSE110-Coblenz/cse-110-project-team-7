@@ -26,11 +26,10 @@ export class TowerSelectScreenView implements View {
 			height: STAGE_HEIGHT,
 			fillLinearGradientStartPoint: { x: 0, y: 0 },
 			fillLinearGradientEndPoint: { x: 0, y: STAGE_HEIGHT },
-			fillLinearGradientColorStops: [0, "#2E1A47", 0.6, "#6A2C70", 1, "#F08A5D"], // Deep purple -> Magenta -> Sunset Orange
+			fillLinearGradientColorStops: [0, "#2E1A47", 0.6, "#6A2C70", 1, "#F08A5D"], //purple --> pink --> orange sky color
 		});
 		this.group.add(sky);
 
-		// 2. Moon (Pale glow)
 		const moon = new Konva.Circle({
 			x: STAGE_WIDTH - 100,
 			y: 80,
@@ -102,6 +101,7 @@ export class TowerSelectScreenView implements View {
 		);
 		subTower.on("click", () => { if (this.onTowerSelect) this.onTowerSelect("subtraction"); });
 		this.group.add(subTower);
+		
 
 		// 3. Tower of Multiplication
 		const multTower = this.createTowerButton(
@@ -157,18 +157,18 @@ export class TowerSelectScreenView implements View {
 		let currentY = baseY;
 		
 		for (let i = 0; i <= segments; i++) {
-			// Randomly go up or down, but stay blocky
+			//goes up and down randomly to create a blocky effecet
 			const step = (Math.random() - 0.5) * variance;
 			currentY += step;
 			
-			// Keep within bounds
+			
 			if (currentY < baseY - variance) currentY = baseY - variance;
 			if (currentY > baseY + variance) currentY = baseY + variance;
 
 			const x = i * segmentWidth;
 			points.push(x, currentY);
 			
-			// Create the "step" effect (flat top)
+			
 			if (i < segments) {
 				points.push((i + 1) * segmentWidth, currentY);
 			}
@@ -296,7 +296,7 @@ export class TowerSelectScreenView implements View {
 	}
 
 	private createInfoModal(): void {
-		// Modal background (semi-transparent overlay)
+		// background overlay
 		const overlay = new Konva.Rect({
 			x: 0,
 			y: 0,
@@ -309,7 +309,7 @@ export class TowerSelectScreenView implements View {
 			this.toggleInfoModal();
 		});
 
-		// Modal box
+		//  box
 		const modalWidth = 500;
 		const modalHeight = 400;
 		const modalX = STAGE_WIDTH / 2 - modalWidth / 2;
@@ -321,7 +321,7 @@ export class TowerSelectScreenView implements View {
 			visible: false,
 		});
 
-		// Modal background
+		// modal background
 		const modalBg = new Konva.Rect({
 			width: modalWidth,
 			height: modalHeight,
@@ -361,7 +361,7 @@ export class TowerSelectScreenView implements View {
 		];
 
 		let yPos = 90;
-		instructions.forEach((instruction, index) => {
+		instructions.forEach((instruction) => {
 			const instructionText = new Konva.Text({
 				x: 30,
 				y: yPos,
