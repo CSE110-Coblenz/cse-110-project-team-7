@@ -4,7 +4,7 @@ import { STAGE_WIDTH, STAGE_HEIGHT } from "../../constants.ts";
 import type { TowerType } from "../../types.ts";
 
 /**
- * TowerSelectScreenView - Renders the tower selection UI using Konva
+ * TowerSelectScreenView - displays the tower selection screen using Konva
  */
 export class TowerSelectScreenView implements View {
 	private group: Konva.Group;
@@ -18,7 +18,7 @@ export class TowerSelectScreenView implements View {
     }
 
 	private setupUI(): void {
-		// 1. Sky Gradient (Dark Purple Sunset/Dusk)
+		// Sky Gradient (Dark Purple Sunset)
 		const sky = new Konva.Rect({
 			x: 0,
 			y: 0,
@@ -34,20 +34,20 @@ export class TowerSelectScreenView implements View {
 			x: STAGE_WIDTH - 100,
 			y: 80,
 			radius: 40,
-			fill: "#F4F6F0", // Pale white
+			fill: "#F4F6F0", 
 			shadowColor: "#FFFFFF",
 			shadowBlur: 30,
 			shadowOpacity: 0.6,
 		});
 		this.group.add(moon);
 
-		// 3. Background Mountains (Dark Silhouette Purple)
+		//Background Mountains 
 		this.createPixelTerrain(STAGE_HEIGHT / 2 + 50, "#372549", 0.9, 80);
 
-		// 4. Midground Hills (Dark Teal/Shadowed Green)
+		// Midground Hills 
 		this.createPixelTerrain(STAGE_HEIGHT / 2 + 120, "#1A3C40", 1, 60);
 
-		// 5. Foreground Ground (Dark Dirt)
+		// Ground (Dark Dirt)
 		const groundY = STAGE_HEIGHT - 100;
 		const ground = new Konva.Rect({
 			x: 0,
@@ -60,10 +60,10 @@ export class TowerSelectScreenView implements View {
 		});
 		this.group.add(ground);
 
-		// Add welcome message at the top
+		
 		this.createWelcomeMessage();
 
-		// Add info button in top-right corner
+		
 		this.createInfoButton();
 
 		// Button dimensions and spacing for 5 towers
@@ -76,7 +76,7 @@ export class TowerSelectScreenView implements View {
 		const totalWidth = 5 * buttonWidth + 4 * buttonSpacing;
 		const startX = STAGE_WIDTH / 2 - totalWidth / 2;
 
-		// 1. Tower of Addition
+		//Addition
 		const addTower = this.createTowerButton(
 			"Addition",
 			"+",
@@ -89,7 +89,7 @@ export class TowerSelectScreenView implements View {
 		addTower.on("click", () => { if (this.onTowerSelect) this.onTowerSelect("addition"); });
 		this.group.add(addTower);
 
-		// 2. Tower of Subtraction
+		// Subtraction
 		const subTower = this.createTowerButton(
 			"Subtraction",
 			"-",
@@ -103,7 +103,7 @@ export class TowerSelectScreenView implements View {
 		this.group.add(subTower);
 		
 
-		// 3. Tower of Multiplication
+		//Multiplication
 		const multTower = this.createTowerButton(
 			"Multiplication",
 			"×",
@@ -116,7 +116,7 @@ export class TowerSelectScreenView implements View {
 		multTower.on("click", () => { if (this.onTowerSelect) this.onTowerSelect("multiplication"); });
 		this.group.add(multTower);
 
-		// 4. Tower of Division
+		// Division
 		const divTower = this.createTowerButton(
 			"Division",
 			"÷",
@@ -129,7 +129,7 @@ export class TowerSelectScreenView implements View {
 		divTower.on("click", () => { if (this.onTowerSelect) this.onTowerSelect("division"); });
 		this.group.add(divTower);
 
-		// 5. Tower of All Operations (Combo)
+		//Tower of All Operations
 		const comboTower = this.createTowerButton(
 			"All Operations",
 			"★",
@@ -194,7 +194,7 @@ export class TowerSelectScreenView implements View {
 			text: "Welcome to Math Towers!",
 			fontSize: 42,
 			fontFamily: "Arial",
-			fill: "black", // Stronger shadow for contrast
+			fill: "black", 
 			opacity: 0.5,
 			align: "center",
 			fontStyle: "bold",
@@ -208,10 +208,10 @@ export class TowerSelectScreenView implements View {
 			text: "Welcome to Math Towers!",
 			fontSize: 42,
 			fontFamily: "Arial",
-			fill: "#FFFFFF", // White text for dark background
+			fill: "#FFFFFF", // White text 
 			align: "center",
 			fontStyle: "bold",
-			shadowColor: "#F08A5D", // Slight glow matching sunset
+			shadowColor: "#F08A5D",
 			shadowBlur: 10,
 		});
 		welcomeText.x(welcomeText.x() - welcomeText.width() / 2);
@@ -260,7 +260,7 @@ export class TowerSelectScreenView implements View {
 		//having trouble getting question mark into the center
 		const questionMark = new Konva.Text({
 			x: -buttonSize / 2,
-			y: -buttonSize / 2 + 9, // +9 for vertical centering ((50-32)/2)
+			y: -buttonSize / 2 + 9, // +9 for vertical centering 
 			width: buttonSize,
 			text: "?",
 			fontSize: 32,
@@ -397,7 +397,7 @@ export class TowerSelectScreenView implements View {
 
 		const closeX = new Konva.Text({
 			x: -closeButtonSize / 2,
-			y: -closeButtonSize / 2 + 1, // Slight adjustment for visual centering
+			y: -closeButtonSize / 2 + 1, // Slight adjustment for centering
 			width: closeButtonSize,
 			height: closeButtonSize,
 			text: "×",
@@ -428,7 +428,7 @@ export class TowerSelectScreenView implements View {
 
 		modalGroup.add(closeButton);
 
-		// Prevent clicks on modal from closing it
+		// Prevent clicks on graphic from closing it
 		modalGroup.on("click", (e) => {
 			e.cancelBubble = true;
 		});
@@ -444,7 +444,7 @@ export class TowerSelectScreenView implements View {
 
 		this.isModalOpen = !this.isModalOpen;
 		
-		// Toggle visibility of overlay and modal
+		// Toggle visibility of overlay
 		const overlay = this.infoModalGroup.children[0] as Konva.Rect;
 		const modal = this.infoModalGroup.children[1] as Konva.Group;
 		
@@ -468,7 +468,7 @@ export class TowerSelectScreenView implements View {
 			y,
 		});
 
-		// Draw tower structure (simple rectangle)
+		// Draw tower structure (rectangle)
 		const towerBody = new Konva.Rect({
 			x: width / 2 - 30,
 			y: -200,
@@ -572,7 +572,7 @@ export class TowerSelectScreenView implements View {
 	}
 
 	public showLockedPopup(): void {
-        // 1. Create a dark overlay
+        //Create a dark overlay
         const overlay = new Konva.Rect({
             x: 0,
             y: 0,
@@ -581,7 +581,7 @@ export class TowerSelectScreenView implements View {
             fill: "rgba(0,0,0,0.7)",
         });
 
-        // 2. Create the popup box
+        //Create the popup box
         const width = 400;
         const height = 200;
         const group = new Konva.Group({
@@ -592,7 +592,7 @@ export class TowerSelectScreenView implements View {
         const rect = new Konva.Rect({
             width: width,
             height: height,
-            fill: "#e74c3c", // Red color for 'Locked'
+            fill: "#e74c3c", // Red color for "locked"
             stroke: "white",
             strokeWidth: 4,
             cornerRadius: 10,
@@ -601,7 +601,7 @@ export class TowerSelectScreenView implements View {
             shadowOpacity: 0.5,
         });
 
-        // 3. Add text
+        // Add text
         const text = new Konva.Text({
             x: 20,
             y: 20,
@@ -617,7 +617,7 @@ export class TowerSelectScreenView implements View {
         // Center the text vertically
         text.y((height - text.height()) / 2);
 
-        // 4. Close button logic
+        //Close button logic (clear group and overlay)
         const closePopup = () => {
             group.destroy();
             overlay.destroy();
