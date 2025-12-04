@@ -99,9 +99,9 @@ export class BasicGameScreenController extends ScreenController {
 
         this.spawnNewEnemy();
         this.loadCurrentEnemy();
-
-        this.model.resetTimer();
+        this.isPaused = false;
         this.stopTimer();
+        this.model.resetTimer();
         this.startTimer();
     }
 
@@ -115,6 +115,7 @@ export class BasicGameScreenController extends ScreenController {
     private sleep(ms: number): Promise<void> { return new Promise(resolve => setTimeout(resolve, ms)); }
 
     private startTimer(): void {
+        if (this.gameTimer !== null) return;
         this.gameTimer = setInterval(() => {
             const timeRemaining = this.model.tickTimer();
             this.view.updateTimer(timeRemaining);
@@ -165,6 +166,7 @@ export class BasicGameScreenController extends ScreenController {
         GlobalPlayer.reset_health();
         this.model.resetTimer();
         this.model.reset_level();
+        this.isPaused = false;
         this.screenSwitcher.switchToScreen({ type: "tower_select" });
     }
 }

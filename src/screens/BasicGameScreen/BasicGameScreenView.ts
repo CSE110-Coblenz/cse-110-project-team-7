@@ -5,7 +5,7 @@ import { BossGameScreenView } from "../BossGameScreen/BossGameScreenView.ts";
 import type { BasicGameScreenController } from "./BasicGameScreenController.ts";
 
 let bossScreen: BossGameScreenView | null = null;
-const DESIRED_MONSTER_SIZE = 150;
+
 
 export class BasicGameScreenView implements View {
     private group: Konva.Group;
@@ -20,8 +20,9 @@ export class BasicGameScreenView implements View {
     private timerText?: Konva.Text;
     private pauseOverlay?: Konva.Rect;
     private pauseCloseBtn?: Konva.Text;
-    private quitBtn?: Konva.Rect | Konva.Text | Konva.Group;
-
+    private pauseButton!: Konva.Text;
+    private quitBtn?: Konva.Group;
+    
     constructor(controller: BasicGameScreenController) {
         this.controller = controller;
         this.group = new Konva.Group({ visible: false });
@@ -31,32 +32,31 @@ export class BasicGameScreenView implements View {
     private initializeUI(): void {
         const maxHealth = this.controller.getMaxHealth();
         this.hearts = new Array(maxHealth);
-
+        
+        // 1. Castle Background
         this.createCobblestoneWall();
         this.createStoneFloor();
-
+        
+        // Add Lanterns
         this.createLantern(100, 150);
         this.createLantern(STAGE_WIDTH - 100, 150);
 
-        // Monster placeholder (use proper scaling on load)
-        Konva.Image.fromURL(this.controller.getCurrentEnemySprite(), (monsterNode) => {
+        // Monster Handling
+        Konva.Image.fromURL('src/assets/monster.png', (monsterNode) => {
             this.monster = monsterNode;
-            const img = monsterNode.image();
-
-            const applyScale = () => {
-                const scale = DESIRED_MONSTER_SIZE / img.width;
-                const position = { x: STAGE_WIDTH / 2.15, y: 100 };
-                monsterNode.position(position);
-                monsterNode.scale({ x: scale, y: scale });
-                this.group.add(monsterNode);
-                this.group.getLayer()?.draw();
-            };
-
-            if (img.width > 0) applyScale();
-            else img.onload = applyScale;
+            monsterNode.setAttrs({
+                x: STAGE_WIDTH / 2.5,
+                y: -10,
+                scaleX: 0.5,
+                scaleY: 0.5,
+                cornerRadius: 20,
+                image: monsterNode.image()
+            });
+            this.group.add(monsterNode);
+            this.group.getLayer()?.draw();
         });
 
-        // Hearts
+        // Hearts Handling
         for (let i = 0; i < maxHealth; i++) {
             Konva.Image.fromURL('src/assets/heart.png', (heart) => {
                 heart.setAttrs({
@@ -72,73 +72,88 @@ export class BasicGameScreenView implements View {
             });
         }
 
-        // Level/progress text
+        this.createHelpButton();
+
+        
+        this.pauseButton = new Konva.Text({
+            x: STAGE_WIDTH - 70,
+            y: 100,
+            text: "II",
+            fontSize: 40,
+            fontFamily: "Arial",
+            fill: "#F7C500",
+            stroke: "black",
+            strokeWidth: 2,
+            cursor: "pointer",
+            fontStyle: "bold"
+        });
+
+        this.pauseButton.on("mouseover", () => {
+            document.body.style.cursor = "pointer";
+            this.pauseButton.fill("#D1A700");
+            this.group.getLayer()?.draw();
+        });
+
+        this.pauseButton.on("mouseout", () => {
+            document.body.style.cursor = "default";
+            this.pauseButton.fill("#F7C500");
+            this.group.getLayer()?.draw();
+        });
+
+        this.pauseButton.on("click", () => {
+            this.controller.togglePaused();
+        });
+
+        this.group.add(this.pauseButton);
+
+
         this.levelText = new Konva.Text({
             x: STAGE_WIDTH - 180,
             y: STAGE_HEIGHT - 50,
             text: `Progress: ${this.controller.getCorrectAnswers()}/${this.controller.getMaxLevels()}`,
             fontSize: 28,
             fontFamily: "Calibri",
-            fill: "black",
+            fill: "white",
+            shadowColor: "black",
+            shadowBlur: 2,
         });
         this.group.add(this.levelText);
 
-        // Enemy health text
         this.enemyHealthText = new Konva.Text({
             x: STAGE_WIDTH / 2,
             y: 0,
             text: "",
             fontSize: 36,
             fontFamily: "Calibri",
-            fill: "black",
+            fill: "white",
+            shadowColor: "black",
+            shadowBlur: 2,
         });
         this.group.add(this.enemyHealthText);
 
-        // Score text
         this.scoreText = new Konva.Text({
             x: 20,
             y: 100,
-            text: "Score: 0",
-            fontSize: 36,
-            fontFamily: "Calibri",
-            fill: "black",
-        });
-        this.group.add(this.scoreText);
-
-        // Timer text
-        this.timerText = new Konva.Text({
-            x: 20,
-            y: 150,
-            text: "Time: 0",
-            fontSize: 36,
-            fontFamily: "Calibri",
-            fill: "black",
-        });
-        this.group.add(this.timerText);
-
-        
-
-        // Pause button
-        const pauseButton = new Konva.Text({
-            x: STAGE_WIDTH - 70,
-            y: 100,
-            text: "II",
+            text: "Score: ",
             fontSize: 36,
             fontFamily: "Calibri",
             fill: "white",
             shadowColor: "black",
             shadowBlur: 2,
-            cursor: "pointer",
         });
-        pauseButton.name("pauseButton");
-        pauseButton.on("click", () => {
-            pauseButton.visible(false);
-            this.controller.togglePaused();
-        });
-        this.group.add(pauseButton);
+        this.group.add(this.scoreText);
 
-        // Add help button
-        this.createHelpButton();
+        this.timerText = new Konva.Text({
+            x: 20,
+            y: 150,
+            text: "Time: ",
+            fontSize: 36,
+            fontFamily: "Calibri",
+            fill: "white",
+            shadowColor: "black",
+            shadowBlur: 2,
+        });
+        this.group.add(this.timerText);
     }
 
     private createCobblestoneWall(): void {
@@ -182,6 +197,7 @@ export class BasicGameScreenView implements View {
             }
         }
     }
+
     private createStoneFloor(): void {
         const width = STAGE_WIDTH || 800;
         const height = STAGE_HEIGHT || 600;
@@ -247,56 +263,271 @@ export class BasicGameScreenView implements View {
     }
 
     private createHelpButton(): void {
-        const helpGroup = new Konva.Group({ x: STAGE_WIDTH - 70, y: 20, cursor: "pointer" });
+        const helpGroup = new Konva.Group({
+            x: STAGE_WIDTH - 70,
+            y: 20,
+            cursor: "pointer",
+        });
 
         const helpBox = new Konva.Rect({
-            x: 0, y: 0, width: 50, height: 50,
-            fill: "lightblue", stroke: "blue", strokeWidth: 2, cornerRadius: 5
+            x: 0,
+            y: 0,
+            width: 50,
+            height: 50,
+            fill: "lightblue",
+            stroke: "blue",
+            strokeWidth: 2,
+            cornerRadius: 5,
         });
 
         const helpText = new Konva.Text({
-            x: 0, y: 0, width: 50, height: 50,
-            text: "?", fontSize: 36, fontFamily: "Calibri",
-            fill: "blue", align: "center", verticalAlign: "middle",
-            listening: false
+            x: 0,
+            y: 0,
+            text: "?",
+            fontSize: 36,
+            fontFamily: "Calibri",
+            fill: "blue",
+            width: 50,
+            height: 50,
+            align: "center",
+            verticalAlign: "middle",
+            listening: false,
         });
 
-        helpGroup.on("mouseover", () => { helpBox.fill("darkblue"); this.group.getLayer()?.batchDraw(); });
-        helpGroup.on("mouseout", () => { helpBox.fill("lightblue"); this.group.getLayer()?.batchDraw(); });
-        helpGroup.on("click", () => { this.showHelpPopup(); });
+        helpGroup.on("mouseover", () => {
+            helpBox.fill("darkblue");
+            this.group.getLayer()?.batchDraw();
+        });
 
-        helpGroup.add(helpBox); helpGroup.add(helpText);
+        helpGroup.on("mouseout", () => {
+            helpBox.fill("lightblue");
+            this.group.getLayer()?.batchDraw();
+        });
+
+        helpGroup.on("click", () => {
+            this.showHelpPopup();
+        });
+
+        helpGroup.add(helpBox);
+        helpGroup.add(helpText);
         this.group.add(helpGroup);
     }
 
-    private showHelpPopup(): void {
-        const overlay = new Konva.Rect({ x: 0, y: 0, width: STAGE_WIDTH, height: STAGE_HEIGHT, fill: "black", opacity: 0.6 });
-        const popup = new Konva.Group({ x: STAGE_WIDTH/2 - 200, y: STAGE_HEIGHT/2 - 150 });
-        const box = new Konva.Rect({ width: 400, height: 300, fill: "white", cornerRadius: 10, shadowColor: "black", shadowBlur: 10, shadowOpacity: 0.5 });
-        const text = new Konva.Text({
-            text: "How to play:\n\n1. Each monster has a number (their health) displayed\n2. Select the equation that equals the monster's health\n3. Be Careful! If you select the wrong answer, you'll lose a life. Three strikes and you're out...\n4. Keep defeating monsters to climb the tower.",
-            width: 380, padding: 10, fontSize: 20, fontFamily: "Calibri", fill: "black", align: "left"
+    showHelpPopup(): void {
+        const overlay = new Konva.Rect({
+            x: 0,
+            y: 0,
+            width: STAGE_WIDTH,
+            height: STAGE_HEIGHT,
+            fill: "black",
+            opacity: 0.6,
         });
-        const closeBtn = new Konva.Text({ x: 360, y: 10, text: "X", fontSize: 24, fontFamily: "Calibri", fill: "red", cursor: "pointer" });
-        closeBtn.on("click", () => { popup.destroy(); overlay.destroy(); this.group.getLayer()?.draw(); });
 
-        popup.add(box); popup.add(text); popup.add(closeBtn);
-        this.group.add(overlay); this.group.add(popup);
-        overlay.moveToTop(); popup.moveToTop();
+        const popup = new Konva.Group({
+            x: STAGE_WIDTH / 2 - 200,
+            y: STAGE_HEIGHT / 2 - 150,
+        });
+
+        const box = new Konva.Rect({
+            width: 400,
+            height: 300,
+            fill: "white",
+            cornerRadius: 10,
+            shadowColor: "black",
+            shadowBlur: 10,
+            shadowOpacity: 0.5,
+        });
+
+        const text = new Konva.Text({
+            text: "How to play:\n\n1. Each monster has a number (their health) displayed \n2. Select the equation that equals the monster's health\n3. Be Careful! If you select the wrong answer, you'll lose a life. Three strikes and you're out...\n4. Keep defeating monsters to climb the tower.",
+            width: 380,
+            padding: 10,
+            fontSize: 20,
+            fontFamily: "Calibri",
+            fill: "black",
+            align: "left",
+        });
+
+        const closeBtn = new Konva.Text({
+            x: 360,
+            y: 10,
+            text: "X",
+            fontSize: 24,
+            fontFamily: "Calibri",
+            fill: "red",
+            cursor: "pointer",
+        });
+
+        closeBtn.on("click", () => {
+            popup.destroy();
+            overlay.destroy();
+            this.group.getLayer()?.draw();
+        });
+
+        popup.add(box);
+        popup.add(text);
+        popup.add(closeBtn);
+
+        this.group.add(overlay);
+        this.group.add(popup);
+
+        overlay.moveToTop();
+        popup.moveToTop();
         this.group.getLayer()?.draw();
     }
+
+    showPauseOverlay(): void {
+        if (this.pauseOverlay) return; // Already shown
+        this.pauseButton.hide();
+
+        const pauseButton = this.group.findOne(".pauseButton");
+        if (pauseButton) pauseButton.visible(false);
+
+        this.pauseOverlay = new Konva.Rect({
+            x: 0,
+            y: 0,
+            width: STAGE_WIDTH,
+            height: STAGE_HEIGHT,
+            fill: "black",
+            opacity: 0.6,
+        });
+
+        const pausedText = new Konva.Text({
+            x: 0,
+            y: STAGE_HEIGHT / 2 - 100,
+            width: STAGE_WIDTH,
+            text: "PAUSED",
+            fontSize: 80,
+            fontFamily: "Arial",
+            fill: "white",
+            align: "center",
+            fontStyle: "bold",
+        });
+        pausedText.name('pausedText');
+
+        this.pauseCloseBtn = new Konva.Text({
+            x: STAGE_WIDTH - 80,
+            y: 90,
+            text: "X",
+            fontSize: 50,
+            fontFamily: "Arial",
+            fill: "red",
+            cursor: "pointer",
+            fontStyle: "bold",
+        });
+
+        this.pauseCloseBtn.on("click", () => {
+            this.controller.togglePaused();
+        });
+
+        this.pauseCloseBtn.on("mouseover", () => {
+            document.body.style.cursor = "pointer";
+            if (this.pauseCloseBtn) this.pauseCloseBtn.fill("darkred");
+            this.group.getLayer()?.draw();
+        });
+
+        this.pauseCloseBtn.on("mouseout", () => {
+            document.body.style.cursor = "default";
+            if (this.pauseCloseBtn) this.pauseCloseBtn.fill("red");
+            this.group.getLayer()?.draw();
+        });     
+
+        // 5. Quit Button (Group with Rect + Text)
+        this.quitBtn = new Konva.Group({
+            x: STAGE_WIDTH / 2 - 100,
+            y: STAGE_HEIGHT / 2 - 25,
+            cursor: "pointer",
+        });
+
+        const quitRect = new Konva.Rect({
+            x: 0,
+            y: 0,
+            width: 200,
+            height: 60,
+            fill: "#e74c3c",
+            stroke: "#c0392b",
+            strokeWidth: 3,
+            cornerRadius: 10,
+        });
+
+        const quitText = new Konva.Text({
+            x: 0,
+            y: 0,
+            width: 200,
+            height: 60,
+            text: "Quit to Tower",
+            fontSize: 24,
+            fontFamily: "Arial",
+            fill: "white",
+            align: "center",
+            verticalAlign: "middle",
+            fontStyle: "bold",
+            listening: false,
+        });
+
+        this.quitBtn.add(quitRect);
+        this.quitBtn.add(quitText);
+
+        this.quitBtn.on("click", () => {
+            this.controller.returnToTowerSelect();
+        });
+
+        // Hover effects for Quit Button
+        this.quitBtn.on("mouseover", () => {
+            document.body.style.cursor = "pointer";
+            quitRect.fill("#c0392b");
+            this.group.getLayer()?.draw();
+        });
+
+        this.quitBtn.on("mouseout", () => {
+            document.body.style.cursor = "default";
+            quitRect.fill("#e74c3c");
+            this.group.getLayer()?.draw();
+        });
+
+        // Add everything to group
+        this.group.add(this.pauseOverlay);
+        this.group.add(pausedText);
+        this.group.add(this.pauseCloseBtn);
+        this.group.add(this.quitBtn);
+
+        // Move to top to cover game elements
+        this.pauseOverlay.moveToTop();
+        pausedText.moveToTop();
+        this.pauseCloseBtn.moveToTop();
+        this.quitBtn.moveToTop();
+
+        this.group.getLayer()?.draw();
+    }
+
+    hidePauseOverlay(): void {
+        // 1. Bring back the main button
+        this.pauseButton.show();
+
+        // 2. Destroy overlay elements
+        this.pauseOverlay?.destroy();
+        this.pauseCloseBtn?.destroy();
+        this.quitBtn?.destroy();
+        const pausedText = this.group.findOne('.pausedText');
+        pausedText?.destroy();
+
+        this.pauseOverlay = undefined;
+        this.pauseCloseBtn = undefined;
+        this.quitBtn = undefined;
+    
+        this.group.getLayer()?.draw();
+    }
+
     getChoiceButtons(): Konva.Group[] {
         return this.choiceButtons;
     }
 
-    getQuitButton(): Konva.Rect | Konva.Text | Konva.Group | undefined {
+    getQuitButton(): Konva.Group | undefined {
         return this.quitBtn;
     }
 
     displayEnemyChallenge(enemyHealth: number, equationOptions: string[]): void {
         this.enemyHealthText.text(enemyHealth.toString());
-        
-        // Remove old buttons
         this.choiceButtons.forEach(btn => btn.destroy());
         this.choiceButtons = [];
 
@@ -334,12 +565,18 @@ export class BasicGameScreenView implements View {
                 verticalAlign: "middle",
             });
 
-            // Hover effects
-            buttonGroup.on("mouseover", () => { rect.fill("#bbb"); this.group.getLayer()?.batchDraw(); });
-            buttonGroup.on("mouseout", () => { rect.fill("#ddd"); this.group.getLayer()?.batchDraw(); });
+            buttonGroup.on("mouseover", () => {
+                rect.fill("#bbb");
+                this.group.getLayer()?.batchDraw();
+            });
 
-            // Click handling
+            buttonGroup.on("mouseout", () => {
+                rect.fill("#ddd");
+                this.group.getLayer()?.batchDraw();
+            });
+
             buttonGroup.on("click", () => {
+                // Notify controller about answer selection
                 this.currentSelectedRect = rect;
                 this.controller.handleAnswer(equation);
             });
@@ -381,38 +618,33 @@ export class BasicGameScreenView implements View {
     }
 
     updateScore(newScore: number): void {
-        if (this.scoreText) {
-            this.scoreText.text(`Score: ${newScore}`);
-            this.group.getLayer()?.draw();
-        }
+        this.scoreText?.text(`Score: ${newScore}`);
+        this.group.getLayer()?.draw();
     }
 
     updateTimer(timeRemaining: number): void {
-        if (this.timerText) {
-            this.timerText.text(`Time: ${timeRemaining}`);
-            this.group.getLayer()?.draw();
-        }
+        this.timerText?.text(`Time: ${timeRemaining}`);
+        this.group.getLayer()?.draw();
     }
 
+    /**
+     * Update monster image
+     */
     updateMonsterImage(newUrl: string): void {
         Konva.Image.fromURL(newUrl, (newMonster) => {
-            const img = newMonster.image();
-            const applyScale = () => {
-                const scale = DESIRED_MONSTER_SIZE / img.width;
-                const position = this.monster ? this.monster.position() : { x: STAGE_WIDTH / 2.15, y: 100 };
-                newMonster.position(position);
-                newMonster.scale({ x: scale, y: scale });
-                
-                this.monster?.destroy();
-                this.monster = newMonster;
-                this.group.add(newMonster);
-                this.group.getLayer()?.draw();
-            };
+            newMonster.position(this.monster!.position());
+            newMonster.scale(this.monster!.scale());
 
-            if (img.width > 0) applyScale();
-            else img.onload = applyScale;
+            this.monster?.destroy();
+            this.monster = newMonster;
+            this.group.add(newMonster);
+            this.group.getLayer()?.draw();
         });
     }
+
+    /**
+     * Show game over screen
+     */
     showGameOver(): void {
         const text = new Konva.Text({
             x: 0,
@@ -426,11 +658,14 @@ export class BasicGameScreenView implements View {
         });
         this.group.add(text);
         this.group.getLayer()?.draw();
-
-        // Disable all choice buttons
+        
+        // Disable all buttons
         this.choiceButtons.forEach(btn => btn.off("click"));
     }
 
+    /**
+     * Switch to boss screen
+     */
     switchToBossScreen(): void {
         console.log("Switching to boss screen...");
         this.hide();
@@ -441,88 +676,26 @@ export class BasicGameScreenView implements View {
         bossScreen.show();
     }
 
+    /**
+     * Show the view
+     */
     show(): void {
         this.group.visible(true);
         this.group.getLayer()?.draw();
     }
 
+    /**
+     * Hide the view
+     */
     hide(): void {
         this.group.visible(false);
         this.group.getLayer()?.draw();
     }
 
+    /**
+     * Get the Konva group
+     */
     getGroup(): Konva.Group {
         return this.group;
-    }
-
-    showPauseOverlay(): void {
-        if (this.pauseOverlay) return; // Already shown
-
-        const pauseButton = this.group.findOne(".pauseButton");
-        if (pauseButton) pauseButton.visible(false);
-
-        this.pauseOverlay = new Konva.Rect({
-            x: 0,
-            y: 0,
-            width: STAGE_WIDTH,
-            height: STAGE_HEIGHT,
-            fill: "black",
-            opacity: 0.4,
-        });
-
-        this.pauseCloseBtn = new Konva.Text({
-            x: STAGE_WIDTH - 60,
-            y: 90,
-            text: "X",
-            fontSize: 40,
-            fontFamily: "Calibri",
-            fill: "red",
-            cursor: "pointer",
-        });
-
-        this.pauseCloseBtn.on("click", () => {
-            this.controller.togglePaused();
-        });
-
-        if (!this.quitBtn) {
-            const quitBtn = new Konva.Rect({
-                x: STAGE_WIDTH / 2 - 75,
-                y: STAGE_HEIGHT / 2 - 25,
-                width: 150,
-                height: 50,
-                fill: "Blue",
-                stroke: "DarkBlue",
-                strokeWidth: 3,
-                cornerRadius: 10,
-                cursor: "pointer",
-            });
-            this.quitBtn = quitBtn;
-            quitBtn.on("click", () => {
-                this.controller.returnToTowerSelect();
-            });
-        }
-
-        this.group.add(this.pauseOverlay);
-        this.group.add(this.pauseCloseBtn);
-        if (this.quitBtn) {
-            this.group.add(this.quitBtn);
-            this.quitBtn.visible(true);
-            this.quitBtn.moveToTop();
-        }
-        this.group.getLayer()?.draw();
-    }
-
-    hidePauseOverlay(): void {
-        this.pauseOverlay?.destroy();
-        this.pauseCloseBtn?.destroy();
-        this.pauseOverlay = undefined;
-        this.pauseCloseBtn = undefined;
-
-        const pauseButton = this.group.findOne(".pauseButton");
-        if (pauseButton) pauseButton.visible(true);
-
-        if (this.quitBtn) this.quitBtn.visible(false);
-
-        this.group.getLayer()?.draw();
     }
 }
