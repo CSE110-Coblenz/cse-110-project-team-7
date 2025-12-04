@@ -261,7 +261,7 @@ export class BossGameScreenView implements View {
 		this.onSubmitPress = callback;
 	}
 
-	//update the score
+	// update the score
 	updateScore(score: number): void {
 		this.scoreText.text(`Score: ${score}`);
 		this.group.getLayer()?.draw();
@@ -508,7 +508,7 @@ export class BossGameScreenView implements View {
 		const startX = invX + (invWidth - totalWidth) / 2;
 		const startY = invY + (invHeight - tileSize) / 2;
 
-		//shuffle the tiles
+		//shuffle the tiles (Fisher-Yates)
 		for (let i = newParts.length - 1; i > 0; i--) {
 			const j = Math.floor(Math.random() * (i + 1));
 			[newParts[i], newParts[j]] = [newParts[j], newParts[i]]; // Swap elements

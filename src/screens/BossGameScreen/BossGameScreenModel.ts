@@ -38,6 +38,7 @@ export class BossGameScreenModel {
 
     //Timer funcctions. 
     tickTimer(): number {
+        // hard stop on 0
         this.timeRemaining = Math.max(0, this.timeRemaining - 1);
         return this.timeRemaining;
     }
