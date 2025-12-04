@@ -32,15 +32,11 @@ export class BasicGameScreenView implements View {
         const maxHealth = this.controller.getMaxHealth();
         this.hearts = new Array(maxHealth);
 
-        // Background
-        const bg = new Konva.Rect({
-            x: 0,
-            y: 0,
-            width: STAGE_WIDTH,
-            height: STAGE_HEIGHT,
-            fill: "#f0f0f0",
-        });
-        this.group.add(bg);
+        this.createCobblestoneWall();
+        this.createStoneFloor();
+
+        this.createLantern(100, 150);
+        this.createLantern(STAGE_WIDTH - 100, 150);
 
         // Monster placeholder (use proper scaling on load)
         Konva.Image.fromURL(this.controller.getCurrentEnemySprite(), (monsterNode) => {
@@ -120,6 +116,8 @@ export class BasicGameScreenView implements View {
         });
         this.group.add(this.timerText);
 
+        
+
         // Pause button
         const pauseButton = new Konva.Text({
             x: STAGE_WIDTH - 70,
@@ -141,6 +139,111 @@ export class BasicGameScreenView implements View {
 
         // Add help button
         this.createHelpButton();
+    }
+
+    private createCobblestoneWall(): void {
+        const width = STAGE_WIDTH || 800;
+        const height = STAGE_HEIGHT || 600;
+
+        // Dark background for the wall
+        const wallBg = new Konva.Rect({
+            x: 0,
+            y: 0,
+            width: width,
+            height: height,
+            fill: "#34495e" // Dark blue-grey
+        });
+        this.group.add(wallBg);
+
+        // Bricks
+        const rows = 20;
+        const cols = 15;
+        const brickWidth = width / cols;
+        const brickHeight = height / rows;
+
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c <= cols; c++) {
+                // Offset every other row
+                const xOffset = (r % 2 === 0) ? 0 : -brickWidth / 2;
+                
+                // Random shade for texture
+                const shade = Math.random() > 0.5 ? "#7f8c8d" : "#95a5a6";
+
+                const brick = new Konva.Rect({
+                    x: c * brickWidth + xOffset,
+                    y: r * brickHeight,
+                    width: brickWidth - 2, // Gap for mortar
+                    height: brickHeight - 2,
+                    fill: shade,
+                    cornerRadius: 2,
+                    opacity: 0.8
+                });
+                this.group.add(brick);
+            }
+        }
+    }
+    private createStoneFloor(): void {
+        const width = STAGE_WIDTH || 800;
+        const height = STAGE_HEIGHT || 600;
+        const floorHeight = 100;
+
+        const floor = new Konva.Rect({
+            x: 0,
+            y: height - floorHeight,
+            width: width,
+            height: floorHeight,
+            fill: "#2c3e50",
+            stroke: "#1a252f",
+            strokeWidth: 5
+        });
+        this.group.add(floor);
+    }
+
+    private createLantern(x: number, y: number): void {
+        // Glow effect
+        const glow = new Konva.Circle({
+            x: x,
+            y: y + 20,
+            radius: 80,
+            fillRadialGradientStartPoint: { x: 0, y: 0 },
+            fillRadialGradientStartRadius: 0,
+            fillRadialGradientEndPoint: { x: 0, y: 0 },
+            fillRadialGradientEndRadius: 80,
+            fillRadialGradientColorStops: [0, "rgba(255, 200, 0, 0.4)", 1, "rgba(0,0,0,0)"]
+        });
+        this.group.add(glow);
+
+        // Hanger/Bracket
+        const bracket = new Konva.Line({
+            points: [x, y, x, y - 20, x + 10, y - 20],
+            stroke: "#2c3e50",
+            strokeWidth: 4
+        });
+
+        // Lantern body
+        const lantern = new Konva.Rect({
+            x: x - 15,
+            y: y,
+            width: 30,
+            height: 40,
+            fill: "rgba(255, 255, 0, 0.2)",
+            stroke: "#2c3e50",
+            strokeWidth: 3
+        });
+
+        // Flame center
+        const flame = new Konva.Circle({
+            x: x,
+            y: y + 20,
+            radius: 8,
+            fill: "#e67e22",
+            stroke: "#f1c40f",
+            strokeWidth: 2
+        });
+
+        this.group.add(bracket);
+        this.group.add(lantern);
+        this.group.add(flame);
     }
 
     private createHelpButton(): void {
