@@ -25,10 +25,9 @@ export class BasicGameScreenController extends ScreenController {
         this.startTimer();
     }
 
-    getView(): BasicGameScreenView {
-        return this.view;
-    }
+    getView(): BasicGameScreenView { return this.view; }
 
+    // --- Enemy management ---
     private spawnNewEnemy(): void {
         const newEnemy = spawnEnemy("normal", 1, this.model.getEquationMode()) as BasicEnemy;
         this.model.setEnemy(newEnemy);
@@ -37,21 +36,26 @@ export class BasicGameScreenController extends ScreenController {
 
     loadCurrentEnemy(): void {
         const enemy = this.model.getCurrentEnemy();
-        if (enemy) {
-            const enemyHealth = this.model.getEnemyHealth();
-            const equationOptions = this.model.getEquationOptions();
+        if (!enemy) return;
 
-            this.view.displayEnemyChallenge(enemyHealth, equationOptions);
-        }
-        this.view.updateScore(GlobalPlayer.get_score());
+        this.view.displayEnemyChallenge(this.model.getEnemyHealth(), this.model.getEquationOptions());
+        this.view.updateMonsterImage(this.getCurrentEnemySprite());
     }
 
+    getCurrentEnemySprite(): string {
+        const enemy = this.model.getCurrentEnemy();
+        return enemy ? enemy.idleSprite : 'src/assets/monster.png';
+    }
+
+    // --- Answer handling ---
     async handleAnswer(selected: string): Promise<void> {
         const isCorrect = this.model.checkAnswer(selected);
+        const enemy = this.model.getCurrentEnemy();
+        if (!enemy) return;
 
         if (isCorrect) {
             this.view.showCorrectFeedback();
-            this.view.updateMonsterImage('src/assets/monstersln.png');
+            this.view.updateMonsterImage(enemy.slainSprite);
 
             this.model.defeatCurrentEnemy();
             this.model.incrementCorrectAnswers();
@@ -66,21 +70,19 @@ export class BasicGameScreenController extends ScreenController {
                 this.screenSwitcher.switchToScreen({type: 'boss_game'})
                 return;
             }
-            
-            this.spawnNewEnemy();
-            this.view.updateMonsterImage('src/assets/monster.png');
-            this.loadCurrentEnemy();
 
+            this.spawnNewEnemy();
+            this.loadCurrentEnemy();
         } else {
             this.view.showWrongFeedback();
-            this.view.updateMonsterImage('src/assets/monsteratk.png');
+            this.view.updateMonsterImage(enemy.attackSprite);
 
             this.model.decreasePlayerHealth();
             this.view.updateHealthDisplay(this.model.getPlayerHealth());
             this.view.updateScore(GlobalPlayer.decrease_score(5));
 
             await this.sleep(2000);
-            this.view.updateMonsterImage('src/assets/monster.png');
+            this.view.updateMonsterImage(this.getCurrentEnemySprite());
 
             if (!this.model.isPlayerAlive()) {
                 this.view.showGameOver();
@@ -89,57 +91,38 @@ export class BasicGameScreenController extends ScreenController {
         }
     }
 
+    // --- Tower management ---
     setTower(tower: number): void {
         this.model.setTower(tower);
         this.view.updateProgress(0, this.model.MAX_LEVELS);
-        
+
         GlobalPlayer.reset_health();
         this.view.updateHealthDisplay(GlobalPlayer.get_health());
-        
+
         this.spawnNewEnemy();
         this.loadCurrentEnemy();
-        this.isPaused = false; 
+        this.isPaused = false;
         this.stopTimer();
-        
         this.model.resetTimer();
-        //this.stopTimer();
         this.startTimer();
     }
 
-    getTower(): number {
-        return this.model.tower;
-    }
-    getPlayerHealth(): number {
-        return this.model.getPlayerHealth();
-    }
+    getTower(): number { return this.model.tower; }
+    getPlayerHealth(): number { return this.model.getPlayerHealth(); }
+    getMaxHealth(): number { return this.model.MAX_HEALTH; }
+    getCorrectAnswers(): number { return this.model.getCorrectAnswers(); }
+    getMaxLevels(): number { return this.model.MAX_LEVELS; }
 
-    getMaxHealth(): number {
-        return this.model.MAX_HEALTH;
-    }
-
-    getCorrectAnswers(): number {
-        return this.model.getCorrectAnswers();
-    }
-
-    getMaxLevels(): number {
-        return this.model.MAX_LEVELS;
-    }
-
-    private sleep(ms: number): Promise<void> {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
+    // --- Timer ---
+    private sleep(ms: number): Promise<void> { return new Promise(resolve => setTimeout(resolve, ms)); }
 
     private startTimer(): void {
-        if (this.gameTimer !== null) {
-            return; // If a timer is already running, don't make a new one
-        }
+        if (this.gameTimer !== null) return;
         this.gameTimer = setInterval(() => {
-            const timeRemaining = this.model.tickTimer(); // decrement every tick
+            const timeRemaining = this.model.tickTimer();
             this.view.updateTimer(timeRemaining);
 
-            if (timeRemaining <= 0) {
-                this.handleTimeOut();
-            }
+            if (timeRemaining <= 0) this.handleTimeOut();
         }, 1000);
     }
 
@@ -157,15 +140,13 @@ export class BasicGameScreenController extends ScreenController {
         this.model.resetTimer();
     }
 
+    // --- Pause/Resume ---
     togglePaused(): void {
         this.isPaused = !this.isPaused;
-        if (this.isPaused) {
-            this.pauseGame();
-        } else {
-            this.resumeGame();
-        }
+        if (this.isPaused) this.pauseGame();
+        else this.resumeGame();
     }
-     
+
     private pauseGame(): void {
         this.stopTimer();
         this.view.showPauseOverlay();
@@ -177,7 +158,8 @@ export class BasicGameScreenController extends ScreenController {
         this.view.hidePauseOverlay();
         this.view.getChoiceButtons().forEach(btn => btn.listening(true));
     }
-    
+
+    // --- Quit / return ---
     public returnToTowerSelect(): void {
         this.stopTimer();
         const quitButton = this.view.getQuitButton();
@@ -186,6 +168,7 @@ export class BasicGameScreenController extends ScreenController {
         GlobalPlayer.reset_health();
         this.model.resetTimer();
         this.model.reset_level();
+        this.isPaused = false;
         this.screenSwitcher.switchToScreen({ type: "tower_select" });
     }
 }
