@@ -94,6 +94,10 @@ export class SpeedGameScreenModel {
         GlobalPlayer.increase_score(points);
     }
 
+    decrementScore(points: number): void {
+        GlobalPlayer.decrease_score(points);
+    }
+
     getScore(): number {
         return GlobalPlayer.get_score();
     }

@@ -2,10 +2,6 @@ import { ScreenController } from "../../types.ts";
 import type { ScreenSwitcher } from "../../types.ts";
 import { SpeedGameScreenModel } from "./SpeedGameScreenModel.ts";
 import { SpeedGameScreenView } from "./SpeedGameScreenView.ts";
-import type { EquationMode } from "../BasicGameScreen/BasicGameScreenModel.ts";
-import { spawnEnemy } from "../../utils/enemyFactory.ts";
-import { evaluate } from "../../utils/equationSolver.ts";
-import { GlobalPlayer } from "../../GlobalPlayer.ts"; //used for non-health and score operations
 import { SPEED_GAME_DURATION } from "../../constants.ts";
 
 export class SpeedGameScreenController extends ScreenController {
@@ -61,6 +57,9 @@ export class SpeedGameScreenController extends ScreenController {
 
 		if (correct) {
 			this.model.addScore(10);
+			this.view.updateScore(this.model.getScore());
+		} else {
+			this.model.decrementScore(8);
 			this.view.updateScore(this.model.getScore());
 		}
 
