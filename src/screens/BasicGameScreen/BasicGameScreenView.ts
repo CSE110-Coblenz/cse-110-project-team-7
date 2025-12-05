@@ -20,7 +20,8 @@ export class BasicGameScreenView implements View {
     private timerText?: Konva.Text;
     private pauseOverlay?: Konva.Rect;
     private pauseCloseBtn?: Konva.Text;
-    private quitBtn?: Konva.Rect | Konva.Text | Konva.Group;
+    private pauseButton!: Konva.Text;
+    private quitBtn?: Konva.Group;
     
     constructor(controller: BasicGameScreenController) {
         this.controller = controller;
@@ -40,6 +41,7 @@ export class BasicGameScreenView implements View {
         this.createLantern(100, 150);
         this.createLantern(STAGE_WIDTH - 100, 150);
 
+        // Monster Handling
         Konva.Image.fromURL('src/assets/monster.png', (monsterNode) => {
             this.monster = monsterNode;
             monsterNode.setAttrs({
@@ -48,12 +50,13 @@ export class BasicGameScreenView implements View {
                 scaleX: 0.5,
                 scaleY: 0.5,
                 cornerRadius: 20,
-				image: monsterNode.image()
+                image: monsterNode.image()
             });
             this.group.add(monsterNode);
             this.group.getLayer()?.draw();
         });
 
+        // Hearts Handling
         for (let i = 0; i < maxHealth; i++) {
             Konva.Image.fromURL('src/assets/heart.png', (heart) => {
                 heart.setAttrs({
@@ -61,7 +64,7 @@ export class BasicGameScreenView implements View {
                     y: 20,
                     scaleX: 0.15,
                     scaleY: 0.15,
-					image: heart.image()
+                    image: heart.image()
                 });
                 this.group.add(heart);
                 this.hearts[i] = heart;
@@ -70,26 +73,38 @@ export class BasicGameScreenView implements View {
         }
 
         this.createHelpButton();
-        const pauseButton = new Konva.Text({
+
+        
+        this.pauseButton = new Konva.Text({
             x: STAGE_WIDTH - 70,
             y: 100,
             text: "II",
-            fontSize: 36,
-            fontFamily: "Calibri",
-            fill: "white",
-            shadowColor: "black",
-            shadowBlur: 2,
+            fontSize: 40,
+            fontFamily: "Arial",
+            fill: "#F7C500",
+            stroke: "black",
+            strokeWidth: 2,
             cursor: "pointer",
+            fontStyle: "bold"
         });
 
-        pauseButton.name("pauseButton");
-        
-        pauseButton.on("click", () => {
-            pauseButton.visible(false);
+        this.pauseButton.on("mouseover", () => {
+            document.body.style.cursor = "pointer";
+            this.pauseButton.fill("#D1A700");
+            this.group.getLayer()?.draw();
+        });
+
+        this.pauseButton.on("mouseout", () => {
+            document.body.style.cursor = "default";
+            this.pauseButton.fill("#F7C500");
+            this.group.getLayer()?.draw();
+        });
+
+        this.pauseButton.on("click", () => {
             this.controller.togglePaused();
         });
 
-        this.group.add(pauseButton);
+        this.group.add(this.pauseButton);
 
 
         this.levelText = new Konva.Text({
@@ -363,6 +378,7 @@ export class BasicGameScreenView implements View {
 
     showPauseOverlay(): void {
         if (this.pauseOverlay) return; // Already shown
+        this.pauseButton.hide();
 
         const pauseButton = this.group.findOne(".pauseButton");
         if (pauseButton) pauseButton.visible(false);
@@ -373,60 +389,132 @@ export class BasicGameScreenView implements View {
             width: STAGE_WIDTH,
             height: STAGE_HEIGHT,
             fill: "black",
-            opacity: 0.4,
+            opacity: 0.6,
         });
 
+        const pausedText = new Konva.Text({
+            x: 0,
+            y: STAGE_HEIGHT / 2 - 100,
+            width: STAGE_WIDTH,
+            text: "PAUSED",
+            fontSize: 80,
+            fontFamily: "Arial",
+            fill: "white",
+            align: "center",
+            fontStyle: "bold",
+        });
+        pausedText.name('pausedText');
+
         this.pauseCloseBtn = new Konva.Text({
-            x: STAGE_WIDTH - 60,
+            x: STAGE_WIDTH - 80,
             y: 90,
             text: "X",
-            fontSize: 40,
-            fontFamily: "Calibri",
+            fontSize: 50,
+            fontFamily: "Arial",
             fill: "red",
             cursor: "pointer",
+            fontStyle: "bold",
         });
 
         this.pauseCloseBtn.on("click", () => {
             this.controller.togglePaused();
         });
 
-        if (!this.quitBtn) {
-            const quitBtn = new Konva.Rect({
-                x: STAGE_WIDTH / 2 - 75,
-                y: STAGE_HEIGHT / 2 - 25,
-                width: 150,
-                height: 50,
-                fill: "Blue",
-                stroke: "DarkBlue",
-                strokeWidth: 3,
-                cornerRadius: 10,
-                cursor: "pointer",
-            });
-            this.quitBtn = quitBtn;
-            quitBtn.on("click", () => {
-                this.controller.returnToTowerSelect();
-            });
-        }
-        
+        this.pauseCloseBtn.on("mouseover", () => {
+            document.body.style.cursor = "pointer";
+            if (this.pauseCloseBtn) this.pauseCloseBtn.fill("darkred");
+            this.group.getLayer()?.draw();
+        });
+
+        this.pauseCloseBtn.on("mouseout", () => {
+            document.body.style.cursor = "default";
+            if (this.pauseCloseBtn) this.pauseCloseBtn.fill("red");
+            this.group.getLayer()?.draw();
+        });     
+
+        // 5. Quit Button (Group with Rect + Text)
+        this.quitBtn = new Konva.Group({
+            x: STAGE_WIDTH / 2 - 100,
+            y: STAGE_HEIGHT / 2 - 25,
+            cursor: "pointer",
+        });
+
+        const quitRect = new Konva.Rect({
+            x: 0,
+            y: 0,
+            width: 200,
+            height: 60,
+            fill: "#e74c3c",
+            stroke: "#c0392b",
+            strokeWidth: 3,
+            cornerRadius: 10,
+        });
+
+        const quitText = new Konva.Text({
+            x: 0,
+            y: 0,
+            width: 200,
+            height: 60,
+            text: "Quit to Tower",
+            fontSize: 24,
+            fontFamily: "Arial",
+            fill: "white",
+            align: "center",
+            verticalAlign: "middle",
+            fontStyle: "bold",
+            listening: false,
+        });
+
+        this.quitBtn.add(quitRect);
+        this.quitBtn.add(quitText);
+
+        this.quitBtn.on("click", () => {
+            this.controller.returnToTowerSelect();
+        });
+
+        // Hover effects for Quit Button
+        this.quitBtn.on("mouseover", () => {
+            document.body.style.cursor = "pointer";
+            quitRect.fill("#c0392b");
+            this.group.getLayer()?.draw();
+        });
+
+        this.quitBtn.on("mouseout", () => {
+            document.body.style.cursor = "default";
+            quitRect.fill("#e74c3c");
+            this.group.getLayer()?.draw();
+        });
+
+        // Add everything to group
         this.group.add(this.pauseOverlay);
+        this.group.add(pausedText);
         this.group.add(this.pauseCloseBtn);
-        if (this.quitBtn){
-            this.group.add(this.quitBtn);
-            this.quitBtn.visible(true);
-            this.quitBtn.moveToTop();
-        } 
+        this.group.add(this.quitBtn);
+
+        // Move to top to cover game elements
+        this.pauseOverlay.moveToTop();
+        pausedText.moveToTop();
+        this.pauseCloseBtn.moveToTop();
+        this.quitBtn.moveToTop();
+
         this.group.getLayer()?.draw();
     }
 
     hidePauseOverlay(): void {
+        // 1. Bring back the main button
+        this.pauseButton.show();
+
+        // 2. Destroy overlay elements
         this.pauseOverlay?.destroy();
         this.pauseCloseBtn?.destroy();
+        this.quitBtn?.destroy();
+        const pausedText = this.group.findOne('.pausedText');
+        pausedText?.destroy();
+
         this.pauseOverlay = undefined;
         this.pauseCloseBtn = undefined;
-        const pauseButton = this.group.findOne(".pauseButton");
-        if (pauseButton) pauseButton.visible(true);
-
-        this.quitBtn?.visible(false);           
+        this.quitBtn = undefined;
+    
         this.group.getLayer()?.draw();
     }
 
@@ -434,7 +522,7 @@ export class BasicGameScreenView implements View {
         return this.choiceButtons;
     }
 
-    getQuitButton(): Konva.Rect | Konva.Text | Konva.Group | undefined {
+    getQuitButton(): Konva.Group | undefined {
         return this.quitBtn;
     }
 
