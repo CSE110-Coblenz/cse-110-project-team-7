@@ -396,6 +396,10 @@ export class LoginScreenView implements View {
 	hide(): void {
 		this.group.visible(false);
 		this.cursor.visible(false);
+		if (this.cursorIntervalId!=null){
+			clearInterval(this.cursorIntervalId)
+			this.cursorIntervalId=null;
+		}
 		this.group.getLayer()?.draw();
 	}
 
