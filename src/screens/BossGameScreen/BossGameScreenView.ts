@@ -31,6 +31,9 @@ export class BossGameScreenView implements View {
 	//boss number
 	private bossNumber: Konva.Text;
 
+	//game over text (to be hidden)
+	private gameOverGroup?: Konva.Group;
+
 	//tile callbacks
 	private onTileEntry?: (tile: Tile) => void;
 	private onTileRemoval?: (tile: Tile) => void;
@@ -55,7 +58,7 @@ export class BossGameScreenView implements View {
 		this.onQuitClick = callback;
 	}
 	getTiles(): Tile[] {
-    	return this.tiles;
+		return this.tiles;
 	}
 
 
@@ -121,7 +124,7 @@ export class BossGameScreenView implements View {
 			fontStyle: "bold"
 		});
 		this.group.add(this.pauseButton);
-		
+
 
 		this.pauseButton.on("mouseover", () => {
 			document.body.style.cursor = "pointer";
@@ -224,7 +227,7 @@ export class BossGameScreenView implements View {
 			y: STAGE_HEIGHT / 2 + 50, // bottom half
 			width: STAGE_WIDTH / 2,
 			height: STAGE_HEIGHT / 2 - 50,
-			fill: "#d2b48c", 
+			fill: "#d2b48c",
 			stroke: "black",
 			strokeWidth: 3,
 			cornerRadius: 10,
@@ -373,7 +376,7 @@ export class BossGameScreenView implements View {
 			this.bossNumPulseAnim.stop();
 			this.bossNumPulseAnim = undefined;
 			// reset color
-			this.bossNumber.fill("black"); 
+			this.bossNumber.fill("black");
 			this.bossNumber.getLayer()?.draw();
 		}
 	}
@@ -554,10 +557,23 @@ export class BossGameScreenView implements View {
 		this.group.getLayer()?.draw();
 	}
 
+	/* 
+		Show a game over menu with the option to return back to screen
+	*/
 	showGameOver(): void {
+
+		this.gameOverGroup?.destroy();
+
+		const g = new Konva.Group({
+			x: 0, 
+			y: 0,
+			name: 'gameOverOverlay'
+		});
+		this.gameOverGroup = g;
+
 		const text = new Konva.Text({
 			x: 0,
-			y: STAGE_HEIGHT / 2 - 50,
+			y: STAGE_HEIGHT / 2 - 100,
 			width: STAGE_WIDTH,
 			align: "center",
 			text: "GAME OVER",
@@ -566,8 +582,66 @@ export class BossGameScreenView implements View {
 			fontStyle: "bold",
 			fill: "red"
 		});
-		this.group.getLayer()?.listening(false);
-		this.group.add(text);
+
+		g.add(text);
+		// ADD the QUIT BUTTON
+
+		const quitGroup = new Konva.Group({
+			x: STAGE_WIDTH / 2 - 100,
+			y: STAGE_HEIGHT / 2,
+			cursor: "pointer",
+		});
+
+		const quitRect = new Konva.Rect({
+			x: 0,
+			y: 0,
+			width: 200,
+			height: 60,
+			fill: "#e74c3c",
+			stroke: "#c0392b",
+			strokeWidth: 3,
+			cornerRadius: 10,
+		});
+
+		const quitText = new Konva.Text({
+			x: 0,
+			y: 0,
+			width: 200,
+			height: 60,
+			text: "Quit to Tower",
+			fontSize: 24,
+			fontFamily: "Arial",
+			fill: "white",
+			align: "center",
+			verticalAlign: "middle",
+			fontStyle: "bold",
+			listening: false,
+		});
+
+		quitGroup.add(quitRect);
+		quitGroup.add(quitText);
+
+		quitGroup.on("click", () => {
+			this.hideGameOver();
+			if (this.onQuitClick) this.onQuitClick();
+		});
+
+		quitGroup.on("mouseover", () => {
+			document.body.style.cursor = "pointer";
+			quitRect.fill("#c0392b");
+			this.group.getLayer()?.draw();
+		});
+
+		quitGroup.on("mouseout", () => {
+			document.body.style.cursor = "default";
+			quitRect.fill("#e74c3c");
+			this.group.getLayer()?.draw();
+		});
+		
+		g.add(quitGroup);
+
+		this.group.add(g);
+		g.moveToTop();
 		this.group.getLayer()?.draw();
 	}
 
@@ -584,7 +658,7 @@ export class BossGameScreenView implements View {
 			fill: "black",
 			opacity: 0.6,
 		});
-		
+
 		this.pauseCloseBtn = new Konva.Text({
 			x: STAGE_WIDTH - 80,
 			y: 90,
@@ -603,105 +677,112 @@ export class BossGameScreenView implements View {
 		this.pauseCloseBtn.on("mouseover", () => {
 			document.body.style.cursor = "pointer";
 			if (this.pauseCloseBtn) this.pauseCloseBtn.fill("darkred");
-        	this.group.getLayer()?.draw();
+			this.group.getLayer()?.draw();
 		});
 
-    	this.pauseCloseBtn.on("mouseout", () => {
-        	document.body.style.cursor = "default";
-        	if (this.pauseCloseBtn) this.pauseCloseBtn.fill("red");
-        	this.group.getLayer()?.draw();
-    	});		
+		this.pauseCloseBtn.on("mouseout", () => {
+			document.body.style.cursor = "default";
+			if (this.pauseCloseBtn) this.pauseCloseBtn.fill("red");
+			this.group.getLayer()?.draw();
+		});
 
 		const quitGroup = new Konva.Group({
-        	x: STAGE_WIDTH / 2 - 100,
-        	y: STAGE_HEIGHT / 2 - 25,
-        	cursor: "pointer",
-    	});
+			x: STAGE_WIDTH / 2 - 100,
+			y: STAGE_HEIGHT / 2 - 25,
+			cursor: "pointer",
+		});
 
 		const quitRect = new Konva.Rect({
-        	x: 0,
-        	y: 0,
-        	width: 200,
-        	height: 60,
-        	fill: "#e74c3c",
-        	stroke: "#c0392b",
-        	strokeWidth: 3,
-        	cornerRadius: 10,
-    	});
+			x: 0,
+			y: 0,
+			width: 200,
+			height: 60,
+			fill: "#e74c3c",
+			stroke: "#c0392b",
+			strokeWidth: 3,
+			cornerRadius: 10,
+		});
 
 		const quitText = new Konva.Text({
-        	x: 0,
-        	y: 0,
-        	width: 200,
-        	height: 60,
-        	text: "Quit to Tower",
-        	fontSize: 24,
-        	fontFamily: "Arial",
-        	fill: "white",
-        	align: "center",
-        	verticalAlign: "middle",
-        	fontStyle: "bold",
-        	listening: false,
-    	});
+			x: 0,
+			y: 0,
+			width: 200,
+			height: 60,
+			text: "Quit to Tower",
+			fontSize: 24,
+			fontFamily: "Arial",
+			fill: "white",
+			align: "center",
+			verticalAlign: "middle",
+			fontStyle: "bold",
+			listening: false,
+		});
 
 		quitGroup.on("click", () => {
-        	if (this.onQuitClick) this.onQuitClick();
-    	});
+			if (this.onQuitClick) this.onQuitClick();
+		});
 
 		quitGroup.on("mouseover", () => {
-        	document.body.style.cursor = "pointer";
-        	quitRect.fill("#c0392b");
-        	this.group.getLayer()?.draw();
-    	});
+			document.body.style.cursor = "pointer";
+			quitRect.fill("#c0392b");
+			this.group.getLayer()?.draw();
+		});
 
-    	quitGroup.on("mouseout", () => {
-        	document.body.style.cursor = "default";
-        	quitRect.fill("#e74c3c");
-        	this.group.getLayer()?.draw();
-    	});
+		quitGroup.on("mouseout", () => {
+			document.body.style.cursor = "default";
+			quitRect.fill("#e74c3c");
+			this.group.getLayer()?.draw();
+		});
 
-    	quitGroup.add(quitRect);
-    	quitGroup.add(quitText);
-    	this.quitBtn = quitGroup;
+		quitGroup.add(quitRect);
+		quitGroup.add(quitText);
+		this.quitBtn = quitGroup;
 
-    	// Add PAUSED text
-    	const pausedText = new Konva.Text({
-        	x: 0,
-        	y: STAGE_HEIGHT / 2 - 100,
-        	width: STAGE_WIDTH,
-        	text: "PAUSED",
-        	fontSize: 80,
-        	fontFamily: "Arial",
-        	fill: "white",
-        	align: "center",
-        	fontStyle: "bold",
-    	});
+		// Add PAUSED text
+		const pausedText = new Konva.Text({
+			x: 0,
+			y: STAGE_HEIGHT / 2 - 100,
+			width: STAGE_WIDTH,
+			text: "PAUSED",
+			fontSize: 80,
+			fontFamily: "Arial",
+			fill: "white",
+			align: "center",
+			fontStyle: "bold",
+		});
 
-    	// Add everything to the stage
-    	this.group.add(this.pauseOverlay);
-    	this.group.add(pausedText);
-    	this.group.add(this.pauseCloseBtn);
-    	this.group.add(this.quitBtn);
+		// Add everything to the stage
+		this.group.add(this.pauseOverlay);
+		this.group.add(pausedText);
+		this.group.add(this.pauseCloseBtn);
+		this.group.add(this.quitBtn);
 		// Make sure they're on top
-    	this.pauseOverlay.moveToTop();
-    	pausedText.moveToTop();
-    	this.pauseCloseBtn.moveToTop();
-    	this.quitBtn.moveToTop();
+		this.pauseOverlay.moveToTop();
+		pausedText.moveToTop();
+		this.pauseCloseBtn.moveToTop();
+		this.quitBtn.moveToTop();
 
-    	this.group.getLayer()?.draw();
+		this.group.getLayer()?.draw();
 	}
 
 	hidePauseOverlay(): void {
 		this.pauseButton?.show();
-    	this.pauseOverlay?.destroy();
-    	this.pauseCloseBtn?.destroy();
-    	this.quitBtn?.destroy();
-    
-    	this.pauseOverlay = undefined;
-    	this.pauseCloseBtn = undefined;
-    	this.quitBtn = undefined;
-    
-    	this.group.getLayer()?.draw();
+		this.pauseOverlay?.destroy();
+		this.pauseCloseBtn?.destroy();
+		this.quitBtn?.destroy();
+
+		this.pauseOverlay = undefined;
+		this.pauseCloseBtn = undefined;
+		this.quitBtn = undefined;
+
+		this.group.getLayer()?.draw();
+	}
+
+	hideGameOver(): void {
+		this.gameOverGroup?.destroy();
+		this.gameOverGroup = undefined;
+
+		this.group.getLayer()?.draw();
 	}
 
 

@@ -32,6 +32,7 @@ export class BasicGameScreenController extends ScreenController {
     private spawnNewEnemy(): void {
         const newEnemy = spawnEnemy("normal", 1, this.model.getEquationMode()) as BasicEnemy;
         this.model.setEnemy(newEnemy);
+        this.view.updateScore(GlobalPlayer.get_score());
     }
 
     loadCurrentEnemy(): void {
@@ -71,9 +72,9 @@ export class BasicGameScreenController extends ScreenController {
             await this.sleep(2000);
 
             if (this.model.hasReachedMaxLevel()) {
-                this.screenSwitcher.switchToScreen({type: 'boss_game'});
-                this.view.updateScore(GlobalPlayer.increase_score(15));
-                this.input_locked = false;
+                this.stopTimer();
+                this.view.updateScore(GlobalPlayer.increase_score(15))
+                this.screenSwitcher.switchToScreen({type: 'boss_game'})
                 return;
             }
 
