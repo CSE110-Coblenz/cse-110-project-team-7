@@ -6,6 +6,7 @@ import { BasicGameScreenController } from "./screens/BasicGameScreen/BasicGameSc
 import { BossGameScreenController } from "./screens/BossGameScreen/BossGameScreenController.ts";
 import { TowerSelectScreenController } from "./screens/TowerSelectScreen/TowerSelectScreenController.ts";
 import { LoginScreenController } from "./screens/LoginScreen/LoginScreenController.ts";
+import { SpeedGameScreenController } from "./screens/SpeedGameScreen/SpeedGameScreenController.ts";
 
 /**
  * Main Application - Coordinates all screens
@@ -26,6 +27,7 @@ class App implements ScreenSwitcher {
 	private bossgamecontroller: BossGameScreenController;
 	private towerselectcontroller: TowerSelectScreenController;
 	private logincontroller: LoginScreenController;
+	private speedgamecontroller: SpeedGameScreenController;
 
 	constructor(container: string) {
 		// Initialize Konva stage (the main canvas)
@@ -54,6 +56,7 @@ class App implements ScreenSwitcher {
 		this.bossgamecontroller = new BossGameScreenController(this);
 		this.towerselectcontroller = new TowerSelectScreenController(this);
 		this.logincontroller = new LoginScreenController(this);
+		this.speedgamecontroller = new SpeedGameScreenController(this);
 
 
 		// Add all screen groups to the layer
@@ -62,6 +65,7 @@ class App implements ScreenSwitcher {
 		this.layer.add(this.bossgamecontroller.getView().getGroup());
 		this.layer.add(this.towerselectcontroller.getView().getGroup());
 		this.layer.add(this.logincontroller.getView().getGroup());
+		this.layer.add(this.speedgamecontroller.getView().getGroup());
 
 
 		// Draw the layer (render everything to the canvas)
@@ -86,6 +90,7 @@ class App implements ScreenSwitcher {
 		this.bossgamecontroller.hide();
 		this.towerselectcontroller.hide();
 		this.logincontroller.hide();
+		this.speedgamecontroller.hide();
 
 
 		// Show the requested screen based on the screen type
@@ -107,6 +112,9 @@ class App implements ScreenSwitcher {
 			case "login":
 				this.logincontroller.show();
 				break;
+			case "speed_game":
+				this.speedgamecontroller.show();
+				this.speedgamecontroller.startGame();
 
 			//add more cases as we go
 		}

@@ -24,6 +24,7 @@ export type Screen =
     | { type: "tower_select"}
     | { type: "basic_game"; towerType?: TowerType }
 	| { type: "boss_game"; towerType?: TowerType }
+	| { type: "speed_game"; towerType?: TowerType}
 	;
 
 export abstract class ScreenController {

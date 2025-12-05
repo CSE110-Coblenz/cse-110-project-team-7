@@ -3,6 +3,7 @@ import type { ScreenSwitcher, TowerType } from "../../types.ts";
 import { TowerSelectScreenModel } from "./TowerSelectScreenModel.ts";
 import { TowerSelectScreenView } from "./TowerSelectScreenView.ts";
 import { GlobalPlayer } from "../../GlobalPlayer.ts";
+
 /**
  * TowerSelectScreenController - Coordinates tower selection logic between Model and View
  */
@@ -21,6 +22,11 @@ export class TowerSelectScreenController extends ScreenController {
 		// Set up the callback for when a tower is selected
 		this.view.setOnTowerSelect((towerType: TowerType) => {
 			this.handleTowerSelection(towerType);
+		});
+
+		// Set up the callback for speed game button
+		this.view.setOnSpeedGameClick(() => {
+			this.handleSpeedGameClick();
 		});
     }
 	
@@ -42,6 +48,7 @@ export class TowerSelectScreenController extends ScreenController {
 				return 5
 		}
 	}
+
 	private handleTowerSelection(towerType: TowerType): void {
 		const towerNum = this.tower_type_to_num(towerType);
     
@@ -53,6 +60,13 @@ export class TowerSelectScreenController extends ScreenController {
 		this.screenSwitcher.setCurrentTower(towerNum); 
 		
 		this.screenSwitcher.switchToScreen({ type: "basic_game" });
+	}
+
+	/**
+	 * Handle speed game button click
+	 */
+	private handleSpeedGameClick(): void {
+		this.screenSwitcher.switchToScreen({ type: "speed_game" });
 	}
 	
 	/**
