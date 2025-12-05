@@ -1,11 +1,11 @@
 // Model for the boss enemy. 
 // Needs to be managed and called from src/screens/BossGameScreen
 
-export interface BossPhase {
-    targetNumber: number;
-    tiles: string[];
-    imagePath: string;
-}
+    export interface BossPhase {
+        targetNumber: number;
+        tiles: string[];
+        imagePath: string;
+    }
 
 export class BossEnemyModel {
     private phases: BossPhase[];

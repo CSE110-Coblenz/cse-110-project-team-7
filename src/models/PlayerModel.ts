@@ -10,7 +10,15 @@ export class Player {
         this.health = MAX_HEALTH;
         this.name = name;
         this.score = 0;
-        this.highestTowerUnlocked = 1; // start with the first tower unlocked
+        this.highestTowerUnlocked = 1;
+    }
+
+    set_username(username:string):void{
+        this.name=username;
+    }
+
+    get_username():string{
+        return this.name;
     }
 
     // Health methods
@@ -28,6 +36,40 @@ export class Player {
 
     take_damage(damage: number): void {
         this.health -= damage;
+    }
+
+    increase_score(change: number): number{
+        //console.log("pkayer model increase score");
+        this.score += change;
+
+        return this.score;
+    }
+
+    decrease_score(change: number): number {
+        this.score -= change;
+        if (this.score < 0) this.score = 0;
+
+        return this.score;
+    }
+
+    get_score(): number { 
+        return this.score;
+    }
+    
+    get_highest_tower(): number {
+        return this.highestTowerUnlocked;
+    }
+
+    set_highest_tower(level:number):number{
+        return this.highestTowerUnlocked=level;
+    }
+
+    unlock_next_tower(): void {
+        this.highestTowerUnlocked += 1;
+    }
+
+    is_tower_unlocked(tower: number): boolean {
+        return this.highestTowerUnlocked >= tower;
     }
 
     // Score methods
