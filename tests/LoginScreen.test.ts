@@ -7,7 +7,7 @@ describe("LoginScreenModel Class",() => {
         expect(model.username).toBe('')
         expect(model.password).toBe('')
     })
-    test('can set username and password',()=>{
+    test('can set the username and password',()=>{
         const model=new LoginScreenModel()
         model.username='testuser'
         model.password='testpassword'
