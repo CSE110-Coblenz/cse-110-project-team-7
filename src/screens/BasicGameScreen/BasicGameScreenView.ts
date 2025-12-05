@@ -646,40 +646,203 @@ export class BasicGameScreenView implements View {
      * Show game over screen
      */
     showGameOver(): void {
+        const overlay=new Konva.Rect({
+            x:0,
+            y:0,
+            width:STAGE_WIDTH,
+            height:STAGE_HEIGHT,
+            fill:'black',
+            opacity:0.7,
+            name: 'GameOverOverlay'
+        })
+        const gameOver=new Konva.Group({
+            x:0,
+            y:0,
+            name:'gameOverGroup'
+        })
         const text = new Konva.Text({
             x: 0,
-            y: STAGE_HEIGHT / 2 - 50,
+            y: STAGE_HEIGHT / 2 - 150,
             width: STAGE_WIDTH,
             align: "center",
-            text: "GAME OVER",
-            fontSize: 60,
+            text: "GAME OVER!!!",
+            fontSize: 100,
             fontFamily: "Calibri",
-            fill: "red"
+            fontStyle:'bold',
+            fill: "red",
+            shadowColor:'black',
+            shadowBlur:10,
+            shadowOpacity:0.8
         });
-        this.group.add(text);
+        //this.group.add(text);
+        const qg=new Konva.Group({
+            x:STAGE_WIDTH/2-125,
+            y:STAGE_HEIGHT/2+20,
+            cursor:'pointer'
+        })
+        const qr=new Konva.Rect({
+            x:0,
+            y:0,
+            width:250,
+            height:70,
+            fill:'#e74c3c',
+            stroke:'#c0392b',
+            strokeWidth:4,
+            cornerRadius:12,
+            shadowColor:'black',
+            shadowBlur:8,
+            shadowOpacity:0.5
+        })
+        const qt=new Konva.Text({
+            x:0,
+            y:0,
+            width:250,
+            height:70,
+            text:'Return to Towers',
+            fontSize:28,
+            fontFamily:'Arial',
+            fill:'white',
+            align:'center',
+            verticalAlign:'middle',
+            fontStyle:'bold',
+            listening:false
+        })
+        qg.add(qr)
+        qg.add(qt)
+
+        qg.on('click',()=>{
+            this.controller.returnToTowerSelect()
+        })
+        qg.on('mouseover',()=>{
+            document.body.style.cursor='pointer';
+            qr.fill('#c0392b');
+            qr.shadowBlur(12);
+            this.group.getLayer()?.draw()
+        })
+        qg.on('mouseout',()=>{
+            document.body.style.cursor='default'
+            qr.fill('#e74c3c')
+            qr.shadowBlur(8)
+            this.group.getLayer()?.draw()
+        })
+        gameOver.add(text)
+        gameOver.add(qg)
+        this.group.add(overlay)
+        this.group.add(gameOver)
+        gameOver.moveToTop()
+
+
         this.group.getLayer()?.draw();
+
+        
         
         // Disable all buttons
         this.choiceButtons.forEach(btn => btn.off("click"));
     }
 
+    hideGameOver():void{
+        const overlay=this.group.findOne('.GameOverOverlay')
+        const gameOver=this.group.findOne('.gameOverGroup')
+
+        overlay?.destroy();
+        gameOver?.destroy();
+        this.group.getLayer()?.draw()
+    }
+
     /**
      * Switch to boss screen
      */
-    switchToBossScreen(): void {
+    switchToBossScreen(onComplete:()=>void): void {
         console.log("Switching to boss screen...");
-        this.hide();
+        this.group.visible(true)
+        const overlay=new Konva.Rect({
+            x:0,
+            y:0,
+            width:STAGE_WIDTH,
+            height:STAGE_HEIGHT,
+            fill:'black',
+            opacity:0
+        })
+        const bossprepText=new Konva.Text({
+            x:0,
+            y:STAGE_HEIGHT/2-50,
+            width:STAGE_WIDTH,
+            text:'PREPARE TO ENTER BOSS MODE',
+            fontSize:80,
+            fill:'#ff3333',
+            align:'center',
+            fontStyle:'bold',
+            opacity:0
+        })
+        this.group.add(overlay)
+        this.group.add(bossprepText)
+        overlay.moveToTop()
+        bossprepText.moveToTop()
 
-        if (!bossScreen) {
-            bossScreen = new BossGameScreenView();
+        const layer=this.group.getLayer();
+        if(!layer){
+            console.error('Transition Layer not found');
+            onComplete();
+            return;
+            //if(!bossScreen){
+                //bossScreen=new BossGameScreenView()
+            //}
+            //bossScreen.show()
+            //return
         }
-        bossScreen.show();
+
+        layer.batchDraw()
+
+        const fadingIn=new Konva.Tween({
+            node:overlay,
+            duration:2,
+            opacity:0.8,
+            onUpdate:()=>{
+                layer.batchDraw()
+            },
+            onFinish:()=>{
+                console.log('Overlay fade done')
+            }
+        })
+        const fadetext=new Konva.Tween({
+            node:bossprepText,
+            duration:2,
+            opacity:1,
+            onUpdate:()=>{
+                this.group.getLayer()?.batchDraw()
+            },
+            onFinish:()=>{
+                console.log('Text Fade Done')
+            }
+        })
+        fadingIn.play()
+        fadetext.play()
+
+        setTimeout(()=>{
+            overlay.destroy();
+            bossprepText.destroy();
+            layer.batchDraw();
+            //this.hide()
+            //if(!bossScreen){
+                //bossScreen=new BossGameScreenView();
+            //}
+            //bossScreen.show()
+            onComplete();
+        },4000)
     }
+        //this.hide();
+
+        //if (!bossScreen) {
+            //bossScreen = new BossGameScreenView();
+        //
+        //bossScreen.show();
+    //}
 
     /**
      * Show the view
      */
     show(): void {
+        this.hideGameOver();
         this.group.visible(true);
         this.group.getLayer()?.draw();
     }
