@@ -13,6 +13,7 @@ export class BasicGameScreenController extends ScreenController {
     private isPaused = false;
     private gameTimer: number | null = null;
 
+    input_locked = false;
     constructor(screenSwitcher: ScreenSwitcher) {
         super();
         this.screenSwitcher = screenSwitcher;
@@ -49,6 +50,12 @@ export class BasicGameScreenController extends ScreenController {
 
     // --- Answer handling ---
     async handleAnswer(selected: string): Promise<void> {
+        if (this.input_locked){
+            return;
+        }
+
+        this.input_locked = true;
+
         const isCorrect = this.model.checkAnswer(selected);
         const enemy = this.model.getCurrentEnemy();
         if (!enemy) return;
@@ -89,6 +96,8 @@ export class BasicGameScreenController extends ScreenController {
                 this.stopTimer();
             }
         }
+
+        this.input_locked = false;
     }
 
     // --- Tower management ---
