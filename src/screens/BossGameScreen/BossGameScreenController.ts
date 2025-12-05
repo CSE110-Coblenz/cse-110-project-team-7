@@ -39,7 +39,7 @@ export class BossGameScreenController extends ScreenController {
 		});
 
 		this.view.setOnSubmitPress((_: Konva.Rect) => {
-			console.log("SUBMIT PRESSED")
+			//console.log("SUBMIT PRESSED")
 			this.checkSubmit();
 		});
 
@@ -47,11 +47,11 @@ export class BossGameScreenController extends ScreenController {
 
 		// Pause functionality
 		this.view.setOnPauseClick(() => {
-        	this.togglePause();
+			this.togglePause();
 		});
 
 		this.view.setOnQuitClick(() => {
-    		this.returnToTowerSelect();
+			this.returnToTowerSelect();
 		});
 	}
 
@@ -90,6 +90,8 @@ export class BossGameScreenController extends ScreenController {
 		this.boss.reset();
 
 		this.loadPhaseIntoView();
+		this.view.hideGameOver();
+		this.view.hidePauseOverlay();
 		this.view.show();
 		this.view.updateHealth(this.model.get_health());
 		this.view.updateScore(this.model.getScore());
@@ -108,6 +110,8 @@ export class BossGameScreenController extends ScreenController {
 		this.view.updateBossImage(phase.imagePath);
 		this.view.updatePhaseTiles(phase.tiles);
 		this.view.updateEquationText("");
+		this.view.hideGameOver(); //in case they are coming back from a death
+		this.view.hidePauseOverlay(); // in case they are unpausing
 	}
 
 	/* 
@@ -213,7 +217,7 @@ export class BossGameScreenController extends ScreenController {
 	}
 
 	private isPaused = false; // Tracks pause state 
-			
+
 
 	private togglePause(): void {
 		if (this.isPaused) {
@@ -228,8 +232,8 @@ export class BossGameScreenController extends ScreenController {
 
 	private pauseGame(): void {
 		this.stopTimer();
-		this.view.showPauseOverlay(); 
-    	this.view.getTiles().forEach(tile => tile.getNode().listening(false));
+		this.view.showPauseOverlay();
+		this.view.getTiles().forEach(tile => tile.getNode().listening(false));
 		this.view.stopEquationPulsate();
 		this.view.stopBossNumPulsate();
 	}
@@ -237,24 +241,25 @@ export class BossGameScreenController extends ScreenController {
 	private resumeGame(): void {
 		this.view.hidePauseOverlay(); // Add this line
 		this.startTimer();
-    	this.view.getTiles().forEach(tile => tile.getNode().listening(true));
+		this.view.getTiles().forEach(tile => tile.getNode().listening(true));
 		this.view.startEquationPulsate();
 		this.view.startBossNumPulsate();
 	}
 
-	/**
-	 * Stop the timer
-	 */
 	public returnToTowerSelect(): void {
-    	this.stopTimer();
-    	this.view.hidePauseOverlay();
-    	this.tileSet.clear();
-    	GlobalPlayer.reset_health();
-    	this.model.resetTimer();
-    	this.isPaused = false; // Reset pause state
-    	this.screenSwitcher.switchToScreen({ type: "tower_select" });
+		this.stopTimer();
+		this.view.hidePauseOverlay();
+		this.view.hideGameOver();
+		this.tileSet.clear();
+		GlobalPlayer.reset_health();
+		this.model.resetTimer();
+		this.isPaused = false; // Reset pause state
+		this.screenSwitcher.switchToScreen({ type: "tower_select" });
 	}
-	
+
+	/**
+	  * Stop the timer
+	  */
 	private stopTimer(): void {
 		if (this.gameTimer != null) {
 			clearInterval(this.gameTimer);
@@ -320,7 +325,13 @@ export class BossGameScreenController extends ScreenController {
 		// check if the equation made by makeEquation() equals the boss num
 		// return true if it does equal boss num
 
-		const val: number = evaluate(this.makeEquation());
+		const equationText: string = this.makeEquation();
+
+		if (equationText === "") {
+			return false;
+		}
+
+		const val: number = evaluate(equationText);
 
 		return val === this.boss.getCurrentPhase().targetNumber;
 	}
