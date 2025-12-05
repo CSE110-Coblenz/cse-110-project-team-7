@@ -1,3 +1,30 @@
+jest.mock('konva',()=>{
+    return{
+        default:{
+            Group:jest.fn().mockImplementation(()=>({
+                add:jest.fn(),
+                on:jest.fn()
+            })),
+            Text:jest.fn().mockImplementation(()=>({
+                width:jest.fn().mockReturnValue(100),
+                offsetX:jest.fn(),
+                offsetY:jest.fn(),
+                text:jest.fn(),
+                fontSize:jest.fn(),
+                on:jest.fn(),
+            })),
+            Rect:jest.fn().mockImplementation(()=>({
+                width:jest.fn().mockReturnValue(100),
+                height:jest.fn().mockReturnValue(50),
+                fill:jest.fn(),
+                on:jest.fn(),
+                x:jest.fn(),
+                y:jest.fn()
+            })),
+            Stage:jest.fn()
+        }
+    }
+});
 import { LoginScreenModel } from "../src/screens/LoginScreen/LoginScreenModel";
 import { LoginScreenController } from "../src/screens/LoginScreen/LoginScreenController";
 
