@@ -564,6 +564,16 @@ export class BossGameScreenView implements View {
 
 		this.gameOverGroup?.destroy();
 
+		const overlay=new Konva.Rect({
+			x:0,
+			y:0,
+			width:STAGE_WIDTH,
+			height:STAGE_HEIGHT,
+			fill:'black',
+			opacity:0.7,
+			name:'GameOverOverlay'
+		})
+
 		const g = new Konva.Group({
 			x: 0, 
 			y: 0,
@@ -573,43 +583,50 @@ export class BossGameScreenView implements View {
 
 		const text = new Konva.Text({
 			x: 0,
-			y: STAGE_HEIGHT / 2 - 100,
+			y: STAGE_HEIGHT / 2 - 200,
 			width: STAGE_WIDTH,
 			align: "center",
-			text: "GAME OVER",
-			fontSize: 150,
+			text: "GAME OVER!!!",
+			fontSize: 100,
 			fontFamily: "Calibri",
 			fontStyle: "bold",
-			fill: "red"
+			fill: "red",
+			shadowColor:'black',
+			shadowBlur:10,
+			shadowOpacity:0.8
 		});
 
-		g.add(text);
+
+		//g.add(text);
 		// ADD the QUIT BUTTON
 
 		const quitGroup = new Konva.Group({
-			x: STAGE_WIDTH / 2 - 100,
-			y: STAGE_HEIGHT / 2,
+			x: STAGE_WIDTH / 2 - 125,
+			y: STAGE_HEIGHT /2+50,
 			cursor: "pointer",
 		});
 
 		const quitRect = new Konva.Rect({
 			x: 0,
 			y: 0,
-			width: 200,
-			height: 60,
+			width: 250,
+			height: 70,
 			fill: "#e74c3c",
 			stroke: "#c0392b",
-			strokeWidth: 3,
-			cornerRadius: 10,
+			strokeWidth: 4,
+			cornerRadius: 12,
+			shadowColor:'black',
+			shadowBlur:8,
+			shadowOpacity:0.5
 		});
 
 		const quitText = new Konva.Text({
 			x: 0,
 			y: 0,
-			width: 200,
-			height: 60,
-			text: "Quit to Tower",
-			fontSize: 24,
+			width: 250,
+			height: 70,
+			text: "Return to Towers",
+			fontSize: 28,
 			fontFamily: "Arial",
 			fill: "white",
 			align: "center",
@@ -629,18 +646,22 @@ export class BossGameScreenView implements View {
 		quitGroup.on("mouseover", () => {
 			document.body.style.cursor = "pointer";
 			quitRect.fill("#c0392b");
+			quitRect.shadowBlur(12)
 			this.group.getLayer()?.draw();
 		});
 
 		quitGroup.on("mouseout", () => {
 			document.body.style.cursor = "default";
 			quitRect.fill("#e74c3c");
+			quitRect.shadowBlur(8)
 			this.group.getLayer()?.draw();
 		});
-		
+		g.add(text)
 		g.add(quitGroup);
 
+		this.group.add(overlay);
 		this.group.add(g);
+		overlay.moveToTop()
 		g.moveToTop();
 		this.group.getLayer()?.draw();
 	}

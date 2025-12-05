@@ -1,6 +1,7 @@
-import Konva from "konva";
+//import Konva from "konva";
 import type { View } from "../../types";
 import { STAGE_WIDTH, STAGE_HEIGHT } from "../../constants";
+import Konva from "konva"
 
 export class LoginScreenView implements View {
 	private group: Konva.Group;
@@ -396,6 +397,10 @@ export class LoginScreenView implements View {
 	hide(): void {
 		this.group.visible(false);
 		this.cursor.visible(false);
+		if (this.cursorIntervalId!=null){
+			clearInterval(this.cursorIntervalId)
+			this.cursorIntervalId=null;
+		}
 		this.group.getLayer()?.draw();
 	}
 

@@ -17,7 +17,6 @@ export class LoginScreenController extends ScreenController {
 		this.screenSwitcher = screenSwitcher;
 
 	// Initialize Model and View
-	// Initialize Model and View
 		this.model = new LoginScreenModel();
 		this.view = new LoginScreenView(
 			async (username: string, password:string) => {

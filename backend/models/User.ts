@@ -5,7 +5,7 @@ const UserSchema = new mongoose.Schema({
   passwordHash: { type: String, required: true },
 
   highestTowerUnlocked:{type:Number,default:1},
-  score:{type:Number,default:0},
+  //score:{type:Number,default:0},
 
 },{
   timestamps:true
