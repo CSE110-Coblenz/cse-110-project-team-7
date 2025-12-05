@@ -74,9 +74,7 @@ export class BasicGameScreenView implements View {
 
         this.createHelpButton();
 
-        // --- FIXED PAUSE BUTTON SECTION ---
         
-        // 1. CREATE the button first (This was likely missing or happened too late)
         this.pauseButton = new Konva.Text({
             x: STAGE_WIDTH - 70,
             y: 100,
@@ -90,7 +88,6 @@ export class BasicGameScreenView implements View {
             fontStyle: "bold"
         });
 
-        // 2. NOW add the listeners (Because 'this.pauseButton' now exists)
         this.pauseButton.on("mouseover", () => {
             document.body.style.cursor = "pointer";
             this.pauseButton.fill("#D1A700");
@@ -107,10 +104,8 @@ export class BasicGameScreenView implements View {
             this.controller.togglePaused();
         });
 
-        // 3. Add to group
         this.group.add(this.pauseButton);
 
-        // --- END PAUSE BUTTON SECTION ---
 
         this.levelText = new Konva.Text({
             x: STAGE_WIDTH - 180,

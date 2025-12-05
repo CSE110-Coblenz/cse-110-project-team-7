@@ -47,6 +47,7 @@ export class TowerSelectScreenController extends ScreenController {
     
 		if (!GlobalPlayer.is_tower_unlocked(towerNum)) {
 			console.log(`Tower ${towerNum} is locked!`);
+			this.view.showLockedPopup();
 			return;
 		}
 		this.screenSwitcher.setCurrentTower(towerNum); 

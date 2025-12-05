@@ -1,25 +1,48 @@
-const normal_sprites = {
-    'slime': 'sprite', 
-    'skeleton': 'sprite', 
-    'goblin': 'sprite', 
-    'bat': 'sprite'}
-
-const boss_sprites = {
-    'ghost': "https://p7.hiclipart.com/preview/79/102/357/pac-man-world-3-ghosts-clip-art-pac-man-ghost-png-transparent-image-thumbnail.jpg"}
-
-
-function getRandomKey<T extends object>(dict: T): keyof T {
-  const keys = Object.keys(dict) as (keyof T)[];
-  const randomIndex = Math.floor(Math.random() * keys.length);
-  return keys[randomIndex];
+export interface SpriteSet {
+    idle: string;
+    attack: string;
+    damage: string;
+    slain: string;
 }
 
-export function getRandomSprite(type: "normal" | "boss" = "normal"): [string, string] | undefined{
-    if (type == 'normal'){
-        const key = getRandomKey(normal_sprites);
-        return [key, normal_sprites[key]];
-    } else if (type == 'boss'){
-        const key = getRandomKey(boss_sprites);
-        return [key, boss_sprites[key]];
+// You already have this list
+export const ENEMY_SPRITE_SETS: SpriteSet[] = [
+    {
+        idle: 'src/assets/monsters/mask.png',
+        attack: 'src/assets/monsters/maskatk.png',
+        damage: 'src/assets/monsters/maskdmg.png',
+        slain: 'src/assets/monsters/maskdmg.png'
+    },
+    {
+        idle: 'src/assets/monster.png',
+        attack: 'src/assets/monsteratk.png',
+        damage: 'src/assets/monsterhurt.png',
+        slain: 'src/assets/monstersln.png'
+    },
+    {
+        idle: 'src/assets/monsters/redrobot.png',
+        attack: 'src/assets/monsters/redrobotatk.png',
+        damage: 'src/assets/monsters/redrobotdmg.png',
+        slain: 'src/assets/monsters/redrobotdmg.png'
+    },
+    {
+        idle: 'src/assets/monsters/slimeblue.png',
+        attack: 'src/assets/monsters/slimeblueatk.png',
+        damage: 'src/assets/monsters/slimebluedmg.png',
+        slain: 'src/assets/monsters/slimebluedmg.png'
     }
+];
+
+const normalNames = ["slime", "skeleton", "goblin", "bat"];
+const bossNames = ["ogre", "witch", "giant", "werewolf"];
+
+function pick<T>(arr: T[]): T {
+    return arr[Math.floor(Math.random() * arr.length)];
+}
+
+export function getRandomSprite(type: "normal" | "boss" = "normal") {
+    const name = type === "normal" ? pick(normalNames) : pick(bossNames);
+    const spriteSet = pick(ENEMY_SPRITE_SETS);
+
+    return { name, spriteSet };
 }
