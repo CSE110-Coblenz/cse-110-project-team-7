@@ -2,23 +2,38 @@ export class BasicEnemy {
     health: number;
     damage: number;
     name: string;
-    sprite: string;
-    // default damage is 1, can modify for other types of enemies
-    constructor(health: number, damage: number = 1, name: any, sprite: string){
+
+    idleSprite: string;
+    attackSprite: string;
+    damageSprite: string;
+    slainSprite: string;
+
+    constructor(
+        health: number,
+        damage: number = 1,
+        name: string,
+        sprites: {
+            idle: string;
+            attack: string;
+            damage: string;
+            slain: string;
+        }
+    ) {
         this.health = health;
         this.damage = damage;
         this.name = name;
-        this.sprite = sprite;
+
+        this.idleSprite = sprites.idle;
+        this.attackSprite = sprites.attack;
+        this.damageSprite = sprites.damage;
+        this.slainSprite = sprites.slain;
     }
 
-    // enemy only takes damage if player answers exact health
-    // player answer should be handled in controller
-    take_damage(): void{
+    take_damage(): void {
         this.health = 0;
     }
 
-    is_alive(): boolean{
+    is_alive(): boolean {
         return this.health > 0;
     }
-    
 }

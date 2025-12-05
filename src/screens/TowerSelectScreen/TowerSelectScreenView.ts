@@ -4,7 +4,7 @@ import { STAGE_WIDTH, STAGE_HEIGHT } from "../../constants.ts";
 import type { TowerType } from "../../types.ts";
 
 /**
- * TowerSelectScreenView - Renders the tower selection UI using Konva
+ * TowerSelectScreenView - displays the tower selection screen using Konva
  */
 export class TowerSelectScreenView implements View {
 	private group: Konva.Group;
@@ -18,7 +18,7 @@ export class TowerSelectScreenView implements View {
     }
 
 	private setupUI(): void {
-		// 1. Sky Gradient (Dark Purple Sunset/Dusk)
+		// Sky Gradient (Dark Purple Sunset)
 		const sky = new Konva.Rect({
 			x: 0,
 			y: 0,
@@ -26,29 +26,28 @@ export class TowerSelectScreenView implements View {
 			height: STAGE_HEIGHT,
 			fillLinearGradientStartPoint: { x: 0, y: 0 },
 			fillLinearGradientEndPoint: { x: 0, y: STAGE_HEIGHT },
-			fillLinearGradientColorStops: [0, "#2E1A47", 0.6, "#6A2C70", 1, "#F08A5D"], // Deep purple -> Magenta -> Sunset Orange
+			fillLinearGradientColorStops: [0, "#2E1A47", 0.6, "#6A2C70", 1, "#F08A5D"], //purple --> pink --> orange sky color
 		});
 		this.group.add(sky);
 
-		// 2. Moon (Pale glow)
 		const moon = new Konva.Circle({
 			x: STAGE_WIDTH - 100,
 			y: 80,
 			radius: 40,
-			fill: "#F4F6F0", // Pale white
+			fill: "#F4F6F0", 
 			shadowColor: "#FFFFFF",
 			shadowBlur: 30,
 			shadowOpacity: 0.6,
 		});
 		this.group.add(moon);
 
-		// 3. Background Mountains (Dark Silhouette Purple)
+		//Background Mountains 
 		this.createPixelTerrain(STAGE_HEIGHT / 2 + 50, "#372549", 0.9, 80);
 
-		// 4. Midground Hills (Dark Teal/Shadowed Green)
+		// Midground Hills 
 		this.createPixelTerrain(STAGE_HEIGHT / 2 + 120, "#1A3C40", 1, 60);
 
-		// 5. Foreground Ground (Dark Dirt)
+		// Ground (Dark Dirt)
 		const groundY = STAGE_HEIGHT - 100;
 		const ground = new Konva.Rect({
 			x: 0,
@@ -61,10 +60,10 @@ export class TowerSelectScreenView implements View {
 		});
 		this.group.add(ground);
 
-		// Add welcome message at the top
+		
 		this.createWelcomeMessage();
 
-		// Add info button in top-right corner
+		
 		this.createInfoButton();
 
 		// Button dimensions and spacing for 5 towers
@@ -77,7 +76,7 @@ export class TowerSelectScreenView implements View {
 		const totalWidth = 5 * buttonWidth + 4 * buttonSpacing;
 		const startX = STAGE_WIDTH / 2 - totalWidth / 2;
 
-		// 1. Tower of Addition
+		//Addition
 		const addTower = this.createTowerButton(
 			"Addition",
 			"+",
@@ -90,7 +89,7 @@ export class TowerSelectScreenView implements View {
 		addTower.on("click", () => { if (this.onTowerSelect) this.onTowerSelect("addition"); });
 		this.group.add(addTower);
 
-		// 2. Tower of Subtraction
+		// Subtraction
 		const subTower = this.createTowerButton(
 			"Subtraction",
 			"-",
@@ -102,8 +101,9 @@ export class TowerSelectScreenView implements View {
 		);
 		subTower.on("click", () => { if (this.onTowerSelect) this.onTowerSelect("subtraction"); });
 		this.group.add(subTower);
+		
 
-		// 3. Tower of Multiplication
+		//Multiplication
 		const multTower = this.createTowerButton(
 			"Multiplication",
 			"×",
@@ -116,7 +116,7 @@ export class TowerSelectScreenView implements View {
 		multTower.on("click", () => { if (this.onTowerSelect) this.onTowerSelect("multiplication"); });
 		this.group.add(multTower);
 
-		// 4. Tower of Division
+		// Division
 		const divTower = this.createTowerButton(
 			"Division",
 			"÷",
@@ -129,7 +129,7 @@ export class TowerSelectScreenView implements View {
 		divTower.on("click", () => { if (this.onTowerSelect) this.onTowerSelect("division"); });
 		this.group.add(divTower);
 
-		// 5. Tower of All Operations (Combo)
+		//Tower of All Operations
 		const comboTower = this.createTowerButton(
 			"All Operations",
 			"★",
@@ -157,18 +157,18 @@ export class TowerSelectScreenView implements View {
 		let currentY = baseY;
 		
 		for (let i = 0; i <= segments; i++) {
-			// Randomly go up or down, but stay blocky
+			//goes up and down randomly to create a blocky effecet
 			const step = (Math.random() - 0.5) * variance;
 			currentY += step;
 			
-			// Keep within bounds
+			
 			if (currentY < baseY - variance) currentY = baseY - variance;
 			if (currentY > baseY + variance) currentY = baseY + variance;
 
 			const x = i * segmentWidth;
 			points.push(x, currentY);
 			
-			// Create the "step" effect (flat top)
+			
 			if (i < segments) {
 				points.push((i + 1) * segmentWidth, currentY);
 			}
@@ -194,7 +194,7 @@ export class TowerSelectScreenView implements View {
 			text: "Welcome to Math Towers!",
 			fontSize: 42,
 			fontFamily: "Arial",
-			fill: "black", // Stronger shadow for contrast
+			fill: "black", 
 			opacity: 0.5,
 			align: "center",
 			fontStyle: "bold",
@@ -208,10 +208,10 @@ export class TowerSelectScreenView implements View {
 			text: "Welcome to Math Towers!",
 			fontSize: 42,
 			fontFamily: "Arial",
-			fill: "#FFFFFF", // White text for dark background
+			fill: "#FFFFFF", // White text 
 			align: "center",
 			fontStyle: "bold",
-			shadowColor: "#F08A5D", // Slight glow matching sunset
+			shadowColor: "#F08A5D",
 			shadowBlur: 10,
 		});
 		welcomeText.x(welcomeText.x() - welcomeText.width() / 2);
@@ -260,7 +260,7 @@ export class TowerSelectScreenView implements View {
 		//having trouble getting question mark into the center
 		const questionMark = new Konva.Text({
 			x: -buttonSize / 2,
-			y: -buttonSize / 2 + 9, // +9 for vertical centering ((50-32)/2)
+			y: -buttonSize / 2 + 9, // +9 for vertical centering 
 			width: buttonSize,
 			text: "?",
 			fontSize: 32,
@@ -296,7 +296,7 @@ export class TowerSelectScreenView implements View {
 	}
 
 	private createInfoModal(): void {
-		// Modal background (semi-transparent overlay)
+		// background overlay
 		const overlay = new Konva.Rect({
 			x: 0,
 			y: 0,
@@ -309,7 +309,7 @@ export class TowerSelectScreenView implements View {
 			this.toggleInfoModal();
 		});
 
-		// Modal box
+		//  box
 		const modalWidth = 500;
 		const modalHeight = 400;
 		const modalX = STAGE_WIDTH / 2 - modalWidth / 2;
@@ -321,7 +321,7 @@ export class TowerSelectScreenView implements View {
 			visible: false,
 		});
 
-		// Modal background
+		// modal background
 		const modalBg = new Konva.Rect({
 			width: modalWidth,
 			height: modalHeight,
@@ -361,7 +361,7 @@ export class TowerSelectScreenView implements View {
 		];
 
 		let yPos = 90;
-		instructions.forEach((instruction, index) => {
+		instructions.forEach((instruction) => {
 			const instructionText = new Konva.Text({
 				x: 30,
 				y: yPos,
@@ -397,7 +397,7 @@ export class TowerSelectScreenView implements View {
 
 		const closeX = new Konva.Text({
 			x: -closeButtonSize / 2,
-			y: -closeButtonSize / 2 + 1, // Slight adjustment for visual centering
+			y: -closeButtonSize / 2 + 1, // Slight adjustment for centering
 			width: closeButtonSize,
 			height: closeButtonSize,
 			text: "×",
@@ -428,7 +428,7 @@ export class TowerSelectScreenView implements View {
 
 		modalGroup.add(closeButton);
 
-		// Prevent clicks on modal from closing it
+		// Prevent clicks on graphic from closing it
 		modalGroup.on("click", (e) => {
 			e.cancelBubble = true;
 		});
@@ -444,7 +444,7 @@ export class TowerSelectScreenView implements View {
 
 		this.isModalOpen = !this.isModalOpen;
 		
-		// Toggle visibility of overlay and modal
+		// Toggle visibility of overlay
 		const overlay = this.infoModalGroup.children[0] as Konva.Rect;
 		const modal = this.infoModalGroup.children[1] as Konva.Group;
 		
@@ -468,7 +468,7 @@ export class TowerSelectScreenView implements View {
 			y,
 		});
 
-		// Draw tower structure (simple rectangle)
+		// Draw tower structure (rectangle)
 		const towerBody = new Konva.Rect({
 			x: width / 2 - 30,
 			y: -200,
@@ -570,6 +570,73 @@ export class TowerSelectScreenView implements View {
 
 		return group;
 	}
+
+	public showLockedPopup(): void {
+        //Create a dark overlay
+        const overlay = new Konva.Rect({
+            x: 0,
+            y: 0,
+            width: STAGE_WIDTH,
+            height: STAGE_HEIGHT,
+            fill: "rgba(0,0,0,0.7)",
+        });
+
+        //Create the popup box
+        const width = 400;
+        const height = 200;
+        const group = new Konva.Group({
+            x: STAGE_WIDTH / 2 - width / 2,
+            y: STAGE_HEIGHT / 2 - height / 2,
+        });
+
+        const rect = new Konva.Rect({
+            width: width,
+            height: height,
+            fill: "#e74c3c", // Red color for "locked"
+            stroke: "white",
+            strokeWidth: 4,
+            cornerRadius: 10,
+            shadowColor: "black",
+            shadowBlur: 10,
+            shadowOpacity: 0.5,
+        });
+
+        // Add text
+        const text = new Konva.Text({
+            x: 20,
+            y: 20,
+            width: width - 40,
+            text: "LOCKED!\n\nYou must complete the previous tower to unlock this one. \n\n(Press anywhere to close)",
+            fontSize: 24,
+            fontFamily: "Arial",
+            fill: "white",
+            align: "center",
+            fontStyle: "bold"
+        });
+        
+        // Center the text vertically
+        text.y((height - text.height()) / 2);
+
+        //Close button logic (clear group and overlay)
+        const closePopup = () => {
+            group.destroy();
+            overlay.destroy();
+            this.group.getLayer()?.draw();
+        };
+
+        // Click anywhere to close
+        overlay.on('click', closePopup);
+        group.on('click', closePopup);
+
+        group.add(rect);
+        group.add(text);
+
+        this.group.add(overlay);
+        this.group.add(group);
+        overlay.moveToTop();
+        group.moveToTop();
+        this.group.getLayer()?.draw();
+    }
 
 	setOnTowerSelect(callback: (towerType: TowerType) => void): void {
 		this.onTowerSelect = callback;
