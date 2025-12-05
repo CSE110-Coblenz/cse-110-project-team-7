@@ -470,7 +470,7 @@ export class BossGameScreenView implements View {
 		const img = new Image();
 		img.onload = () => {
 			// Remove old hearts
-			this.hearts.forEach(h => h.destroy());
+			this.hearts?.forEach(h => h.destroy());
 			this.hearts = [];
 
 			const heartSize = 40;
