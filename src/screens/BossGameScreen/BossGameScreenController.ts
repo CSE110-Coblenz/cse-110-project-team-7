@@ -39,7 +39,7 @@ export class BossGameScreenController extends ScreenController {
 		});
 
 		this.view.setOnSubmitPress((_: Konva.Rect) => {
-			console.log("SUBMIT PRESSED")
+			//console.log("SUBMIT PRESSED")
 			this.checkSubmit();
 		});
 
@@ -258,8 +258,8 @@ export class BossGameScreenController extends ScreenController {
 	}
 
 	/**
- 	* Stop the timer
- 	*/
+	  * Stop the timer
+	  */
 	private stopTimer(): void {
 		if (this.gameTimer != null) {
 			clearInterval(this.gameTimer);
@@ -325,7 +325,13 @@ export class BossGameScreenController extends ScreenController {
 		// check if the equation made by makeEquation() equals the boss num
 		// return true if it does equal boss num
 
-		const val: number = evaluate(this.makeEquation());
+		const equationText: string = this.makeEquation();
+
+		if (equationText === "") {
+			return false;
+		}
+
+		const val: number = evaluate(equationText);
 
 		return val === this.boss.getCurrentPhase().targetNumber;
 	}
