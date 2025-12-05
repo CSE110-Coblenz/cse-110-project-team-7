@@ -9,6 +9,7 @@ import type { TowerType } from "../../types.ts";
 export class TowerSelectScreenView implements View {
 	private group: Konva.Group;
 	private onTowerSelect?: (towerType: TowerType) => void;
+	private onSpeedGameClick?: () => void;
 	private infoModalGroup: Konva.Group | null = null;
 	private isModalOpen: boolean = false;
 
@@ -65,6 +66,9 @@ export class TowerSelectScreenView implements View {
 
 		
 		this.createInfoButton();
+
+		// Add Speed Game button (top left)
+		this.createSpeedGameButton();
 
 		// Button dimensions and spacing for 5 towers
 		const buttonWidth = 120;
@@ -144,6 +148,82 @@ export class TowerSelectScreenView implements View {
 
 		// Create info modal (initially hidden)
 		this.createInfoModal();
+	}
+
+	private createSpeedGameButton(): void {
+		const buttonWidth = 150;
+		const buttonHeight = 50;
+		const padding = 20;
+
+		const speedGameGroup = new Konva.Group({
+			x: padding,
+			y: padding,
+		});
+
+		// Button background
+		const buttonBg = new Konva.Rect({
+			width: buttonWidth,
+			height: buttonHeight,
+			fill: "#E67E22", // Orange color
+			stroke: "#D35400",
+			strokeWidth: 3,
+			cornerRadius: 10,
+			shadowColor: "black",
+			shadowBlur: 5,
+			shadowOffset: { x: 2, y: 2 },
+			shadowOpacity: 0.3,
+		});
+		speedGameGroup.add(buttonBg);
+
+		// Lightning bolt icon (⚡)
+		const icon = new Konva.Text({
+			x: 15,
+			y: buttonHeight / 2,
+			text: "⚡",
+			fontSize: 28,
+			fill: "white",
+			align: "center",
+		});
+		icon.y(icon.y() - icon.height() / 2);
+		speedGameGroup.add(icon);
+
+		// Button text
+		const buttonText = new Konva.Text({
+			x: 45,
+			y: buttonHeight / 2,
+			text: "Speed Game",
+			fontSize: 18,
+			fontFamily: "Arial",
+			fill: "white",
+			align: "left",
+			fontStyle: "bold",
+		});
+		buttonText.y(buttonText.y() - buttonText.height() / 2);
+		speedGameGroup.add(buttonText);
+
+		// Hover effects
+		speedGameGroup.on("mouseenter", () => {
+			document.body.style.cursor = "pointer";
+			buttonBg.fill("#D35400");
+			buttonBg.scale({ x: 1.05, y: 1.05 });
+			this.group.getLayer()?.draw();
+		});
+
+		speedGameGroup.on("mouseleave", () => {
+			document.body.style.cursor = "default";
+			buttonBg.fill("#E67E22");
+			buttonBg.scale({ x: 1, y: 1 });
+			this.group.getLayer()?.draw();
+		});
+
+		// Click handler
+		speedGameGroup.on("click", () => {
+			if (this.onSpeedGameClick) {
+				this.onSpeedGameClick();
+			}
+		});
+
+		this.group.add(speedGameGroup);
 	}
 
 	private createPixelTerrain(baseY: number, color: string, opacity: number, variance: number): void {
@@ -640,6 +720,10 @@ export class TowerSelectScreenView implements View {
 
 	setOnTowerSelect(callback: (towerType: TowerType) => void): void {
 		this.onTowerSelect = callback;
+	}
+
+	setOnSpeedGameClick(callback: () => void): void {
+		this.onSpeedGameClick = callback;
 	}
 
 	/**
