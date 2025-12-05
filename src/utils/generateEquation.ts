@@ -17,55 +17,56 @@ export function generateEquation(target: number, length: number, count: number, 
 
     const [minNum, maxNum] = [1, 99];
 
-    // Pre-generate a shuffled list of all candidate numbers
     const allNumbers = shuffledArray(
         Array.from({ length: maxNum - minNum + 1 }, (_, i) => minNum + i)
     );
 
-    function backtrack(curr: string, idx: number, val: number, prev: number, lastOp: string | null) {
+    function backtrack(curr: string[], idx: number, val: number, prev: number, lastOp: string | null) {
         if (res.length >= count) return;
 
+        // If we used exactly `length` tokens
         if (idx === length) {
             if (val === target) {
-                res.push(curr);
+                res.push(curr.join("")); // join at end
             }
             return;
         }
 
+        // Odd indices -> operators
         if (idx % 2 === 1) {
-            // operator slot — loop through randomized operators
             for (const op of operations) {
-                backtrack(curr + op, idx + 1, val, prev, op);
+                backtrack([...curr, op], idx + 1, val, prev, op);
             }
-        } else {
-            // number slot — loop through randomized numbers
-            for (const num of allNumbers) {
-                const nextStr = curr + num;
+        }
 
+        // Even indices -> numbers
+        else {
+            for (const num of allNumbers) {
+                const str = String(num);
+
+                // First number
                 if (idx === 0) {
-                    backtrack(nextStr, 1, num, num, null);
+                    backtrack([str], 1, num, num, null);
                     continue;
                 }
 
-                // handle math
                 if (lastOp === "+") {
-                    backtrack(nextStr, idx + 1, val + num, num, null);
+                    backtrack([...curr, str], idx + 1, val + num, num, null);
                 } else if (lastOp === "-") {
-                    backtrack(nextStr, idx + 1, val - num, -num, null);
+                    backtrack([...curr, str], idx + 1, val - num, -num, null);
                 } else if (lastOp === "x") {
                     const newPrev = prev * num;
-                    backtrack(nextStr, idx + 1, val - prev + newPrev, newPrev, null);
+                    backtrack([...curr, str], idx + 1, val - prev + newPrev, newPrev, null);
                 } else if (lastOp === "/") {
                     if (prev % num === 0) {
                         const newPrev = prev / num;
-                        backtrack(nextStr, idx + 1, val - prev + newPrev, newPrev, null);
+                        backtrack([...curr, str], idx + 1, val - prev + newPrev, newPrev, null);
                     }
                 }
             }
         }
     }
-
-    backtrack("", 0, 0, 0, null);
+    backtrack([], 0, 0, 0, null);
     return res;
 }
 
