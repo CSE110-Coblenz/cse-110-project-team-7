@@ -25,20 +25,41 @@ export class LoginScreenView implements View {
 		this.onLogin = onLogin;
 		this.onSignUp = onSignUp;
 
+		Konva.Image.fromURL('src/assets/background.jpg', (bgNode) => {
+            bgNode.setAttrs({
+                x: 0,
+                y: 0,
+                width: STAGE_WIDTH,
+                height: STAGE_HEIGHT,
+                image: bgNode.image() 
+            });
+            
+            this.group.add(bgNode);
+            
+            bgNode.moveToBottom(); 
+            
+            this.group.getLayer()?.batchDraw();
+        });
+
 		/*
-		 * Title
-		 */
-		const title = new Konva.Text({
-			x: STAGE_WIDTH / 2,
-			y: STAGE_HEIGHT/2-120,
-			text: "Welcome to the Math Game",
-			fontSize: 36,
-			fontFamily: "Arial",
-			fill: "white",
-			align:'center'
-		});
-		title.offsetX(title.width() / 2);
-		this.group.add(title);
+         * Title Image
+         */
+        Konva.Image.fromURL('src/assets/title.png', (imageNode) => {
+            imageNode.setAttrs({
+                x: STAGE_WIDTH / 2,
+                y: STAGE_HEIGHT / 2 - 200,
+                scaleX: 1,
+                scaleY: 1,
+                // FIX: Pass the existing image back to satisfy TypeScript
+                image: imageNode.image() 
+            });
+
+            // Center the image horizontally
+            imageNode.offsetX(imageNode.width() / 2);
+            
+            this.group.add(imageNode);
+            this.group.getLayer()?.batchDraw();
+        });
 
 		/*
 		 * Username Input Box
