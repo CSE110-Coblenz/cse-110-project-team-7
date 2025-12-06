@@ -1,10 +1,10 @@
-import { GlobalPlayer } from "../../GlobalPlayer";
 import { SPEED_GAME_DURATION } from "../../constants";
 import { generateEquation } from "../../utils/generateEquation";
 import { evaluate } from "../../utils/equationSolver";
 
 export class SpeedGameScreenModel {
     private timeRemaining: number = SPEED_GAME_DURATION;
+    private score: number  = 0;
     private currentQuestion: { a: number; b: number; op: string; answer: number } | null = null;
 
     constructor() {}
@@ -91,15 +91,15 @@ export class SpeedGameScreenModel {
     }
 
     addScore(points: number): void {
-        GlobalPlayer.increase_score(points);
+        this.score += points;
     }
 
     decrementScore(points: number): void {
-        GlobalPlayer.decrease_score(points);
+        this.score = Math.max(0, this.score - points);
     }
 
     getScore(): number {
-        return GlobalPlayer.get_score();
+        return this.score;
     }
 
     tickTimer(): number {

@@ -115,7 +115,7 @@ export class SpeedGameScreenView implements View {
 			x: 0,
 			y: STAGE_HEIGHT - 60,
 			width: STAGE_WIDTH,
-			text: 'Type your answer and press ENTER\n(progress here does not affect progress in the main game)',
+			text: 'Type your answer (Number keys only) and press ENTER\n(progress here does not affect progress in the main game)',
 			fontSize: 20,
 			fontFamily: 'Arial',
 			fill: '#333',
