@@ -17,17 +17,20 @@ function generateBossPhase(operations: string[]): BossPhase {
 
   if (!equations || equations.length === 0) {
       console.warn("No equations generated, using fallback.");
-      equations = [target.toString()]; // fallback: just the number itself
+      equations = [target.toString()];
   }
 
   const chosenEquation = equations[Math.floor(Math.random() * equations.length)];
 
+  const { spriteSet } = getRandomSprite("boss");
+
   return {
       targetNumber: target,
       tiles: chosenEquation.split(''),
-      imagePath: "https://p7.hiclipart.com/preview/79/102/357/pac-man-world-3-ghosts-clip-art-pac-man-ghost-png-transparent-image-thumbnail.jpg"
+      imagePath: spriteSet.idle
   };
 }
+
 
 function generatePhases(count: number = 3, operations: string[]): BossPhase[] {
   return Array.from({ length: count }, () => generateBossPhase(operations));

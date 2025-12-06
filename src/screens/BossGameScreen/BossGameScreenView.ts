@@ -563,22 +563,26 @@ export class BossGameScreenView implements View {
 		const img = new Image();
 		img.onload = () => {
 			if (this.bossImageNode) {
-				this.bossImageNode.image(img); // update existing node
+				this.bossImageNode.image(img);
 			} else {
 				this.bossImageNode = new Konva.Image({
-					x: STAGE_WIDTH / 2 - 100,
-					y: 50,
+					x: STAGE_WIDTH / 2 - 120,
+					y: 30,
 					image: img,
-					width: 200,
-					height: 200,
+					width: 500,
+					height: 500,
 				});
 				this.group.add(this.bossImageNode);
-				this.bossImageNode.zIndex(1);
 			}
+	
+			this.bossImageNode.moveToTop();
+			this.bossNumber.moveToTop();
+	
 			this.group.getLayer()?.draw();
 		};
 		img.src = path;
 	}
+	
 
 	updateHealth(numHearts: number): void {
 		const HEART_PATH = "src/assets/heart.png";

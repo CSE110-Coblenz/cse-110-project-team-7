@@ -41,20 +41,28 @@ export class BasicGameScreenView implements View {
         this.createLantern(100, 150);
         this.createLantern(STAGE_WIDTH - 100, 150);
 
-        // Monster Handling
         Konva.Image.fromURL('src/assets/monster.png', (monsterNode) => {
             this.monster = monsterNode;
+        
+            const img = monsterNode.image();
+        
             monsterNode.setAttrs({
-                x: STAGE_WIDTH / 2.5,
-                y: -10,
-                scaleX: 0.5,
-                scaleY: 0.5,
-                cornerRadius: 20,
-                image: monsterNode.image()
+                x: 800,
+                y: 15,
+        
+                // scale if you want
+                scaleX: 1,
+                scaleY: 1,
+        
+                // ⭐ Center the image inside itself
+                offsetX: img.width / 2,
+                offsetY: img.height / 2,
             });
+        
             this.group.add(monsterNode);
             this.group.getLayer()?.draw();
         });
+        
 
         // Hearts Handling
         for (let i = 0; i < maxHealth; i++) {
