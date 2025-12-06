@@ -3,7 +3,10 @@ jest.mock('konva',()=>{
         default:{
             Group:jest.fn().mockImplementation(()=>({
                 add:jest.fn(),
-                on:jest.fn()
+                on:jest.fn(),
+                getLayer:jest.fn().mockReturnValue({
+                    batchDraw:jest.fn()
+                })
             })),
             Text:jest.fn().mockImplementation(()=>({
                 width:jest.fn().mockReturnValue(100),
@@ -21,6 +24,23 @@ jest.mock('konva',()=>{
                 x:jest.fn(),
                 y:jest.fn()
             })),
+            Image:{
+                fromURL:jest.fn((_url,callback)=>{
+                    const mockImageNode={
+                        setAttrs:jest.fn(),
+                        width:jest.fn().mockReturnValue(800),
+                        height:jest.fn().mockReturnValue(600),
+                        x:jest.fn(),
+                        y:jest.fn(),
+                        on:jest.fn(),
+                        image:jest.fn().mockReturnValue({}),
+                        moveToBottom:jest.fn(),
+                        offsetX:jest.fn(),
+                        offsetY:jest.fn()
+                    }
+                    callback(mockImageNode)
+                })
+            },
             Stage:jest.fn()
         }
     }
