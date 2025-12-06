@@ -43,6 +43,7 @@ export class BossGameScreenView implements View {
 
 	private equationPulseAnim?: Konva.Animation;
 	private bossNumPulseAnim?: Konva.Animation;
+	private helpGroup?: Konva.Group;
 
 	//Pause functionality
 	private onPauseClick?: () => void;
@@ -113,6 +114,9 @@ export class BossGameScreenView implements View {
 			shadowBlur: 2,
 		});
 		this.group.add(this.timerText);
+
+		//Help Button
+		this.createHelpButton();
 
 		//Pause Button (top-right corner)
 		this.pauseButton = new Konva.Text({
@@ -259,6 +263,117 @@ export class BossGameScreenView implements View {
 
 
 	}
+
+	//create the help button
+	private createHelpButton(): void {
+        const helpBtnGroup = new Konva.Group({
+            x: STAGE_WIDTH - 70,
+            y: 180, // Positioned below the Pause button
+            cursor: "pointer",
+        });
+
+        // Simple Box
+        const helpBox = new Konva.Rect({
+            width: 50,
+            height: 50,
+            fill: "lightblue",
+            stroke: "blue",
+            strokeWidth: 2,
+            cornerRadius: 5,
+        });
+
+        // Question Mark
+        const helpText = new Konva.Text({
+            text: "?",
+            fontSize: 36,
+            fontFamily: "Calibri",
+            fill: "blue",
+            width: 50,
+            height: 50,
+            align: "center",
+            verticalAlign: "middle",
+            listening: false,
+        });
+
+        helpBtnGroup.add(helpBox);
+        helpBtnGroup.add(helpText);
+
+        // Click Action -> Toggle the menu
+        helpBtnGroup.on("click", () => {
+            this.toggleHelpMenu();
+        });
+
+        this.group.add(helpBtnGroup);
+    }
+
+    private toggleHelpMenu(): void {
+        // If open, close it
+        if (this.helpGroup) {
+            this.helpGroup.destroy();
+            this.helpGroup = undefined;
+            this.group.getLayer()?.draw();
+            return;
+        }
+
+        // If closed, open it
+        this.helpGroup = new Konva.Group({
+            x: STAGE_WIDTH / 2 - 200, // Center X
+            y: STAGE_HEIGHT / 2 - 150, // Center Y
+        });
+
+        // White background box
+        const bg = new Konva.Rect({
+            width: 400,
+            height: 300,
+            fill: 'white',
+            stroke: 'black',
+            strokeWidth: 4,
+            cornerRadius: 10,
+            shadowColor: 'black',
+            shadowBlur: 10,
+            shadowOpacity: 0.2
+        });
+
+        // Instructions
+        const infoText = new Konva.Text({
+            x: 20,
+            y: 20,
+            width: 360,
+            text: "BOSS BATTLE GUIDE\n\n" +
+                  "1. Match the BOSS NUMBER\n" +
+                  "2. Drag tiles to Entry Box\n" +
+                  "3. Click SUBMIT\n\n" +
+                  "Keep playing, the timer is running!",
+            fontSize: 24,
+            fontFamily: "Calibri",
+            fill: "black",
+            align: "center",
+            lineHeight: 1.4
+        });
+
+        // Close 'X'
+        const closeBtn = new Konva.Text({
+            x: 360,
+            y: 10,
+            text: "X",
+            fontSize: 24,
+            fill: "red",
+            fontStyle: "bold",
+            cursor: "pointer"
+        });
+
+        closeBtn.on("click", () => {
+            this.toggleHelpMenu();
+        });
+
+        this.helpGroup.add(bg);
+        this.helpGroup.add(infoText);
+        this.helpGroup.add(closeBtn);
+
+        this.group.add(this.helpGroup);
+        this.helpGroup.moveToTop();
+        this.group.getLayer()?.draw();
+    }
 
 	private createCobblestoneWall(): void {
 		const width = STAGE_WIDTH || 800;
