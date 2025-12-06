@@ -177,7 +177,7 @@ export class TowerSelectScreenView implements View {
 
 		// Lightning bolt icon (⚡)
 		const icon = new Konva.Text({
-			x: 15,
+			x: 10,
 			y: buttonHeight / 2,
 			text: "⚡",
 			fontSize: 28,
@@ -189,7 +189,7 @@ export class TowerSelectScreenView implements View {
 
 		// Button text
 		const buttonText = new Konva.Text({
-			x: 45,
+			x: 35,
 			y: buttonHeight / 2,
 			text: "Speed Game",
 			fontSize: 18,
